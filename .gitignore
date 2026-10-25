@@ -9,7 +9,7 @@ data/market_refresh_logs.jsonl
 data/scheduled_jobs.json
 data/scheduler_settings.json
 android/
-_ui_v2_backup_*/
+_ui_*/
 *.log
 .DS_Store
 Thumbs.db
