@@ -1,0 +1,1039 @@
+{
+  "meta": {
+    "mode": "demo",
+    "lastRefresh": null,
+    "created": "2026-10-09",
+    "notice": "初始数据来自项目已有工作簿/示范快照；未刷新前不是实时行情"
+  },
+  "profile": {
+    "currency": "CNY",
+    "portfolioValue": 100000,
+    "monthlyIncome": 0,
+    "necessaryExpense": 0,
+    "monthlyInvest": 0,
+    "emergencyMonths": 6,
+    "savingsRateTarget": 20,
+    "emergencyCash": 0,
+    "aiMonthlyCost": 0,
+    "followers": 0,
+    "sideIncome12w": 0,
+    "executionScore": 0,
+    "currentDebt": 0
+  },
+  "globalAllocation": [
+    {
+      "name": "美国股票",
+      "group": "Equity",
+      "code": "513500 标普500ETF；513100 纳指ETF",
+      "target": 17,
+      "score": 46.6,
+      "current": 0,
+      "cap": 30,
+      "note": "盈利与AI投资支撑长期机会；高利率、估值与集中度令短期风险偏不对称。"
+    },
+    {
+      "name": "发达市场（除美国）股票",
+      "group": "Equity",
+      "code": "513520 日经225ETF；513030 德国ETF；513080 法国CAC40ETF",
+      "target": 10,
+      "score": 47.1,
+      "current": 0,
+      "cap": 25,
+      "note": "区域分散价值较高；需跟踪欧洲财政/能源风险及日本利率。仅为区域代理，并非完整发达市场宽基。"
+    },
+    {
+      "name": "新兴市场股票",
+      "group": "Equity",
+      "code": "164824 印度基金LOF；513730 东南亚科技ETF",
+      "target": 7,
+      "score": 53.45,
+      "current": 0,
+      "cap": 15,
+      "note": "区域分散潜力；美元走强和全球融资条件可能压制表现。印度/东南亚产品不是完整EM宽基。"
+    },
+    {
+      "name": "中国/A股",
+      "group": "Equity",
+      "code": "510300 沪深300ETF；510500 中证500ETF",
+      "target": 5,
+      "score": 51,
+      "current": 0,
+      "cap": 10,
+      "note": "作为区域分散仓位；另跟踪国内政策、盈利、人民币与市场广度。"
+    },
+    {
+      "name": "短中久期国债",
+      "group": "Fixed Income",
+      "code": "511010 5年期国债ETF；511020 5–10年期国债ETF",
+      "target": 14,
+      "score": 60.05,
+      "current": 0,
+      "cap": 30,
+      "note": "高收益率提高持有收益起点；相较超长债，对久期冲击较不敏感。场外短债备选004672/006668/006664不是国债且有信用风险。"
+    },
+    {
+      "name": "长久期国债",
+      "group": "Fixed Income",
+      "code": "511260 10年国债ETF；511090 30年国债ETF",
+      "target": 4,
+      "score": 44.75,
+      "current": 0,
+      "cap": 10,
+      "note": "对通胀、期限溢价和政府融资供给敏感；仅作受控对冲仓。"
+    },
+    {
+      "name": "投资级信用债",
+      "group": "Fixed Income",
+      "code": "511030 中高等级公司债ETF；511190 信用债ETF；511360 短融ETF",
+      "target": 7,
+      "score": 51.6,
+      "current": 0,
+      "cap": 15,
+      "note": "票息改善，但需检查信用利差、再融资风险和久期；避免为追收益过度下沉信用。"
+    },
+    {
+      "name": "通胀保值债券",
+      "group": "Fixed Income",
+      "code": "境内暂无与美国TIPS完全等价的直接产品",
+      "target": 5,
+      "score": 57.5,
+      "current": 0,
+      "cap": 15,
+      "note": "用于通胀意外上行对冲；仍受实际利率变化影响，不要把国内国债ETF当作TIPS。"
+    },
+    {
+      "name": "现金/短期国库券",
+      "group": "Cash",
+      "code": "511880 银华日利ETF；511990 华宝添益ETF",
+      "target": 12,
+      "score": 68.8,
+      "current": 0,
+      "cap": 30,
+      "note": "提供流动性、降低波动并支持分批买入；关注币种与产品风险。"
+    },
+    {
+      "name": "黄金",
+      "group": "Real Assets",
+      "code": "518880 华安黄金ETF；159934 易方达黄金ETF",
+      "target": 8,
+      "score": 54.5,
+      "current": 0,
+      "cap": 15,
+      "note": "具有分散与尾部对冲价值，但无票息且波动显著，不是现金替代品。"
+    },
+    {
+      "name": "广义商品",
+      "group": "Real Assets",
+      "code": "159980 有色ETF；159981 能源化工ETF；159985 豆粕ETF",
+      "target": 5,
+      "score": 52.25,
+      "current": 0,
+      "cap": 10,
+      "note": "能源冲击增加通胀对冲需求；单一原油上涨不代表广义商品都便宜。"
+    },
+    {
+      "name": "全球房地产/REITs",
+      "group": "Real Assets",
+      "code": "508000/508018/508021 国内基建REITs；320017 全球收益不动产QDII",
+      "target": 4,
+      "score": 45,
+      "current": 0,
+      "cap": 10,
+      "note": "有分配收益和实物资产特征；对融资成本、资本化率和周期敏感。"
+    },
+    {
+      "name": "数字资产（卫星仓）",
+      "group": "Alternative",
+      "code": "BTC/ETH 等；本地合规渠道需单独核验",
+      "target": 2,
+      "score": 31,
+      "current": 0,
+      "cap": 3,
+      "note": "高波动非核心资产；境内相关交易存在显著合规风险；本项目境内落地配置默认0%，先核验法域与渠道。"
+    }
+  ],
+  "starterAllocation": [
+    {
+      "name": "短债/现金类",
+      "target": 25,
+      "current": 0,
+      "memo": "稳定器和再平衡资金；应急金另算，优先匹配期限和资金用途。"
+    },
+    {
+      "name": "全球宽基股票",
+      "target": 50,
+      "current": 0,
+      "memo": "核心增长仓；核对指数范围、费用、币种、基金注册地和可投资渠道。"
+    },
+    {
+      "name": "VOO / S&P 500倾斜",
+      "target": 10,
+      "current": 0,
+      "memo": "主动倾斜美股大盘；和全球宽基有较高重叠。"
+    },
+    {
+      "name": "QQQ / 纳指倾斜",
+      "target": 5,
+      "current": 0,
+      "memo": "高波动科技倾斜；上限低于核心仓，避免重复科技风险。"
+    },
+    {
+      "name": "黄金",
+      "target": 10,
+      "current": 0,
+      "memo": "用于分散风险，不保证上涨；比较持有形式、费用与流动性。"
+    },
+    {
+      "name": "数字资产/BTC",
+      "target": 0,
+      "current": 0,
+      "memo": "默认目标0；不将其作为境内交易建议。"
+    }
+  ],
+  "nasdaq": {
+    "ndx": 31160.08,
+    "ath": 31325.73,
+    "drawdown": -0.53,
+    "vix": 15.08,
+    "tenYear": 5.27,
+    "ndxe": 10287.65,
+    "bubble": 54.05,
+    "similarity": 28,
+    "entry": 52.15,
+    "actualPosition": 50.7,
+    "targetPosition": 50.7,
+    "coverage": 62,
+    "leverageEnabled": false,
+    "leverageLevel": "L0",
+    "effectiveExposure": 1,
+    "forwardPE": 21.35,
+    "epsGrowth": 29.5,
+    "epsRevision3m": 1.4,
+    "aiCapexRisk": 80,
+    "fcfRoicRisk": 67,
+    "monetizationRisk": 60,
+    "financingRisk": 80,
+    "concentrationRisk": 80,
+    "manualNote": "上述为 2026-10-07 研究参考快照：部分来源为人工/研究输入；不是本次实时接口拉取。"
+  },
+  "etfs": [
+    {
+      "code": "510300",
+      "name": "沪深300",
+      "group": "宽基-大盘",
+      "price": 4.315,
+      "change": -1.69,
+      "r20": -6.52,
+      "score": 25.3,
+      "life": "L0/L5待确认",
+      "status": "弱势观察/暂停新增",
+      "target": 0,
+      "current": 0,
+      "riskGroup": "宽基",
+      "quality": "MA60/成交额缺失；网页快照",
+      "parts": {
+        "macro": 3.3,
+        "policy": 7.5,
+        "life": 3,
+        "technical": 0,
+        "activity": 5,
+        "sentiment": 2,
+        "ladder": 2.5,
+        "earnings": 5
+      },
+      "note": "2026-10-09网页核验示范：报价时点并不统一。"
+    },
+    {
+      "code": "510500",
+      "name": "中证500",
+      "group": "宽基-中盘",
+      "price": 7.245,
+      "change": -0.47,
+      "r20": -5.58,
+      "score": 42,
+      "life": "L5弱势候选",
+      "status": "观察",
+      "target": 0,
+      "current": 0,
+      "riskGroup": "宽基",
+      "quality": "部分日线/时点待刷新",
+      "parts": {
+        "macro": 7,
+        "policy": 7,
+        "life": 5,
+        "technical": 4,
+        "activity": 6,
+        "sentiment": 4,
+        "ladder": 4,
+        "earnings": 5
+      },
+      "note": "需用统一收盘历史数据重算。"
+    },
+    {
+      "code": "159915",
+      "name": "创业板",
+      "group": "成长-创业板",
+      "price": 3.053,
+      "change": -3.2,
+      "r20": -10.18,
+      "score": 31,
+      "life": "L5退潮候选",
+      "status": "暂停新增",
+      "target": 0,
+      "current": 0,
+      "riskGroup": "成长科技",
+      "quality": "10/08收盘参考",
+      "parts": {
+        "macro": 5,
+        "policy": 8,
+        "life": 2,
+        "technical": 2,
+        "activity": 5,
+        "sentiment": 3,
+        "ladder": 2,
+        "earnings": 4
+      },
+      "note": "成长板块波动高；跌势中不按跌幅单独抄底。"
+    },
+    {
+      "code": "588000",
+      "name": "科创50",
+      "group": "成长-科创50",
+      "price": 1.478,
+      "change": -3.84,
+      "r20": null,
+      "score": 34,
+      "life": "L5弱势候选",
+      "status": "暂停新增",
+      "target": 0,
+      "current": 0,
+      "riskGroup": "成长科技",
+      "quality": "10/09盘中延迟；MA20/60缺失",
+      "parts": {
+        "macro": 5,
+        "policy": 8,
+        "life": 3,
+        "technical": 3,
+        "activity": 5,
+        "sentiment": 3,
+        "ladder": 2,
+        "earnings": 5
+      },
+      "note": "硬科技风格代理，需刷新滚动日线确认趋势。"
+    },
+    {
+      "code": "512880",
+      "name": "证券公司",
+      "group": "金融-证券",
+      "price": 1.01,
+      "change": -1.85,
+      "r20": null,
+      "score": 39,
+      "life": "L5待确认",
+      "status": "观察",
+      "target": 0,
+      "current": 0,
+      "riskGroup": "金融周期",
+      "quality": "10/08收盘参考",
+      "parts": {
+        "macro": 6,
+        "policy": 6,
+        "life": 4,
+        "technical": 4,
+        "activity": 6,
+        "sentiment": 4,
+        "ladder": 4,
+        "earnings": 5
+      },
+      "note": "市场活跃度代理，需与市场宽度配合。"
+    },
+    {
+      "code": "510880",
+      "name": "红利ETF",
+      "group": "防御-红利",
+      "price": 3.446,
+      "change": 0.88,
+      "r20": null,
+      "score": 54,
+      "life": "L1观察",
+      "status": "等待确认",
+      "target": 2,
+      "current": 0,
+      "riskGroup": "防御红利",
+      "quality": "10/09盘中延迟；滚动均线待核实",
+      "parts": {
+        "macro": 7,
+        "policy": 7,
+        "life": 8,
+        "technical": 8,
+        "activity": 7,
+        "sentiment": 6,
+        "ladder": 5,
+        "earnings": 7
+      },
+      "note": "防御风格也需检查估值、股息可持续性和利率敏感度。"
+    },
+    {
+      "code": "512480",
+      "name": "半导体",
+      "group": "科技-半导体",
+      "price": 0.873,
+      "change": -4.49,
+      "r20": null,
+      "score": 28,
+      "life": "L5退潮候选",
+      "status": "暂停新增",
+      "target": 0,
+      "current": 0,
+      "riskGroup": "成长科技",
+      "quality": "10/09盘中延迟；MA20/60缺失",
+      "parts": {
+        "macro": 4,
+        "policy": 8,
+        "life": 2,
+        "technical": 2,
+        "activity": 5,
+        "sentiment": 3,
+        "ladder": 2,
+        "earnings": 4
+      },
+      "note": "主题相关性高，和芯片/AI/通信合并计算风险组上限。"
+    },
+    {
+      "code": "512760",
+      "name": "芯片ETF",
+      "group": "科技-芯片",
+      "price": 0.939,
+      "change": -3.3,
+      "r20": -9.36,
+      "score": 33,
+      "life": "L5弱势候选",
+      "status": "暂停新增",
+      "target": 0,
+      "current": 0,
+      "riskGroup": "成长科技",
+      "quality": "公开历史区间估计，需API重算",
+      "parts": {
+        "macro": 4,
+        "policy": 8,
+        "life": 3,
+        "technical": 3,
+        "activity": 5,
+        "sentiment": 3,
+        "ladder": 2,
+        "earnings": 5
+      },
+      "note": "与半导体ETF存在成分重叠。"
+    },
+    {
+      "code": "159819",
+      "name": "人工智能ETF",
+      "group": "科技-人工智能",
+      "price": 1.601,
+      "change": -3.5,
+      "r20": -6.1,
+      "score": 36,
+      "life": "L5弱势候选",
+      "status": "观察",
+      "target": 0,
+      "current": 0,
+      "riskGroup": "成长科技",
+      "quality": "10/08收盘；MA20参考，非完整API",
+      "parts": {
+        "macro": 5,
+        "policy": 8,
+        "life": 3,
+        "technical": 3,
+        "activity": 6,
+        "sentiment": 4,
+        "ladder": 2,
+        "earnings": 5
+      },
+      "note": "覆盖算力、应用与基础设施；需要核验新闻源和盈利。"
+    },
+    {
+      "code": "515050",
+      "name": "通信ETF",
+      "group": "科技-通信",
+      "price": 0.936,
+      "change": -3.01,
+      "r20": null,
+      "score": 38,
+      "life": "L5待确认",
+      "status": "观察",
+      "target": 0,
+      "current": 0,
+      "riskGroup": "成长科技",
+      "quality": "10/08收盘参考",
+      "parts": {
+        "macro": 5,
+        "policy": 8,
+        "life": 4,
+        "technical": 4,
+        "activity": 5,
+        "sentiment": 4,
+        "ladder": 3,
+        "earnings": 5
+      },
+      "note": "通信、光模块、数据中心主题，注意单主题合并敞口。"
+    },
+    {
+      "code": "512660",
+      "name": "军工ETF",
+      "group": "军工",
+      "price": 1.095,
+      "change": -0.54,
+      "r20": -4.62,
+      "score": 45,
+      "life": "L1观察",
+      "status": "等待结构确认",
+      "target": 0,
+      "current": 0,
+      "riskGroup": "成长科技",
+      "quality": "MA20参考；MA60缺失",
+      "parts": {
+        "macro": 6,
+        "policy": 7,
+        "life": 7,
+        "technical": 6,
+        "activity": 6,
+        "sentiment": 5,
+        "ladder": 4,
+        "earnings": 5
+      },
+      "note": "订单/政策需用原文与财报验证。"
+    },
+    {
+      "code": "515030",
+      "name": "新能源车ETF",
+      "group": "新能源周期",
+      "price": 1.468,
+      "change": 1.38,
+      "r20": null,
+      "score": 48,
+      "life": "L1观察",
+      "status": "等待确认",
+      "target": 0,
+      "current": 0,
+      "riskGroup": "周期资源",
+      "quality": "10/09盘中延迟",
+      "parts": {
+        "macro": 6,
+        "policy": 7,
+        "life": 7,
+        "technical": 7,
+        "activity": 6,
+        "sentiment": 5,
+        "ladder": 4,
+        "earnings": 6
+      },
+      "note": "单日反弹不等于趋势反转；产业供需/库存需验证。"
+    },
+    {
+      "code": "515790",
+      "name": "光伏ETF",
+      "group": "新能源周期",
+      "price": 0.763,
+      "change": -1.68,
+      "r20": null,
+      "score": 35,
+      "life": "L5观察",
+      "status": "观察",
+      "target": 0,
+      "current": 0,
+      "riskGroup": "周期资源",
+      "quality": "10/08收盘参考",
+      "parts": {
+        "macro": 5,
+        "policy": 7,
+        "life": 3,
+        "technical": 3,
+        "activity": 5,
+        "sentiment": 4,
+        "ladder": 3,
+        "earnings": 5
+      },
+      "note": "供需与产能出清进度优先于题材热度。"
+    },
+    {
+      "code": "512400",
+      "name": "有色金属ETF",
+      "group": "周期资源",
+      "price": 1.599,
+      "change": -0.37,
+      "r20": null,
+      "score": 50,
+      "life": "L1观察",
+      "status": "观察",
+      "target": 0,
+      "current": 0,
+      "riskGroup": "周期资源",
+      "quality": "10/09延迟报价",
+      "parts": {
+        "macro": 6,
+        "policy": 7,
+        "life": 7,
+        "technical": 6,
+        "activity": 7,
+        "sentiment": 5,
+        "ladder": 5,
+        "earnings": 7
+      },
+      "note": "铜铝等工业金属周期；不能把能源单品表现等同广义商品。"
+    },
+    {
+      "code": "562800",
+      "name": "稀土ETF",
+      "group": "周期资源",
+      "price": 0.807,
+      "change": -1.82,
+      "r20": -10.23,
+      "score": 37,
+      "life": "L5弱势候选",
+      "status": "观察",
+      "target": 0,
+      "current": 0,
+      "riskGroup": "周期资源",
+      "quality": "区间参考，报价时点待核验",
+      "parts": {
+        "macro": 5,
+        "policy": 7,
+        "life": 3,
+        "technical": 3,
+        "activity": 5,
+        "sentiment": 4,
+        "ladder": 4,
+        "earnings": 6
+      },
+      "note": "出口管制/供需主题需公告核验。"
+    },
+    {
+      "code": "562500",
+      "name": "机器人ETF",
+      "group": "机器人/自动化",
+      "price": 0.839,
+      "change": -2.67,
+      "r20": -10.55,
+      "score": 36,
+      "life": "L5弱势候选",
+      "status": "观察",
+      "target": 0,
+      "current": 0,
+      "riskGroup": "成长科技",
+      "quality": "10/09延迟；MA60缺失",
+      "parts": {
+        "macro": 5,
+        "policy": 8,
+        "life": 3,
+        "technical": 3,
+        "activity": 5,
+        "sentiment": 4,
+        "ladder": 3,
+        "earnings": 5
+      },
+      "note": "机器人主题需要从试点、订单、毛利率和交付验证商业化。"
+    },
+    {
+      "code": "512010",
+      "name": "医药ETF",
+      "group": "防御-医药",
+      "price": 0.374,
+      "change": -2.09,
+      "r20": null,
+      "score": 44,
+      "life": "L1待确认",
+      "status": "观察",
+      "target": 0,
+      "current": 0,
+      "riskGroup": "防御红利",
+      "quality": "10/09延迟；历史序列待刷新",
+      "parts": {
+        "macro": 6,
+        "policy": 6,
+        "life": 6,
+        "technical": 5,
+        "activity": 5,
+        "sentiment": 5,
+        "ladder": 4,
+        "earnings": 6
+      },
+      "note": "创新药/医疗政策与财报需单独核验。"
+    },
+    {
+      "code": "512800",
+      "name": "银行ETF",
+      "group": "防御-银行",
+      "price": 0.859,
+      "change": 0.7,
+      "r20": null,
+      "score": 55,
+      "life": "L2待确认",
+      "status": "观察",
+      "target": 2,
+      "current": 0,
+      "riskGroup": "防御红利",
+      "quality": "10/08收盘参考",
+      "parts": {
+        "macro": 7,
+        "policy": 6,
+        "life": 8,
+        "technical": 8,
+        "activity": 7,
+        "sentiment": 6,
+        "ladder": 5,
+        "earnings": 8
+      },
+      "note": "息差、信用周期、不良率和分红持续性要一起跟踪。"
+    }
+  ],
+  "tasks": [
+    {
+      "phase": "第1周",
+      "task": "个人资产负债盘点",
+      "action": "录入所有账户资产、负债、必要支出、税后收入；应急金和投资资产分开",
+      "evidence": "台账覆盖≥95%的资产与负债",
+      "priority": "P0",
+      "status": "未开始",
+      "exit": "金额不明标记估值日期，不允许靠猜数制造精确感。"
+    },
+    {
+      "phase": "第1周",
+      "task": "订阅和消费止漏",
+      "action": "列出AI/软件/设备月费；识别重复、低使用率、纯展示消费",
+      "evidence": "所有订阅有用途、价格和月度价值",
+      "priority": "P0",
+      "status": "未开始",
+      "exit": "连续30天无使用或无产出，取消/降级。"
+    },
+    {
+      "phase": "第2周",
+      "task": "应急金计划",
+      "action": "按必要月支出×6个月计算目标；收入波动或准备转型时提高到9–12个月",
+      "evidence": "应急金缺口与每月补足额",
+      "priority": "P0",
+      "status": "未开始",
+      "exit": "应急金未达标前不加杠杆、不买大额低流动性资产。"
+    },
+    {
+      "phase": "第2周",
+      "task": "写出投资政策书IPS",
+      "action": "明确资金期限、最大可承受回撤、再平衡规则、合法资金路径；设置每月投资额",
+      "evidence": "一页纸投资规则与目标配置",
+      "priority": "P0",
+      "status": "未开始",
+      "exit": "若组合跌30%就会恐慌卖出，降低股票/科技比例。"
+    },
+    {
+      "phase": "第2–4周",
+      "task": "跨境合规检查",
+      "action": "盘点税务居民身份、资金来源、境外收入、目标基金/券商渠道及税务成本",
+      "evidence": "书面问题清单；必要时取得专业意见",
+      "priority": "P0",
+      "status": "未开始",
+      "exit": "没有明确合法资金路径，就先不交易对应境外资产。"
+    },
+    {
+      "phase": "第1–4周",
+      "task": "技能产出闭环",
+      "action": "围绕税务软件+AI编程建立一个可展示的工具或教程，而非泛学工具",
+      "evidence": "1个可运行项目/案例和复盘说明",
+      "priority": "P1",
+      "status": "未开始",
+      "exit": "必须可演示、可复用、可被用户评价。"
+    },
+    {
+      "phase": "第1–4周",
+      "task": "英语/健康底盘",
+      "action": "每周英语180分钟、力量训练3次、睡眠均值8小时作为试运行目标",
+      "evidence": "每周打卡数据",
+      "priority": "P0",
+      "status": "未开始",
+      "exit": "连续两周完不成时降级目标并修复时间安排，不靠熬夜补作业。"
+    },
+    {
+      "phase": "第2个月",
+      "task": "内容验证",
+      "action": "每周发布3条，围绕同一受众测试3种选题；追踪收藏、咨询、线索而非只看播放",
+      "evidence": "至少8–12条内容和复盘",
+      "priority": "P1",
+      "status": "未开始",
+      "exit": "连续4周无正向信号，调整受众/选题/分发而非机械更新。"
+    },
+    {
+      "phase": "第2个月",
+      "task": "建立副业产品",
+      "action": "将有效内容整理成模板、代码工具、咨询服务或课程雏形；小范围验证付费需求",
+      "evidence": "首批用户反馈/报价/小额收入",
+      "priority": "P1",
+      "status": "未开始",
+      "exit": "先验证愿意付费的问题，再投入公司、品牌、昂贵设备。"
+    },
+    {
+      "phase": "第2–3个月",
+      "task": "开始核心资产定投",
+      "action": "仅通过确认合规的渠道，按IPS投入低成本核心配置；记录汇率、费用、税务与基准",
+      "evidence": "连续3次定投和持仓记录",
+      "priority": "P1",
+      "status": "未开始",
+      "exit": "不以一周涨跌临时修改长期配置；偏离目标再平衡。"
+    },
+    {
+      "phase": "第3个月",
+      "task": "扩展账户/身份清单",
+      "action": "选一个最可能使用的海外目的地，评估银行账户、券商、签证或居留的真实收益与维护成本",
+      "evidence": "成本—收益—合规对比表",
+      "priority": "P2",
+      "status": "未开始",
+      "exit": "无明确使用场景就暂缓开公司、买房、申请多地身份。"
+    },
+    {
+      "phase": "第3个月",
+      "task": "季度复盘",
+      "action": "复核净资产、储蓄率、内容转化、AI订阅ROI、睡眠/训练持续性、合规事项",
+      "evidence": "一页季度复盘与下季度3个目标",
+      "priority": "P0",
+      "status": "未开始",
+      "exit": "只保留有证据带来收入、效率、健康或选择权的系统。"
+    }
+  ],
+  "infrastructure": [
+    {
+      "category": "AI 月费 / 软件订阅",
+      "priority": "P0",
+      "status": "待盘点",
+      "next": "列出工具、月费、使用次数、节省小时和可归因收入",
+      "review": "每月",
+      "guardrail": "连续30天无使用或无产出就取消/降级；不向不合规服务发送敏感数据。"
+    },
+    {
+      "category": "AI 算力 / 数据",
+      "priority": "P1",
+      "status": "待验证",
+      "next": "先验证真实需求与付费场景，再购置GPU/云算力/数据服务",
+      "review": "每月",
+      "guardrail": "以单位产出成本、利用率、数据授权和隐私合规作决策。"
+    },
+    {
+      "category": "机器人 / 自动化设备",
+      "priority": "P2",
+      "status": "待验证",
+      "next": "从可展示的自动化小项目或试用开始，记录节省时间/收入贡献",
+      "review": "每季度",
+      "guardrail": "设备是成本，不因题材热度购置。"
+    },
+    {
+      "category": "全球股票 / 全球宽基",
+      "priority": "P1",
+      "status": "未开始",
+      "next": "比较指数覆盖、费用、币种、注册地、税务及合规资金渠道",
+      "review": "每月",
+      "guardrail": "先核心宽基，再考虑VOO/QQQ倾斜。"
+    },
+    {
+      "category": "VOO / S&P 500",
+      "priority": "P1",
+      "status": "未开始",
+      "next": "核验可投渠道、费用、基金注册地和美国遗产税等跨境风险",
+      "review": "每季度",
+      "guardrail": "和全球宽基持仓重叠；不默认能由境内渠道直接买。"
+    },
+    {
+      "category": "QQQ / 纳斯达克100",
+      "priority": "P1",
+      "status": "监控中",
+      "next": "执行AI泡沫分、2000相似度、配置分、Core/Swing/Crisis与回撤梯队",
+      "review": "每交易日",
+      "guardrail": "QDII ETF溢价>5%时原则上不追买；核对IOPV与申购状态。"
+    },
+    {
+      "category": "黄金",
+      "priority": "P1",
+      "status": "监控中",
+      "next": "将黄金作为分散资产，与现金/债券和风险资产一起做组合评估",
+      "review": "每月",
+      "guardrail": "不是现金替代，不因单一宏观叙事重仓。"
+    },
+    {
+      "category": "BTC / 稳定币 / 数字资产",
+      "priority": "P3",
+      "status": "暂缓/法域核验",
+      "next": "按所在地法规、资金渠道、托管、反洗钱、税务及极端损失能力评估",
+      "review": "规则变化时",
+      "guardrail": "境内虚拟货币交易存在显著法律与合规风险；默认配置0%，不作为面向境内居民的买入指令。"
+    },
+    {
+      "category": "全球银行账户 / 多币种账户",
+      "priority": "P1",
+      "status": "未开始",
+      "next": "比较开户资格、最低余额、月费、汇款换汇费、存款保障和非居民维护要求",
+      "review": "每半年",
+      "guardrail": "账户是基础设施，不是收益资产；保留资金来源及交易凭证。"
+    },
+    {
+      "category": "海外券商账户",
+      "priority": "P1",
+      "status": "未开始",
+      "next": "核验持牌实体、开户资格、入金渠道、投资者保护、费用、税表与继承安排",
+      "review": "每半年",
+      "guardrail": "不使用虚假地址/身份；先确认资金路径合规。"
+    },
+    {
+      "category": "签证 / 长期居留",
+      "priority": "P2",
+      "status": "未开始",
+      "next": "选择一个最可能使用的目的地，列资格、成本、停留天数、续签与税务影响",
+      "review": "每半年",
+      "guardrail": "签证、永居、税务居民是不同概念；身份必须有真实用途。"
+    },
+    {
+      "category": "多本护照 / 国籍规划",
+      "priority": "P3",
+      "status": "待法律核验",
+      "next": "核验目标法域国籍法、原国籍后果及出行需求，必要时咨询专业律师",
+      "review": "法规变化时",
+      "guardrail": "国籍策略涉及重大法律后果，不作为资产配置项目机械追求。"
+    },
+    {
+      "category": "全球公司 / 离岸公司",
+      "priority": "P3",
+      "status": "暂缓",
+      "next": "已有真实客户/经营需要后，测算设立、审计、报税、秘书、经济实质和个人税负成本",
+      "review": "每季度/年度",
+      "guardrail": "不为标签设公司；无真实经营目的会增加合规风险。"
+    },
+    {
+      "category": "海外房产",
+      "priority": "P4",
+      "status": "暂缓",
+      "next": "先租住验证城市，再建立全成本现金流模型并压力测试税费、汇率、空置与退出",
+      "review": "每季度",
+      "guardrail": "金额大、流动性低、跨境税务复杂，不应作为第一步。"
+    },
+    {
+      "category": "全球保险 / 医疗保障",
+      "priority": "P1",
+      "status": "待盘点",
+      "next": "对照常驻国家和保障缺口，核对地区、续保、免赔额、等待期、理赔材料与长期保费",
+      "review": "每年",
+      "guardrail": "保险不是储蓄替代品；投资型/分红型需审阅费用、退保损失与税务。"
+    },
+    {
+      "category": "技能/内容/个人现金流",
+      "priority": "P0",
+      "status": "待启动",
+      "next": "每周发布3条/完成AI编程或内容可展示交付，追踪咨询、线索、收入而不只看播放量",
+      "review": "每周",
+      "guardrail": "先验证愿意付费的问题，再投入品牌、公司和昂贵设备。"
+    }
+  ],
+  "dailyLog": [
+    {
+      "date": "2026-10-09",
+      "kind": "初始化参考快照",
+      "action": "暂不自动下单；先补齐真实持仓与数据源后开始日常执行",
+      "reason": "A股网页快照报价时点不统一、部分MA60/成交额等数据缺失；Nasdaq研究快照部分字段为人工输入。",
+      "status": "待用户首次更新"
+    }
+  ],
+  "screenRule": {
+    "windowDays": 7,
+    "yellowBMin": 2,
+    "includeHigherGrades": true,
+    "gradeUniverse": "A+, A, B+, B",
+    "condition": "近7个交易日内黄色B及以上信号次数 ≥ 2",
+    "candidate": "需结合成交额、趋势、风险扣分与个股/ETF适配规则；不因选股公式单独买入。"
+  },
+  "cycleNotes": [
+    {
+      "period": "涛动周期论的历史预测条目",
+      "status": "待补原文",
+      "note": "目前可见历史对话只含题名/摘要，没有完整的预测时间、资产对象、方向和目标点位；应导入原始聊天后逐条盲测，避免事后解释。"
+    },
+    {
+      "period": "历史复核框架",
+      "status": "框架已建",
+      "note": "每条预测登记发布日期、预测期限、标的/价格、方向、命中标准、对照基准、偏差与失效条件；区分明确预测与宽泛叙事。"
+    }
+  ],
+  "chatArchive": [
+    {
+      "date": "2026-10-09",
+      "title": "新登配置落地方案",
+      "topics": "BTC、黄金、VOO、QQQ、全球股票、AI月费、机器人、算力、数据、稳定币、数字资产、全球银行/券商账户、多本护照、长期居留、多国签证、全球公司/离岸公司、海外房产、全球保险；90天路线图和持续跟踪。",
+      "status": "已纳入主要能力与待办模块；原始完整聊天记录需用户提供以逐字归档。"
+    },
+    {
+      "date": "2026-10-09",
+      "title": "A股ETF跟踪体系",
+      "topics": "自动采集日线、1/5/20/60日收益、MA20/MA60、相对沪深300强弱、成交额活跃度、波动/回撤、市场宽度、涨停炸板跌停、龙虎榜/新闻、八维评分、L0-L5生命周期、建议仓位和历史跟踪。",
+      "status": "已纳入ETF监控、数据质量与每日节奏；原工具源码/工作簿在参考材料目录。"
+    },
+    {
+      "date": "2026-10-09",
+      "title": "全球资产配置建议",
+      "topics": "境内可执行的短中久期国债、长债、投资级信用债、现金/国库券、黄金、商品、REITs、全球股票/A股/海外区域代理与产品代码，动态目标与再平衡。",
+      "status": "已纳入全球配置表和产品代码映射；具体下单前需再次核对产品状态/公告/溢价。"
+    },
+    {
+      "date": "2026-10-08",
+      "title": "纳斯达克入场策略分析",
+      "topics": "AI泡沫分、2000相似度、配置分、Core/Swing/Crisis、25/25/50、-5/-8/-12/-16/-20回撤梯队、1/4 Kelly、波段止盈/回踩、杠杆状态L0-L5及风险闸门。",
+      "status": "已纳入策略模块；历史行情、人工输入字段及实际仓位仍需要真实源更新。"
+    },
+    {
+      "date": "2026-09-26",
+      "title": "指标维度建议",
+      "topics": "黄色B/A+等评级、近7天至少两次黄色B、选股公式和总分逻辑的多个版本。",
+      "status": "已将规则转为可编辑筛选器；完整原始公式版本未出现在当前可读取上下文，待导入后逐一补齐。"
+    },
+    {
+      "date": "2026-05-04",
+      "title": "涛动周期论分析",
+      "topics": "周金涛涛动周期论、历史预测与后来走势验证、周期性及当下市场资产价格的推演、思维导图。",
+      "status": "已留存研究与验证模块；原始完整论证/图示内容需从聊天记录导入。"
+    }
+  ],
+  "cadence": [
+    {
+      "when": "盘前 08:30–09:20",
+      "what": "更新新闻关键词、主题映射和待核验事项；不更新收盘评分/目标仓位。"
+    },
+    {
+      "when": "盘中 10:00–14:30",
+      "what": "按需刷新ETF价格、涨跌幅、成交额与趋势破位；盘中数据不覆盖收盘评分。避免高频请求。"
+    },
+    {
+      "when": "尾盘 14:30–15:00",
+      "what": "查看收盘前量价/板块共振；异常异动先记录，不凭尾盘拉升自动追买。"
+    },
+    {
+      "when": "盘后 15:15–17:30",
+      "what": "全量更新日线、情绪、涨停梯队、龙虎榜、新闻、八维评分、目标仓位、历史行情/日志；人工核查异常值。"
+    },
+    {
+      "when": "每周五",
+      "what": "复核前五ETF、分数变化、目标/实际仓位、策略错误、主题重叠、交易成本和历史跟踪。"
+    },
+    {
+      "when": "每月末",
+      "what": "更新资产估值/汇率、宏观信用/政策周期、收益归因、相关性/回撤、AI订阅ROI、身份/合规事项和评分假设。"
+    },
+    {
+      "when": "每天个人系统 45–120分钟",
+      "what": "英语输出；完成一项可展示的AI/编程/内容小交付；记录睡眠和训练，不让行情信息流破坏主线。"
+    },
+    {
+      "when": "每周个人系统 30–45分钟",
+      "what": "更新每周跟踪、发布数据和AI订阅价值，检查账户/资产未录入项；确定下周最重要的3个任务。"
+    },
+    {
+      "when": "每季度 90分钟",
+      "what": "复盘技能变现、内容漏斗、税务/账户需求、睡眠/训练持续性；确定下季度3个可衡量结果。"
+    }
+  ],
+  "assetLedger": [],
+  "weeklyLog": [],
+  "contentLog": [],
+  "subscriptions": [],
+  "predictions": []
+}

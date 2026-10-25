@@ -1,0 +1,12 @@
+services:
+  wealth-os:
+    build: .
+    ports:
+      - "127.0.0.1:8765:8765"
+    environment:
+      SECRET_KEY: "local-demo-change-this-key-before-deploy"
+      COOKIE_HTTPS_ONLY: "0"
+      DISABLE_DEMO_ACCOUNT: "0"
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped

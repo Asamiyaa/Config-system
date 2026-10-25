@@ -1,0 +1,15 @@
+.env
+.venv/
+__pycache__/
+*.py[cod]
+data/wealth_os.sqlite3
+*.sqlite3-shm
+*.sqlite3-wal
+data/market_refresh_logs.jsonl
+data/scheduled_jobs.json
+data/scheduler_settings.json
+android/
+_ui_v2_backup_*/
+*.log
+.DS_Store
+Thumbs.db
