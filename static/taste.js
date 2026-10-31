@@ -161,15 +161,94 @@
       if (on) item.setAttribute('aria-current', 'page');
       else item.removeAttribute('aria-current');
     });
+    const healthPages = new Set(['health','checkin','diet','fitness','skin','sleep','style']);
+    $$('.mobile-tab[data-page]').forEach((item) => {
+      const on = item.dataset.page === page || (item.dataset.page === 'health' && healthPages.has(page));
+      item.classList.toggle('active', on);
+      if (on) item.setAttribute('aria-current', 'page');
+      else item.removeAttribute('aria-current');
+    });
   }
   const root = $('#viewRoot');
   if (root && 'MutationObserver' in window) {
-    new MutationObserver(() => requestAnimationFrame(syncActive)).observe(root, { childList: true, subtree: false });
+    new MutationObserver(() => requestAnimationFrame(() => { syncActive(); syncTabs(); syncMenuIcon(); })).observe(root, { childList: true, subtree: false });
   }
   document.addEventListener('click', (e) => {
-    if (e.target.closest('[data-page]')) setTimeout(syncActive, 0);
+    if (e.target.closest('[data-page]')) setTimeout(() => { syncActive(); syncTabs(); syncMenuIcon(); }, 0);
   });
   setTimeout(syncActive, 300);
+
+  /* ---------- app shell: bottom tab bar + hamburger morph ---------- */
+  const MOBILE_TABS = [
+    { page: 'home', label: '首页', icon: 'i-home' },
+    { page: 'schedules', label: '待办', icon: 'i-check' },
+    { page: 'dailyflow', label: '流程', icon: 'i-clock' },
+    { page: 'health', label: '健康', icon: 'i-heart' }
+  ];
+  function icon(id) {
+    return `<svg viewBox="0 0 16 16" aria-hidden="true"><use href="#${id}"></use></svg>`;
+  }
+  function mountMobileTabbar() {
+    if ($('#mobileTabbar')) return;
+    const nav = document.createElement('nav');
+    nav.id = 'mobileTabbar';
+    nav.className = 'mobile-tabbar';
+    nav.setAttribute('aria-label', '移动端主导航');
+    nav.innerHTML = MOBILE_TABS.map((item) => `<button type="button" class="mobile-tab" data-page="${item.page}" aria-label="${item.label}">${icon(item.icon)}<span>${item.label}</span></button>`).join('')
+      + `<button type="button" class="mobile-tab mobile-tab-more" data-action="open-sidebar" aria-label="更多页面">${icon('i-more')}<span>更多</span></button>`;
+    nav.addEventListener('click', (e) => {
+      const tab = e.target.closest('.mobile-tab[data-page]');
+      if (tab) {
+        if (typeof window.renderPage === 'function') window.renderPage(tab.dataset.page);
+        const sidebar = $('#sidebar');
+        sidebar?.classList.remove('open');
+      }
+    });
+    document.body.appendChild(nav);
+  }
+  function syncMenuIcon() {
+    const menu = $('.ui-mobile-menu');
+    if (!menu) return;
+    if (!menu.querySelector('.mobile-menu-bars')) {
+      menu.innerHTML = '<span class="mobile-menu-bars"><i></i><i></i><i></i></span>';
+    }
+    const open = !!$('#sidebar')?.classList.contains('open');
+    menu.classList.toggle('is-open', open);
+    menu.setAttribute('aria-expanded', String(open));
+  }
+  const sidebar = $('#sidebar');
+  if (sidebar && 'MutationObserver' in window) {
+    new MutationObserver(syncMenuIcon).observe(sidebar, { attributes: true, attributeFilter: ['class'] });
+  }
+  setTimeout(() => { mountMobileTabbar(); syncMenuIcon(); }, 0);
+
+  /* ---------- moving tab indicator (1px, shared across tab groups) ---------- */
+  const TAB_GROUPS = ['.fit-tabs', '.flow-page-tabs', '.ncfg-tabs', '.theme-switch', '.watch-filter'];
+  function syncTabs() {
+    TAB_GROUPS.forEach((selector) => {
+      $$(selector).forEach((box) => {
+        let indicator = box.querySelector(':scope > .tab-indicator');
+        if (!indicator) {
+          indicator = document.createElement('i');
+          indicator.className = 'tab-indicator';
+          box.appendChild(indicator);
+          box.classList.add('tab-indicator-host');
+        }
+        const active = box.querySelector('.active, .selected, [aria-selected="true"], [aria-pressed="true"]');
+        if (!active || !active.offsetWidth) {
+          indicator.style.opacity = '0';
+          return;
+        }
+        const left = active.offsetLeft;
+        indicator.style.opacity = '1';
+        indicator.style.width = `${active.offsetWidth}px`;
+        indicator.style.transform = `translate3d(${left}px, 0, 0)`;
+      });
+    });
+  }
+  window.addEventListener('resize', () => requestAnimationFrame(syncTabs), { passive: true });
+  document.addEventListener('click', () => setTimeout(syncTabs, 0));
+  setTimeout(syncTabs, 350);
 
   document.body.dataset.taste = 'data-terminal';
 })();

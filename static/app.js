@@ -44,8 +44,13 @@ function toast(message, isError=false) {
   el.textContent = message;
   el.classList.toggle('error', !!isError);
   el.classList.remove('hidden');
+  requestAnimationFrame(()=>el.classList.add('show'));
   clearTimeout(window.__toastTimeout);
-  window.__toastTimeout = setTimeout(()=>el.classList.add('hidden'), 3100);
+  clearTimeout(window.__toastHideTimeout);
+  window.__toastTimeout = setTimeout(()=>{
+    el.classList.remove('show');
+    window.__toastHideTimeout = setTimeout(()=>el.classList.add('hidden'), 200);
+  }, 3100);
 }
 
 function setAuthMessage(msg, error=true) {
@@ -218,6 +223,9 @@ function renderPage(page, {autoRefresh=false}={}) {
   }
   updateFocusCounts();
   closeSidebar();
+  root.classList.remove('page-enter');
+  void root.offsetWidth;
+  root.classList.add('page-enter');
   if(page==='schedules') loadSchedules().then(()=>{if(currentPage==='schedules'){const r=$('#viewRoot');if(r)r.innerHTML=renderSchedules();}});
   if(page==='archive') loadMarketRefreshLogs();
   if(page==='fitness') hydrateGymLibrary();
@@ -482,7 +490,7 @@ function renderAttentionCards() {
   const cards=[
     {icon:'◉',key:'GLOBAL ALLOCATION',scope:'market',title:'全球资产配置',value:`现金目标 ${fmt(cash,1)}%`,status:state.profile.riskOverlay||'Caution',tone:(state.profile.riskOverlay||'Caution')==='Caution'?'warn':'good',desc:'先核对真实持仓、应急金与负债；比较动态目标和实际比例差额。',page:'allocation',cta:'查看配置'},
     {icon:'⌁',key:'NASDAQ / AI RISK',scope:'market',title:'纳指风险与入场',value:`配置 ${fmt(nd.entry,1)} · 泡沫 ${fmt(nd.bubble,1)}`,status:leverage?'通过部分闸门':'默认不加杠杆',tone:n(nd.bubble)>=55?'warn':'good',desc:'盯住 2000 相似度、AI CapEx/FCF、VIX、10Y、趋势与回撤触发；Core 不做波段。',page:'nasdaq',cta:'查看纳指策略'},
-    {icon:'▥',key:'A-SHARE ETF ROTATION',scope:'market',title:'A 股 ETF 轮动',value:`${state.etfs?.length||0} 只观察 · ${weak} 只低于55分`,status:top?`领先 ${top.code}`:'待更新',tone:weak?'warn':'good',desc:'复核 MA20/MA60、评分质量、市场广度和风险组上限。',page:'ashare',cta:'查看 ETF 池'},
+    {icon:'▥',key:'A-SHARE ETF ROTATION',scope:'market',title:'A 股 ETF 轮动',value:`${state.etfs?.length||0} 只观察 · ${weak} 只低于55分`,status:top?`领先 ${top.code} / ${fmt(top.score,1)}分`:'待更新',tone:weak?'warn':'good',desc:'复核 MA20/MA60、评分质量、市场广度和风险组上限。',page:'ashare',cta:'查看 ETF 池'},
     {icon:'↗',key:'90-DAY BUILD',scope:'exec',title:'新登配置 / 90 天',value:`${done}/${roadmap.length} 项路线图完成`,status:p0?'优先处理 P0':'节奏正常',tone:p0?'warn':'good',desc:'优先现金流与应急金、合规资金路径、低成本核心资产，再扩展账户/身份。',page:'newconfig',cta:'打开路线图'},
     {icon:'◎',key:'GLOBAL OPTIONALITY',scope:'exec',title:'跨境 / AI 订阅 / 技能',value:`AI 月费 ${money(state.profile.aiMonthlyCost||0)}`,status:'先核验收益与合规',tone:'neutral',desc:'跟踪全球银行/券商、保险、居留/签证、公司与房产的真实用途及维护成本。',page:'newconfig',cta:'查看基础设施'}
   ];
