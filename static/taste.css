@@ -2067,6 +2067,7 @@ button, a, [role="button"] { -webkit-tap-highlight-color: transparent; touch-act
 .home-kpi small { display: block; margin-top: 6px; color: var(--muted); font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .home-kpi small.is-up { color: var(--positive); }
 .home-kpi small.is-down { color: var(--negative); }
+.home-kpi small.is-warn { color: var(--warning); }
 .home-kpi-ring-wrap { display: flex; align-items: center; gap: 8px; margin-top: 7px; color: var(--accent); }
 .home-kpi-ring-wrap svg { flex: none; }
 .home-kpi-ring-wrap strong { margin-top: 0; font-size: 24px; }
@@ -2159,9 +2160,8 @@ button, a, [role="button"] { -webkit-tap-highlight-color: transparent; touch-act
 @media (max-width: 480px) {
   .home-dash-title { align-items: flex-start; }
   .home-dash-title p { max-width: 240px; }
-  .home-dash-actions { justify-content: space-between; }
+  .home-dash-actions { justify-content: flex-end; gap: 8px; }
   .home-live { display: none; }
-  .home-dash-actions .btn { margin-left: auto; }
 }
 
 [data-theme="dark"] .recommendation-label { color: #FFB27A !important; }

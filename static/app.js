@@ -875,7 +875,7 @@ function renderHomeDashboard(){
       <article class="home-kpi home-kpi-ring"><div class="home-kpi-top"><span>今日完成</span><b>02</b></div><div class="home-kpi-ring-wrap">${homeRingSvg(completion)}<strong>${doneHome}<em>/${homeTasks.length}</em></strong></div><small>完成率 ${completion}%</small></article>
       <article class="home-kpi"><div class="home-kpi-top"><span>平衡指数</span><b>03</b></div><strong>${balance.score}</strong><small>忙碌 ${balance.busy} · 暂停 ${balance.paused}</small></article>
       <article class="home-kpi"><div class="home-kpi-top"><span>纳指配置分</span><b>04</b></div><strong>${fmt(nd.entry,1)}</strong><small>泡沫 ${fmt(nd.bubble,1)}</small></article>
-      <article class="home-kpi"><div class="home-kpi-top"><span>7 日负载</span><b>05</b></div><strong>${due7}</strong><small class="${delta!==null&&delta>0?'is-up':delta!==null&&delta<0?'is-down':''}">较前 7 日 ${delta===null?'—':`${delta>0?'↑':delta<0?'↓':'·'} ${Math.abs(delta)}%`}</small></article>
+      <article class="home-kpi"><div class="home-kpi-top"><span>7 日负载</span><b>05</b></div><strong>${due7}</strong><small class="${delta!==null&&delta>0?'is-warn':delta!==null&&delta<0?'is-up':''}">较前 7 日 ${delta===null?'—':`${delta>0?'↑':delta<0?'↓':'·'} ${Math.abs(delta)}%`}</small></article>
     </div>
     <div class="home-dash-grid">
       <section class="home-panel home-trend-panel">
