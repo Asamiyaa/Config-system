@@ -786,6 +786,16 @@ td.num, th.num, .data-table td:nth-child(n+3) { text-align: right; font-variant-
   color: var(--text) !important;
   border-bottom: 1px solid var(--accent) !important;
 }
+.inspector-tabs { display: flex !important; gap: 16px; border-bottom: 1px solid var(--border) !important; padding-bottom: 6px; margin-bottom: 8px; }
+.inspector-tabs span {
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: var(--muted) !important;
+  font-size: 11px !important;
+}
+.inspector-tabs span:first-child { color: var(--text) !important; }
 .local-gif-label { color: var(--muted) !important; }
 .body-region-index, .action-inspector { background: var(--surface) !important; border-color: var(--border) !important; border-radius: 6px !important; }
 #viewRoot input, #viewRoot select, #viewRoot textarea {
