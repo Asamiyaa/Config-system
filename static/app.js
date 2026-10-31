@@ -201,14 +201,14 @@ function metricCard(label, value, foot, icon='◦', footType='', cover='') { ret
 function scoreType(score, inverse=false) { const x=n(score); if (inverse) return x>=70?'bad':x>=55?'warn':'good'; return x>=70?'good':x>=55?'warn':'neutral'; }
 function formatDelta(v) { const x=n(v); const cls=x>0?'market-gain':x<0?'market-loss':'market-flat'; const color=x>0?'var(--market-up)':x<0?'var(--market-down)':'inherit'; return `<span class="${cls}" style="color:${color}!important;font-weight:700">${x>0?'+':''}${fmt(x,2)}%</span>`; }
 function cleanPageSections(page, root) {
-  const foldExtras=(extras,label)=>{
+  const foldExtras=(extras,label,parent=root)=>{
     if(!extras.length) return;
     const fold=document.createElement('details');
     fold.className='page-fold';
     fold.innerHTML=`<summary><span>${label}</span><small>${extras.length} 个区块</small></summary><div class="page-fold-body"></div>`;
     const body=fold.querySelector('.page-fold-body');
     extras.forEach((el)=>body.appendChild(el));
-    root.appendChild(fold);
+    parent.appendChild(fold);
   };
   if (page === 'home') {
     const calendarHead=[...root.children].find((el)=>el.classList.contains('page-head') && /周历/.test(el.textContent));
@@ -220,7 +220,15 @@ function cleanPageSections(page, root) {
     }
     return;
   }
-  const keep = {allocation:4,nasdaq:4,ashare:4,execution:4,archive:2,health:3,agents:2,schedules:2,mistakes:2}[page];
+  if (page==='diet'||page==='skin') {
+    const panel=root.querySelector('.hos-shell .fit-panel.active');
+    if (panel) {
+      const panelChildren=[...panel.children];
+      foldExtras(panelChildren.slice(3),'展开其余记录',panel);
+    }
+    return;
+  }
+  const keep = {allocation:4,nasdaq:4,ashare:4,execution:4,archive:2,health:3,checkin:3,diet:3,fitness:3,skin:3,sleep:3,style:3,agents:2,schedules:2,mistakes:2}[page];
   if (!keep) return;
   const children=[...root.children].filter((el)=>!el.classList.contains('page-head')&&!el.classList.contains('home-welcome')&&!el.classList.contains('hub-tabs'));
   if (children.length <= keep) return;
@@ -328,6 +336,7 @@ function renderPage(page, {autoRefresh=false, transition=true, animate=true}={})
   setHeader(page);
   const root=$('#viewRoot');
   root.dataset.page=page;
+  root.dataset.hub=HUB_OF[page]||page;
   const map={today:()=>renderTaskWorkspace('home'),schedules:renderSchedules,agents:renderAgents,mistakes:renderMistakes,home:renderHome,inbox:renderInbox,upcoming:renderUpcoming,calendar:renderCalendar,matrix:renderMatrix,stats:renderFocusStats,important:renderImportant,alltasks:renderAllFocusTasks,dashboard:renderDashboard,allocation:renderAllocation,nasdaq:renderNasdaq,ashare:renderAshare,newconfig:()=> (typeof renderNewConfigV2==='function'?renderNewConfigV2():renderNewConfig()),health:renderHealth,checkin:renderHealthCheckin,diet:()=>renderHealthSection('diet'),fitness:()=>renderHealthSection('fitness'),skin:()=>renderHealthSection('skin'),sleep:()=>renderHealthSection('sleep'),style:()=>renderHealthSection('style'),english:()=> (typeof renderEnglishV2==='function'?renderEnglishV2():renderEnglish()),reading:()=> (typeof renderReadingV2==='function'?renderReadingV2():renderReading()),execution:renderExecution,archive:renderArchive,dailyflow:renderDailyFlow,flowstats:renderFlowStats,alpharadar:renderAlphaRadar};
   const investingPages=['dashboard','allocation','nasdaq','ashare','execution'];
   const body=(map[page]||renderHome)();
@@ -359,7 +368,13 @@ function renderPage(page, {autoRefresh=false, transition=true, animate=true}={})
   const reduceMotion=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   if (document.startViewTransition && !reduceMotion && transition) {
     root.classList.remove('page-enter');
-    document.startViewTransition(commit);
+    try {
+      const vt=document.startViewTransition(commit);
+      vt.finished?.catch(()=>{});
+    } catch (_) {
+      commit();
+      root.classList.add('page-enter');
+    }
   } else {
     commit();
     if (animate) {
@@ -533,7 +548,7 @@ function renderFocusTaskRows(view) {
   const query=(ui.focusQuery||'').trim().toLowerCase();
   const rows=focusTaskFilter(view).filter(t=>!query||[t.title,t.project,t.note,t.priority].join(' ').toLowerCase().includes(query)).sort((a,b)=>Number(a.done)-Number(b.done)||(a.dueDate||'9999').localeCompare(b.dueDate||'9999')||({'高':0,'中':1,'低':2}[a.priority]??3)-({'高':0,'中':1,'低':2}[b.priority]??3));
   if(!rows.length) return `<div class="task-empty"><span class="empty-spark">✳</span><strong>${query?'没有匹配的任务':'这一区域暂时没有任务'}</strong><p>${query?'试试任务名称、模块或备注。':'先添加一项任务，把想法变成下一步行动。'}</p></div>`;
-  return rows.map(t=>`<article class="focus-task-row ${t.done?'is-done':''}" data-focus-task-row="${esc(t.id)}">
+  return rows.map((t,i)=>`<article class="focus-task-row ${t.done?'is-done':''}" data-focus-task-row="${esc(t.id)}" style="--task-i:${Math.min(i,12)}">
     <button class="focus-check ${t.done?'checked':''}" data-action="toggle-focus-task" data-id="${esc(t.id)}" aria-label="${t.done?'标记未完成':'完成任务'}">${t.done?'✓':''}</button>
     <div class="focus-task-copy"><div class="focus-task-title">${esc(t.title)}</div><div class="focus-task-meta"><span class="project-chip">${esc(t.project||'收集箱')}</span><span class="task-due ${t.dueDate<todayKey()&&!t.done?'overdue':''}">${esc(taskDueLabel(t))}</span><span>◷ ${Math.max(0,n(t.estimate,0))}m</span><span class="priority-label ${taskPriorityClass(t.priority)}">${esc(t.priority||'低')}优先级</span></div>${t.note?`<p class="focus-task-note">${esc(t.note)}</p>`:''}</div>
     <button class="task-star ${t.important?'starred':''}" data-action="toggle-focus-important" data-id="${esc(t.id)}" title="${t.important?'取消重要':'标记重要'}">${t.important?'★':'☆'}</button>

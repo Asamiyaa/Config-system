@@ -165,6 +165,7 @@
     localizeLabels($('#viewRoot') || document);
     restoreBento();
     mountAgentDepth();
+    mountDashboardDepth();
     $$('#mainNav .nav-item').forEach((item) => {
       const on = item.dataset.page === hub;
       item.classList.toggle('active', on);
@@ -466,6 +467,35 @@
     if (tiltCard === card) tiltCard=null;
   }
   document.addEventListener('pointerleave', () => { if (tiltCard) resetTilt(tiltCard); });
+
+  /* ---------- dashboard depth: the cover photo becomes a parallax layer ---------- */
+  function mountDashboardDepth() {
+    if((typeof currentPage !== 'undefined' ? currentPage : '') !== 'dashboard') return;
+    const head=document.querySelector('#viewRoot > .page-head');
+    if(!head || head.dataset.depthBound==='1') return;
+    head.dataset.depthBound='1';
+    const reduce=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    const fine=window.matchMedia?.('(hover: hover) and (pointer: fine)').matches;
+    if(reduce || !fine || window.innerWidth<=1100) return;
+    head.classList.add('is-depth');
+    let raf=0;
+    head.addEventListener('pointermove', (e) => {
+      if(raf) return;
+      raf=requestAnimationFrame(()=>{
+        raf=0;
+        const r=head.getBoundingClientRect();
+        const x=(e.clientX-r.left)/Math.max(1,r.width)-.5;
+        const y=(e.clientY-r.top)/Math.max(1,r.height)-.5;
+        head.style.setProperty('--head-x', `${(x*9).toFixed(2)}px`);
+        head.style.setProperty('--head-y', `${(y*6).toFixed(2)}px`);
+      });
+    }, {passive:true});
+    head.addEventListener('pointerleave', () => {
+      cancelAnimationFrame(raf); raf=0;
+      head.style.setProperty('--head-x','0px');
+      head.style.setProperty('--head-y','0px');
+    });
+  }
 
   /* ---------- agents depth stage: pointer parallax ---------- */
   function mountAgentDepth() {

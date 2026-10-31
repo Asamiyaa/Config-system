@@ -1717,3 +1717,34 @@ body[data-theme="light"] .nav-item[aria-current="page"] { box-shadow: none !impo
 @media (max-width: 860px) {
   .agent-balance-stage.is-depth { transform: none !important; }
 }
+
+/* execution beat: rows land in reading order, completion snaps */
+.focus-task-row { animation: task-row-in 300ms var(--ease-out) both; animation-delay: calc(var(--task-i, 0) * 24ms); }
+.focus-check.checked { animation: check-snap 320ms var(--ease-out) both; }
+@keyframes task-row-in { from { opacity: 0; transform: translateY(7px) scale(.996); } to { opacity: 1; transform: none; } }
+@keyframes check-snap { 0% { transform: scale(.72); } 62% { transform: scale(1.12); } 100% { transform: scale(1); } }
+
+/* dashboard depth: photo layer moves opposite the pointer under the dark masthead */
+#viewRoot[data-page="dashboard"] > .page-head.is-depth .page-cover-media img {
+  transform: translate3d(calc(var(--head-x, 0px) * -1), calc(var(--head-y, 0px) * -1), 0) scale(1.045);
+  transition: transform 260ms var(--ease-out);
+  will-change: transform;
+}
+@media (max-width: 1100px) {
+  #viewRoot[data-page="dashboard"] > .page-head.is-depth .page-cover-media img { transform: none; }
+}
+
+/* divergence: health masthead is image-left, unlike the command-style pages */
+#viewRoot[data-hub="health"] > .page-head:has(h1) {
+  padding: 22px 26px 20px 250px !important;
+}
+#viewRoot[data-hub="health"] > .page-head:has(h1) .page-cover-media {
+  right: auto; left: 0; border-left: 0;
+  border-right: 1px solid var(--border);
+}
+@media (max-width: 860px) {
+  #viewRoot[data-hub="health"] > .page-head:has(h1) { padding: 20px 18px 18px 104px !important; }
+  #viewRoot[data-hub="health"] > .page-head:has(h1) .page-cover-media { left: 0; right: auto; }
+}
+
+#viewRoot[data-hub="health"] .page-cover-media img { object-position: 68% 48%; }
