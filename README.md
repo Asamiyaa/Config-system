@@ -20,6 +20,7 @@
 - **聊天归档与参考文件**：项目主题索引、原工作簿/源码包下载、数据来源注册表、导出/导入 JSON。
 - **行情刷新**：用户点击后，尝试从 Yahoo Finance (`yfinance`) 抓取 NDX/VIX/10年收益率/QQQ/VOO/GLD/BTC/ACWI，尝试通过 AKShare 获取 18 只 ETF 历史日线；部分请求超时会保留旧值并显示成功/失败计数，不会把失败响应显示成成功。
 - **健康管理 / 健身管理（openGym 原生接入）**：在“健康管理 → 健身管理”内新增动作库、周计划与引导训练。直接读取本机 openGym `catalogue` 的 5,600+ 动作、中文名称/步骤与本地动作动画，**不需要单独启动 openGym**（不需要 Node、Docker 或额外端口）。支持关键词/部位/器械/分类检索、动作详情、收藏、加入周计划、按目标与可用器械自动生成整周计划；训练记录继续写入健康管理现有数据，参与热力图、PR、恢复与疲劳分析。
+- **Taste redesign · data-terminal**：按 `Leonxlnx/taste-skill` 的 app-screen 规则重构 UI：Public Sans + DM Mono、`#171719` 中性暗色、1px 边框、单一 `#4a8ad6` 选择线、dividable KPI strip、ledger 式关注点/四象限、命令面板 `⌘K`、可折叠 labelled sidebar；登录页与移动端同步重做。详见 `TASTE_REDESIGN.md`。
 - **健康管理 / 皮肤护理（Skin OS）**：按肤质、敏感度、经验与诉求生成 AM/PM 流程；视黄醇/水杨酸/果酸按周排程并检查同晚冲突；逐步骤打卡、皮肤评分、28 天日历、产品耐受观察与成分速查。详见 `UPDATE_HEALTH_SKIN_DIET_SLEEP_V14.md`。
 - **Agent 分身 · 3D 平衡轨道**：六个分身使用 Microsoft Fluent Emoji 3D 形象（MIT）绕中心旋转，中心平衡秤代表主控 OS；每个分身有明确能力含义、失衡信号与入口，支持状态切换、暂停旋转、平衡指数与移动端适配。详见 `UPDATE_AGENT_3D_BALANCE_V15.md`。
 - **每日流程 · 编排/统计双页签**：侧边栏只保留一个「每日流程」入口，页面内用左右页签切换「流程编排」与「流程统计」；编排支持工作日/休息日时间轴、拖动/缩放、开始记录与编辑删除，统计展示打开/完成次数、近 14 天趋势、分类与单项明细。详见 `UPDATE_DAILY_FLOW_TABS_V16.md`。

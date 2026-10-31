@@ -65,7 +65,7 @@ function engSkillTone(skill) {
 
 function renderEnglishV2() {
   const s = engStats();
-  return `${sectionHead('ENGLISH · INPUT TO REUSABLE OUTPUT', '英语 · 从输入到可复用输出', '把阅读、听力、词汇输入转化为可复用的写作、口语复述、项目说明与公开作品。新增和编辑都在弹层完成，列表只保留可扫描的记录。', `<button class="btn btn-outline" data-action="capability-page" data-page="home">← 返回今日工作台</button><button class="btn btn-primary" data-action="eng-add-log">＋ 新增学习记录</button>`)}
+  return `${sectionHead('ENGLISH · INPUT TO REUSABLE OUTPUT', '外语', '把阅读、听力、词汇输入转化为可复用的写作、口语复述、项目说明与公开作品。新增和编辑都在弹层完成，列表只保留可扫描的记录。', `<button class="btn btn-outline" data-action="capability-page" data-page="home">← 返回今日工作台</button><button class="btn btn-primary" data-action="eng-add-log">＋ 新增学习记录</button>`)}
   <div class="hos-shell" data-tab-shell data-tab-key="english" data-default-tab="overview">
     <div class="hos-bar"><div class="fit-tabs" data-tabs role="tablist">
       <button class="fit-tab active" data-tab="overview" role="tab">概览</button>

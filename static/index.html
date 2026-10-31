@@ -3,27 +3,40 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#101713" />
-  <title>Wealth OS · 全球资产与执行系统</title>
+  <meta name="theme-color" content="#171719" />
+  <title>Wealth OS · 私人操作系统</title>
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="/static/styles.css" />
   <link rel="stylesheet" href="/static/theme.css" />
+  <link rel="stylesheet" href="/static/taste.css" />
 </head>
 <body>
+  <svg class="taste-icon-sprite" aria-hidden="true" focusable="false">
+    <symbol id="i-home" viewBox="0 0 16 16"><path d="M2.5 7.2 8 2.5l5.5 4.7v5.8a.5.5 0 0 1-.5.5h-3.2V9.8H6.2v3.7H3a.5.5 0 0 1-.5-.5V7.2Z"/></symbol>
+    <symbol id="i-check" viewBox="0 0 16 16"><path d="M3 8.4 6.2 11.6 13 4.8"/><path d="M2.5 2.5h11v11h-11z" opacity=".35"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.8"/><path d="M8 4.6V8l2.3 1.4"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 16 16"><path d="M8 2.6 14.2 13H1.8L8 2.6Z"/><path d="M8 6.2v3.1M8 11.2v.1"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 16 16"><path d="M8 2.2v3.1M8 10.7v3.1M2.2 8h3.1M10.7 8h3.1M4.1 4.1l2.2 2.2M9.7 9.7l2.2 2.2M11.9 4.1 9.7 6.3M6.3 9.7l-2.2 2.2"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 16 16"><path d="M8 2.3 13 4v3.5c0 3-2.1 5.1-5 6.2-2.9-1.1-5-3.2-5-6.2V4l5-1.7Z"/><path d="M5.8 8.1 7.3 9.6l3-3.2"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 16 16"><path d="M8 13.3S2.4 10 2.4 5.9A2.8 2.8 0 0 1 8 4.5a2.8 2.8 0 0 1 5.6 1.4c0 4.1-5.6 7.4-5.6 7.4Z"/></symbol>
+    <symbol id="i-compass" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.8"/><path d="m10.4 5.6-1.5 3.3-3.3 1.5 1.5-3.3 3.3-1.5Z"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.8"/><path d="M2.5 8h11M8 2.2c1.5 1.6 2.3 3.5 2.3 5.8S9.5 12.2 8 13.8C6.5 12.2 5.7 10.3 5.7 8S6.5 3.8 8 2.2Z"/></symbol>
+    <symbol id="i-book" viewBox="0 0 16 16"><path d="M2.8 3.2c2.2-.8 3.7-.5 5.2.6v9.4c-1.5-1.1-3-1.4-5.2-.6V3.2ZM13.2 3.2c-2.2-.8-3.7-.5-5.2.6v9.4c1.5-1.1 3-1.4 5.2-.6V3.2Z"/></symbol>
+    <symbol id="i-archive" viewBox="0 0 16 16"><path d="M2.5 5.5h11v8h-11zM2 2.5h12v3H2zM6.3 8.2h3.4"/></symbol>
+  </svg>
+
   <div id="authScreen" class="auth-screen">
     <div class="auth-brand">
       <div class="brand-mark">W<span>·</span></div>
-      <div><strong>WEALTH OS</strong><small>GLOBAL ASSET COMMAND CENTER</small></div>
+      <div><strong>WEALTH OS</strong><small>PRIVATE OS</small></div>
     </div>
     <div class="auth-art">
       <div class="auth-grid"></div>
       <div class="auth-copy">
         <div class="eyebrow">ONE WORKSPACE · MANY DECISIONS</div>
-        <h1>把资产配置，<br><em>变成可执行系统。</em></h1>
+        <h2>把资产配置，<br><em>变成可执行系统。</em></h2>
         <p>监控 · 评分 · 触发条件 · 日志 · 90天落地路线图。策略与数据在一个工作台里持续迭代。</p>
-        <div class="auth-pill-row"><span>GLOBAL ASSETS</span><span>NASDAQ AI</span><span>A-SHARE ETF</span><span>90-DAY OPS</span></div>
       </div>
-      <div class="auth-orbit orbit-a"></div><div class="auth-orbit orbit-b"></div>
-      <div class="auth-mini-card"><small>RISK FIRST / EXECUTION SECOND</small><strong>01<span> / </span>Monitor</strong><strong>02<span> / </span>Score</strong><strong>03<span> / </span>Review</strong></div>
     </div>
     <div class="auth-panel">
       <div class="auth-panel-top"><span class="live-dot"></span><span>PRIVATE WORKSPACE</span><span class="auth-divider"></span><span>本地账户</span></div>
@@ -36,49 +49,59 @@
       </form>
       <div class="auth-mode"><span id="authModeText">还没有账户？</span><button type="button" id="authModeToggle">创建本地账户</button></div>
       <div class="demo-login" id="demoLogin"><div><small>DEMO ACCESS</small><strong>用户名 demo / 密码 Demo1234!</strong></div><button type="button" id="fillDemo">填入 <span>→</span></button></div>
-      <div class="auth-foot">演示账户仅供本地试用；部署到公网前请禁用Demo并启用HTTPS。</div>
+      <div class="auth-foot">演示账户仅供本地试用；部署到公网前请禁用 Demo 并启用 HTTPS。</div>
     </div>
   </div>
 
   <div id="appShell" class="app-shell hidden">
     <aside class="sidebar" id="sidebar">
-      <div class="sidebar-brand"><div class="brand-mark small">W<span>·</span></div><div><strong>WEALTH OS</strong><small>PERSONAL COMMAND</small></div><button class="mobile-close" data-action="close-sidebar">×</button></div>
+      <div class="sidebar-brand">
+        <div class="brand-mark small">W<span>·</span></div>
+        <div class="sidebar-brand-copy"><strong>WEALTH OS</strong><small>PRIVATE OS</small></div>
+        <button class="sidebar-collapse" id="tasteCollapse" type="button" title="收起侧栏" aria-label="收起侧栏">‹</button>
+        <button class="mobile-close" data-action="close-sidebar">×</button>
+      </div>
+      <button class="sidebar-search" id="tasteSearch" type="button" aria-label="搜索页面">
+        <span class="sidebar-search-icon">⌕</span><span class="sidebar-search-label">搜索页面</span><kbd>⌘K</kbd>
+      </button>
       <div class="sidebar-scroll">
-        <div class="sidebar-section-label">TICKFLOW · TASKS</div>
         <nav id="mainNav" class="main-nav">
-          <button class="nav-item core-capability-nav" data-page="newconfig"><span class="nav-icon">↗</span><span>新登</span><kbd>90D</kbd></button>
-          <button class="nav-item core-capability-nav active" data-page="home"><span class="nav-icon">◷</span><span>首页</span><span class="nav-count" id="homeCount">0</span></button>
-          <button class="nav-item core-capability-nav" data-page="agents"><span class="nav-icon">✧</span><span>分身</span><kbd>OS</kbd></button>
-          <button class="nav-item core-capability-nav" data-page="mistakes"><span class="nav-icon">◎</span><span>切记</span><kbd>NEW</kbd></button>
-          <button class="nav-item core-capability-nav" data-page="dailyflow"><span class="nav-icon">◷</span><span>流程</span><kbd>2</kbd></button>
-          <button class="nav-item investing-group-toggle" data-action="toggle-investing" aria-expanded="false"><span class="nav-icon">◈</span><span>风控</span><kbd>＋</kbd></button>
+          <div class="nav-group-label">日常</div>
+          <button class="nav-item core-capability-nav active" data-page="home" title="首页"><svg class="nav-icon"><use href="#i-home"></use></svg><span class="nav-label">首页</span></button>
+          <button class="nav-item core-capability-nav" data-page="schedules" title="待办"><svg class="nav-icon"><use href="#i-check"></use></svg><span class="nav-label">待办</span></button>
+          <button class="nav-item core-capability-nav" data-page="dailyflow" title="流程"><svg class="nav-icon"><use href="#i-clock"></use></svg><span class="nav-label">流程</span></button>
+          <button class="nav-item core-capability-nav" data-page="mistakes" title="切记"><svg class="nav-icon"><use href="#i-alert"></use></svg><span class="nav-label">切记</span></button>
+          <div class="nav-group-label">系统</div>
+          <button class="nav-item investing-group-toggle" data-action="toggle-investing" aria-expanded="false" title="风控"><svg class="nav-icon"><use href="#i-shield"></use></svg><span class="nav-label">风控</span><kbd class="nav-chevron">＋</kbd></button>
           <div id="investingSubnav" class="investing-subnav hidden">
-            <button class="nav-item" data-page="dashboard"><span class="nav-icon">◫</span><span>资产总览 Dashboard</span><kbd>01</kbd></button>
-            <button class="nav-item" data-page="allocation"><span class="nav-icon">◉</span><span>全球资产配置</span><kbd>02</kbd></button>
-            <button class="nav-item" data-page="nasdaq"><span class="nav-icon">⌁</span><span>纳斯达克 AI 策略</span><kbd>03</kbd></button>
-            <button class="nav-item" data-page="ashare"><span class="nav-icon">▥</span><span>A股 ETF 轮动</span><kbd>04</kbd></button>
-            <button class="nav-item" data-page="alpharadar"><span class="nav-icon">⌁</span><span>Alpha Radar</span><kbd>05</kbd></button>
-            <button class="nav-item" data-page="execution"><span class="nav-icon">✓</span><span>每日执行与日志</span><kbd>06</kbd></button>
+            <button class="nav-item" data-page="dashboard"><span class="nav-label">资产总览</span></button>
+            <button class="nav-item" data-page="allocation"><span class="nav-label">全球资产配置</span></button>
+            <button class="nav-item" data-page="nasdaq"><span class="nav-label">纳斯达克 AI 策略</span></button>
+            <button class="nav-item" data-page="ashare"><span class="nav-label">A股 ETF 轮动</span></button>
+            <button class="nav-item" data-page="alpharadar"><span class="nav-label">Alpha Radar</span></button>
+            <button class="nav-item" data-page="execution"><span class="nav-label">每日执行与日志</span></button>
           </div>
-          <button class="nav-item core-capability-nav capability-group-toggle" data-action="toggle-health-nav" aria-expanded="false"><span class="nav-icon">✚</span><span>健康</span><kbd>＋</kbd></button>
+          <button class="nav-item capability-group-toggle" data-action="toggle-health-nav" aria-expanded="false" title="健康"><svg class="nav-icon"><use href="#i-heart"></use></svg><span class="nav-label">健康</span><kbd class="nav-chevron">＋</kbd></button>
           <div id="healthSubnav" class="investing-subnav hidden capability-subnav">
-            <button class="nav-item" data-page="health"><span class="nav-icon">◉</span><span>健康总览</span></button>
-            <button class="nav-item" data-page="checkin"><span class="nav-icon">▦</span><span>打卡/统计</span></button>
-            <button class="nav-item" data-page="diet"><span class="nav-icon">◌</span><span>饮食饮水记录</span></button>
-            <button class="nav-item" data-page="fitness"><span class="nav-icon">⌁</span><span>健身管理</span></button>
-            <button class="nav-item" data-page="skin"><span class="nav-icon">✧</span><span>皮肤护理</span></button>
-            <button class="nav-item" data-page="sleep"><span class="nav-icon">☾</span><span>睡眠记录与恢复</span></button>
-            <button class="nav-item" data-page="style"><span class="nav-icon">◇</span><span>发型与穿搭</span></button>
+            <button class="nav-item" data-page="health"><span class="nav-label">健康总览</span></button>
+            <button class="nav-item" data-page="checkin"><span class="nav-label">打卡与统计</span></button>
+            <button class="nav-item" data-page="diet"><span class="nav-label">饮食饮水</span></button>
+            <button class="nav-item" data-page="fitness"><span class="nav-label">健身管理</span></button>
+            <button class="nav-item" data-page="skin"><span class="nav-label">皮肤护理</span></button>
+            <button class="nav-item" data-page="sleep"><span class="nav-label">睡眠与恢复</span></button>
+            <button class="nav-item" data-page="style"><span class="nav-label">发型与穿搭</span></button>
           </div>
-          <button class="nav-item core-capability-nav" data-page="english"><span class="nav-icon">Aa</span><span>外语</span><kbd>02</kbd></button>
-          <button class="nav-item core-capability-nav" data-page="reading"><span class="nav-icon">▤</span><span>书单</span><kbd>03</kbd></button>
-          <button class="nav-item" data-page="archive"><span class="nav-icon">▤</span><span>归档</span><kbd>09</kbd></button>
-          <button class="nav-item core-capability-nav" data-page="schedules"><span class="nav-icon">⏱</span><span>待办</span><kbd>NEW</kbd></button>
+          <button class="nav-item core-capability-nav" data-page="agents" title="分身"><svg class="nav-icon"><use href="#i-spark"></use></svg><span class="nav-label">分身</span></button>
+          <div class="nav-group-label">积累</div>
+          <button class="nav-item core-capability-nav" data-page="newconfig" title="新登"><svg class="nav-icon"><use href="#i-compass"></use></svg><span class="nav-label">新登</span></button>
+          <button class="nav-item core-capability-nav" data-page="english" title="外语"><svg class="nav-icon"><use href="#i-globe"></use></svg><span class="nav-label">外语</span></button>
+          <button class="nav-item core-capability-nav" data-page="reading" title="书单"><svg class="nav-icon"><use href="#i-book"></use></svg><span class="nav-label">书单</span></button>
+          <button class="nav-item" data-page="archive" title="归档"><svg class="nav-icon"><use href="#i-archive"></use></svg><span class="nav-label">归档</span></button>
         </nav>
       </div>
       <div class="sidebar-bottom">
-        <div class="sidebar-status"><span class="status-ring"></span><div><strong>LOCAL DATA MODE</strong><small>可编辑 · 可保存 · 不自动下单</small></div></div>
-        <div class="profile-strip"><div class="avatar" id="userAvatar">D</div><div class="profile-meta"><strong id="sidebarUser">demo</strong><small>私人投资工作台</small></div><button data-action="logout" class="logout-btn" title="退出登录">⇥</button></div>
+        <div class="sidebar-status"><span class="status-ring"></span><div><strong>本地数据</strong><small>可编辑 · 可保存 · 不自动下单</small></div></div>
+        <div class="profile-strip"><div class="avatar" id="userAvatar">D</div><div class="profile-meta"><strong id="sidebarUser">demo</strong><small>私人工作区</small></div><button data-action="logout" class="logout-btn" title="退出登录" aria-label="退出登录">⇥</button></div>
       </div>
     </aside>
 
@@ -88,6 +111,15 @@
       <footer class="app-footer"><span>WEALTH OS · PRIVATE WORKSPACE</span><span>规则是风险预算器，不是涨跌预测。交易前核验源数据、合规和产品状态。</span><span id="saveStatus">未修改</span></footer>
     </main>
   </div>
+
+  <div id="tastePalette" class="taste-palette hidden" role="dialog" aria-modal="true" aria-label="快速跳转">
+    <div class="taste-palette-backdrop" data-palette-close></div>
+    <div class="taste-palette-panel">
+      <div class="taste-palette-input"><span>⌕</span><input id="tastePaletteInput" type="search" placeholder="搜索页面…" autocomplete="off" aria-label="搜索页面" /><kbd>ESC</kbd></div>
+      <div id="tastePaletteResults" class="taste-palette-results"></div>
+    </div>
+  </div>
+
   <script src="/static/health_core.js"></script>
   <script src="/static/skin_os.js"></script>
   <script src="/static/diet_os.js"></script>
@@ -97,5 +129,6 @@
   <script src="/static/reading_os.js"></script>
   <script src="/static/app.js"></script>
   <script src="/static/ui.js" defer></script>
+  <script src="/static/taste.js" defer></script>
 </body>
 </html>
