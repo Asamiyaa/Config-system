@@ -98,7 +98,7 @@ body[data-theme="light"] {
   --faint: #756c60;
   --accent: #a94c22;
   --positive: #4f7452;
-  --negative: #a63b2c;
+  --negative: #8f2d20;
   --warning: #9a6b20;
   --primary: #a94c22;
   --primary-ink: #fffdf9;
@@ -1692,3 +1692,6 @@ body[data-theme="light"] .nav-item[aria-current="page"] { box-shadow: none !impo
 #viewRoot .english-tool-mark { color: var(--text) !important; }
 
 #saveStatus, .app-footer #saveStatus { color: var(--muted) !important; }
+
+#viewRoot .task-due { color: var(--negative) !important; }
+#viewRoot .fit-ex .fit-ex-note { color: var(--muted) !important; }
