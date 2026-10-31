@@ -37,13 +37,13 @@
 |---|---|
 | 字体 | **Public Sans**（本地 woff2，中文回退 Noto Sans SC / PingFang / 微软雅黑） |
 | 数字 | **DM Mono**，tabular-nums |
-| 底色 | `#171719` |
-| 面板 | `#131217` |
-| 边框 | `#222224`，1px |
+| 底色 | `#0d0f0c` |
+| 面板 | `#141711` |
+| 边框 | `#293024`，1px |
 | 主文本 | `#ffffff` |
 | 次文本 | `#b4b6ba` |
 | 弱文本 | `#8a8c92` |
-| Accent | `#4a8ad6`，只用于选择线、数据图和状态点 |
+| Accent | `#b7f36a`（暗）/ `#5c8a31`（浅），只用于选择线、数据图和状态点 |
 | 圆角 | 6px（不再 12–20px 大圆角） |
 | 间距 | 24px 单一 gutter，32px canvas padding |
 | 控件 | 32–36px 高，主按钮白底黑字，次按钮透明描边 |
@@ -65,7 +65,7 @@
 
 - 11 个目的地按「日常 / 系统 / 积累」分组；
 - 统一 16px 线性 SVG 图标；
-- active 状态是中性灰 pill + 1px 蓝色下划线；
+- active 状态是中性灰 pill + 1px 亮绿下划线；
 - 去掉 `90D / OS / NEW / 02` 等装饰性 badge；
 - 桌面可折叠为 56px icon rail，状态保存在 localStorage；
 - 移动端全屏抽屉，标签保留。
@@ -125,7 +125,7 @@ RESULT: 0 FAIL, 2 WARN — measurements pass.
 剩余 WARN：
 
 - `tiny-text`：80% 文本在 13px 以下。属于 data-terminal 的密集标签策略；正文 13px、标签 11–12px、标题 26px，未继续放大以保持信息密度。
-- `no-data-hue`：首页本身没有可绘制的数据图表，7 个 timeline 是日历/任务骨架；数据色出现在各模块图表与矩阵计数（蓝色）。
+- `no-data-hue`：首页本身没有可绘制的数据图表，7 个 timeline 是日历/任务骨架；数据色出现在各模块图表与矩阵计数（绿色）。
 
 `lint.mjs`：**0 FAIL, 44 WARN**。WARN 主要是 `box-shadow:none`、`backdrop-filter:none` 的字面匹配和刻意保留的数字 mono。
 

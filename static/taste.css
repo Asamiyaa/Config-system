@@ -33,34 +33,34 @@
 :root,
 html[data-theme="dark"],
 body[data-theme="dark"] {
-  --ground: #171719;
-  --surface: #131217;
-  --raised: #212023;
-  --active: #222224;
-  --border: #222224;
-  --rule: #1b1a1f;
-  --control: #3a3a3e;
-  --text: #ffffff;
-  --muted: #b4b6ba;
-  --faint: #8a8c92;
-  --accent: #4a8ad6;
-  --positive: #5fc39c;
-  --negative: #e5566f;
-  --warning: #d9a441;
-  --primary: #ffffff;
-  --primary-ink: #0b0b0c;
-  --pill-positive-bg: #1b2828;
-  --pill-positive-ink: #5fc39c;
-  --pill-negative-bg: #2c1a20;
-  --pill-negative-ink: #e5566f;
-  --pill-warning-bg: #2a2416;
-  --pill-warning-ink: #d9a441;
-  --pill-neutral-bg: #212023;
-  --pill-neutral-ink: #bdbdc0;
-  --chart-1: #f2f2f3;
-  --chart-2: #e5566f;
-  --chart-3: #4a8ad6;
-  --grid: #2b2b2b;
+  --ground: #0d0f0c;
+  --surface: #141711;
+  --raised: #1c2018;
+  --active: #22271e;
+  --border: #293024;
+  --rule: #1e231b;
+  --control: #3a4233;
+  --text: #f5f7f1;
+  --muted: #b0b8aa;
+  --faint: #858d7f;
+  --accent: #b7f36a;
+  --positive: #8fd06a;
+  --negative: #ef6a76;
+  --warning: #e3b45d;
+  --primary: #b7f36a;
+  --primary-ink: #101408;
+  --pill-positive-bg: #1e2a1a;
+  --pill-positive-ink: #9bd578;
+  --pill-negative-bg: #2c1a1c;
+  --pill-negative-ink: #ef7c86;
+  --pill-warning-bg: #2b2415;
+  --pill-warning-ink: #e3b45d;
+  --pill-neutral-bg: #1d2119;
+  --pill-neutral-ink: #b9c0b3;
+  --chart-1: #f3f5ef;
+  --chart-2: #ef6a76;
+  --chart-3: #b7f36a;
+  --grid: #2b3327;
   --chart-span: 0.12;
   --sans: "Public Sans", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
   --mono: "DM Mono", "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
@@ -83,34 +83,34 @@ body[data-theme="dark"] {
 
 html[data-theme="light"],
 body[data-theme="light"] {
-  --ground: #f7f7f8;
+  --ground: #eef1eb;
   --surface: #ffffff;
-  --raised: #f1f1f2;
-  --active: #eaeaea;
-  --border: #e5e5e5;
-  --rule: #efefef;
-  --control: #d1d5db;
-  --text: #111111;
-  --muted: #5f6368;
-  --faint: #6b6b6b;
-  --accent: #2f6fa8;
-  --positive: #247b50;
-  --negative: #c4242a;
-  --warning: #92400e;
-  --primary: #1d1f20;
+  --raised: #f4f6f1;
+  --active: #e7ecdf;
+  --border: #dfe3d8;
+  --rule: #e8ece3;
+  --control: #c9d1c1;
+  --text: #151713;
+  --muted: #5d6558;
+  --faint: #7b8375;
+  --accent: #5c8a31;
+  --positive: #2f7a4a;
+  --negative: #b4232a;
+  --warning: #8a5a00;
+  --primary: #5c8a31;
   --primary-ink: #ffffff;
-  --pill-positive-bg: #dcfae5;
-  --pill-positive-ink: #04250e;
+  --pill-positive-bg: #e3f2d8;
+  --pill-positive-ink: #24420f;
   --pill-negative-bg: #ffedea;
   --pill-negative-ink: #831c1e;
   --pill-warning-bg: #fffbeb;
-  --pill-warning-ink: #92400e;
-  --pill-neutral-bg: #eeeeee;
-  --pill-neutral-ink: #3d3d3d;
-  --chart-1: #2f6fa8;
+  --pill-warning-ink: #8a5a00;
+  --pill-neutral-bg: #edf0e8;
+  --pill-neutral-ink: #3e443a;
+  --chart-1: #5c8a31;
   --chart-2: #8fb8ad;
   --chart-3: #b08a2e;
-  --grid: #e5e5e5;
+  --grid: #e2e7dc;
   --chart-span: 0.06;
 }
 
@@ -141,6 +141,10 @@ a { color: inherit; text-decoration: none; }
 img, svg, video, canvas { max-width: 100%; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
 ::selection { background: color-mix(in srgb, var(--accent) 35%, transparent); }
+body, .app-shell, .sidebar, .main-panel, .view-root, .card, .home-feature, .home-watch,
+.dashboard-kpis, .metric-card, .btn, .nav-item, .theme-option {
+  transition: background-color 180ms var(--ease-out), border-color 180ms var(--ease-out), color 180ms var(--ease-out);
+}
 * { scrollbar-width: thin; scrollbar-color: var(--control) transparent; }
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-thumb { background: var(--control); border-radius: 99px; }
@@ -411,6 +415,21 @@ html body .brand-mark span { color: var(--accent) !important; }
 .section-head p, .attention-section-head p { display: none !important; }
 .attention-section-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin: 32px 0 12px !important; }
 .attention-section-head .eyebrow { display: none !important; }
+.attention-tools { display: flex; align-items: center; gap: 20px; flex: none; }
+.watch-filter { display: flex; align-items: center; gap: 16px; }
+.watch-filter button {
+  padding: 0 0 6px !important;
+  border: 0 !important;
+  border-bottom: 1px solid transparent !important;
+  background: transparent !important;
+  color: var(--faint) !important;
+  font: 500 11px/1 var(--sans) !important;
+  white-space: nowrap;
+}
+.watch-filter button span { margin-left: 3px; color: var(--faint); font: 400 11px/1 var(--mono); }
+.watch-filter button:hover { color: var(--text) !important; }
+.watch-filter button.active { color: var(--text) !important; border-bottom-color: var(--accent) !important; }
+.watch-filter button.active span { color: var(--accent); }
 
 /* ---------- controls ---------- */
 .btn {
@@ -567,7 +586,7 @@ hr, .subtle-divider { border: 0 !important; border-top: 1px solid var(--border) 
   display: grid !important;
   grid-template-columns: minmax(0, 1.55fr) minmax(300px, 0.82fr) !important;
   gap: 24px !important;
-  align-items: stretch !important;
+  align-items: start !important;
 }
 .home-feature {
   display: flex !important;
@@ -621,7 +640,7 @@ hr, .subtle-divider { border: 0 !important; border-top: 1px solid var(--border) 
   grid-template-columns: 22px minmax(0, 1fr) auto 14px !important;
   align-items: center !important;
   gap: 12px !important;
-  flex: 1;
+  flex: 0 0 auto;
   min-height: 64px;
   padding: 12px 18px !important;
   border: 0 !important;
@@ -645,7 +664,18 @@ hr, .subtle-divider { border: 0 !important; border-top: 1px solid var(--border) 
 .watch-arrow { color: var(--faint); font-size: 13px; }
 .watch-row:hover .watch-arrow { color: var(--accent); }
 
-/* ---------- tags / pills ---------- */
+.dashboard-kpis {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 30;
+  margin: 0 0 14px !important;
+  padding: 8px 0 10px !important;
+  background: var(--ground) !important;
+  border-bottom: 1px solid var(--border);
+}
+.dashboard-kpis .metric-card { background: var(--surface) !important; }
+#viewRoot[data-page="dashboard"] .grid-2,
+#viewRoot[data-page="dashboard"] .grid-3 { align-items: start !important; }
 .tag, .soft-badge, .pill, .hos-badge, .ncfg-badge {
   display: inline-flex; align-items: center; gap: 4px;
   height: 20px !important; padding: 0 7px !important;
@@ -966,8 +996,8 @@ td.num, th.num, .data-table td:nth-child(n+3) { text-align: right; font-variant-
 
 /* ---------- overlays ---------- */
 .toast {
-  position: fixed; right: 24px; bottom: 24px; z-index: 1200;
-  max-width: 360px;
+  position: fixed !important; top: auto !important; right: 24px !important; left: auto !important; bottom: 24px !important; z-index: 1200;
+  width: auto !important; height: auto !important; max-width: 360px;
   padding: 10px 14px;
   border: 1px solid var(--border); border-radius: 6px;
   background: var(--surface) !important; color: var(--text) !important;
@@ -1072,6 +1102,9 @@ body.taste-collapsed .sidebar-collapse { position: absolute; right: -12px; top: 
   #viewRoot .matrix-card > p { display: none !important; }
   #viewRoot .matrix-task-list { grid-column: 1; grid-row: 2; }
   .attention-section-head { display: grid !important; justify-content: start !important; align-items: start !important; gap: 8px !important; }
+  .attention-tools { width: 100%; justify-content: space-between; gap: 12px !important; flex-wrap: wrap; }
+  .watch-filter { gap: 12px !important; }
+  .dashboard-kpis { position: static !important; }
   .attention-section-head .btn { justify-self: start; }
   .attention-value { grid-column: 1; font-size: 11px !important; }
   .attention-link { grid-column: 2; grid-row: 1 / span 3; align-self: center; }
@@ -1091,7 +1124,7 @@ body.taste-collapsed .sidebar-collapse { position: absolute; right: -12px; top: 
 @media (max-width: 480px) {
   .page-head h1, .home-welcome h1 { font-size: 24px !important; line-height: 30px !important; }
   .home-kpi strong, .hos-kpi strong, .ncfg-kpi strong { font-size: 18px !important; }
-  .toast { left: 12px; right: 12px; bottom: 12px; max-width: none; }
+  .toast { left: 12px !important; right: 12px !important; bottom: 12px !important; max-width: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
