@@ -477,15 +477,34 @@ function renderAttentionCards() {
   const done=(state.tasks||[]).filter(t=>t.status==='已完成').length, roadmap=state.tasks||[];
   const top=[...(state.etfs||[])].sort((a,b)=>n(b.score)-n(a.score)).slice(0,1)[0];
   const weak=(state.etfs||[]).filter(e=>n(e.score)<55).length;
+  const p0=roadmap.filter(t=>t.priority==='P0'&&t.status!=='已完成').length;
   const leverage=['L1','L2'].includes(nd.leverageLevel)&&nd.leverageEnabled===true;
   const cards=[
     {icon:'◉',key:'GLOBAL ALLOCATION',title:'全球资产配置',value:`现金目标 ${fmt(cash,1)}%`,status:state.profile.riskOverlay||'Caution',tone:(state.profile.riskOverlay||'Caution')==='Caution'?'warn':'good',desc:'先核对真实持仓、应急金与负债；比较动态目标和实际比例差额。',page:'allocation',cta:'查看配置'},
     {icon:'⌁',key:'NASDAQ / AI RISK',title:'纳指风险与入场',value:`配置 ${fmt(nd.entry,1)} · 泡沫 ${fmt(nd.bubble,1)}`,status:leverage?'通过部分闸门':'默认不加杠杆',tone:n(nd.bubble)>=55?'warn':'good',desc:'盯住 2000 相似度、AI CapEx/FCF、VIX、10Y、趋势与回撤触发；Core 不做波段。',page:'nasdaq',cta:'查看纳指策略'},
     {icon:'▥',key:'A-SHARE ETF ROTATION',title:'A 股 ETF 轮动',value:`${state.etfs?.length||0} 只观察 · ${weak} 只低于55分`,status:top?`领先 ${top.code} / ${fmt(top.score,1)}分`:'待更新',tone:weak?'warn':'good',desc:'复核 MA20/MA60、评分质量、市场广度和风险组上限。',page:'ashare',cta:'查看 ETF 池'},
-    {icon:'↗',key:'90-DAY BUILD',title:'新登配置 / 90 天',value:`${done}/${roadmap.length} 项路线图完成`,status:roadmap.filter(t=>t.priority==='P0'&&t.status!=='已完成').length?'优先处理 P0':'节奏正常',tone:'good',desc:'优先现金流与应急金、合规资金路径、低成本核心资产，再扩展账户/身份。',page:'newconfig',cta:'打开路线图'},
+    {icon:'↗',key:'90-DAY BUILD',title:'新登配置 / 90 天',value:`${done}/${roadmap.length} 项路线图完成`,status:p0?'优先处理 P0':'节奏正常',tone:p0?'warn':'good',desc:'优先现金流与应急金、合规资金路径、低成本核心资产，再扩展账户/身份。',page:'newconfig',cta:'打开路线图'},
     {icon:'◎',key:'GLOBAL OPTIONALITY',title:'跨境 / AI 订阅 / 技能',value:`AI 月费 ${money(state.profile.aiMonthlyCost||0)}`,status:'先核验收益与合规',tone:'neutral',desc:'跟踪全球银行/券商、保险、居留/签证、公司与房产的真实用途及维护成本。',page:'newconfig',cta:'查看基础设施'}
   ];
-  return `<div class="attention-section-head"><div><div class="eyebrow">WEALTH OS · WATCHLIST</div><h2>关注点</h2><p>首页不只列任务，也把必须持续检查的市场、合规与长期建设事项放在同一处。</p></div><button class="btn btn-quiet" data-action="go-page" data-page="dashboard">完整资产总览 →</button></div><div class="attention-grid">${cards.map(c=>`<article class="attention-card"><div class="attention-top"><span class="attention-icon">${c.icon}</span><span class="eyebrow">${c.key}</span><span class="attention-light ${c.tone}"></span></div><h3>${c.title}</h3><div class="attention-value">${c.value}</div><span class="attention-status ${c.tone}">${esc(c.status)}</span><p>${c.desc}</p><button class="attention-link" data-action="go-page" data-page="${c.page}">${c.cta} <span>↗</span></button></article>`).join('')}</div>`;
+  // Content-driven lead: the top item is the one that most needs a decision today.
+  const leadKey=p0?'90-DAY BUILD':weak?'A-SHARE ETF ROTATION':n(nd.bubble)>=55?'NASDAQ / AI RISK':'GLOBAL ALLOCATION';
+  const lead=cards.find(c=>c.key===leadKey)||cards[0];
+  const rest=cards.filter(c=>c!==lead);
+  return `<div class="attention-section-head"><div><div class="eyebrow">WEALTH OS · WATCHLIST</div><h2>关注点</h2><p>首页不只列任务，也把必须持续检查的市场、合规与长期建设事项放在同一处。</p></div><button class="btn btn-quiet" data-action="go-page" data-page="dashboard">完整资产总览 →</button></div>
+  <div class="home-editorial">
+    <article class="home-feature tone-${lead.tone}">
+      <div class="feature-kicker"><span>今日判断</span><span>01 / ${String(cards.length).padStart(2,'0')}</span></div>
+      <h2>${lead.title}</h2>
+      <div class="feature-value">${lead.value}</div>
+      <div class="feature-status"><span class="attention-status ${lead.tone}">${esc(lead.status)}</span><span class="feature-source">基于当前数据</span></div>
+      <p class="feature-desc">${lead.desc}</p>
+      <button class="feature-link" data-action="go-page" data-page="${lead.page}">${lead.cta} <span>↗</span></button>
+    </article>
+    <aside class="home-watch">
+      <div class="watch-head"><span>其余关注</span><span>${String(rest.length).padStart(2,'0')}</span></div>
+      ${rest.map((c,i)=>`<button class="watch-row" data-action="go-page" data-page="${c.page}"><span class="watch-index">${String(i+2).padStart(2,'0')}</span><span class="watch-copy"><b>${c.title}</b><small>${c.value}</small></span><span class="watch-status"><i class="attention-light ${c.tone}"></i>${esc(c.status)}</span><span class="watch-arrow">↗</span></button>`).join('')}
+    </aside>
+  </div>`;
 }
 
 const AGENT_DEFS = [
