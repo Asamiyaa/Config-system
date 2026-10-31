@@ -166,6 +166,7 @@
     restoreBento();
     mountAgentDepth();
     mountDashboardDepth();
+    mountHomeSimulator();
     $$('#mainNav .nav-item').forEach((item) => {
       const on = item.dataset.page === hub;
       item.classList.toggle('active', on);
@@ -467,6 +468,23 @@
     if (tiltCard === card) tiltCard=null;
   }
   document.addEventListener('pointerleave', () => { if (tiltCard) resetTilt(tiltCard); });
+
+  /* ---------- home strategy simulator: preview only ---------- */
+  function mountHomeSimulator() {
+    const input=document.querySelector('[data-home-cash]');
+    if(!input || input.dataset.simBound==='1') return;
+    input.dataset.simBound='1';
+    const out=document.querySelector('#homeCashValue'), note=document.querySelector('#homeCashNote');
+    const base=Number(input.value);
+    const paint=()=>{
+      const v=Number(input.value);
+      input.style.setProperty('--v', `${Math.max(0,Math.min(100,(v-5)/35*100))}%`);
+      if(out) out.textContent=`${v.toFixed(1)}%`;
+      if(note) note.textContent=v<base?'现金目标下调，风险预算相对提高；仅预览，不写入配置。':v>base?'现金目标上调，风险预算相对收紧；仅预览，不写入配置。':'调整只影响预览，不写入配置。';
+    };
+    input.addEventListener('input',paint,{passive:true});
+    paint();
+  }
 
   /* ---------- dashboard depth: the cover photo becomes a parallax layer ---------- */
   function mountDashboardDepth() {

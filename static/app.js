@@ -8,14 +8,14 @@ const money = (v, currency='CNY') => new Intl.NumberFormat('zh-CN', {style:'curr
 const fmt = (v, d=2) => v === null || v === undefined || v === '' || !Number.isFinite(Number(v)) ? '—' : Number(v).toFixed(d);
 const stateUrl = '/api/state';
 let state = null;
-const savedTheme = (()=>{try{return localStorage.getItem('wealth-os-theme-v2')==='dark'?'dark':'light'}catch(_){return 'light'}})();
+const savedTheme = (()=>{try{return localStorage.getItem('wealth-os-theme-v3')==='light'?'light':'dark'}catch(_){return 'light'}})();
 document.documentElement.dataset.theme=savedTheme;document.body.dataset.theme=savedTheme;
-const syncThemeColor=()=>{const m=document.querySelector('meta[name="theme-color"]');if(m)m.content=document.body.dataset.theme==='dark'?'#000':'#f5f5f7';};syncThemeColor();
+const syncThemeColor=()=>{const m=document.querySelector('meta[name="theme-color"]');if(m)m.content=document.body.dataset.theme==='dark'?'#0F0F12':'#f5f5f7';};syncThemeColor();
 let currentPage = 'home';
 let authMode = 'login';
 let saveTimer = null;
 let marketBusy = false;
-let ui = { allocationMode:'global', expandedETF:null, showSourceDetails:false, cycleTab:'research', focusQuery:'', calendarWeekOffset:0, showCalendarComposer:false, calendarSelectedDate:'', workbookSheetIndex:0, workbookData:null, calendarDrag:null, calendarResize:null, bodyZone:'', bodyMuscle:'', bodyMode:'muscle', bodySearch:'', bodyView:{x:0,y:0,rx:0,ry:0,scale:1}, bodyDragMoved:false, checkinDate:'', guidedSummaryId:null };
+let ui = { allocationMode:'global', expandedETF:null, showSourceDetails:false, cycleTab:'research', focusQuery:'', homeRange:'7', calendarWeekOffset:0, showCalendarComposer:false, calendarSelectedDate:'', workbookSheetIndex:0, workbookData:null, calendarDrag:null, calendarResize:null, bodyZone:'', bodyMuscle:'', bodyMode:'muscle', bodySearch:'', bodyView:{x:0,y:0,rx:0,ry:0,scale:1}, bodyDragMoved:false, checkinDate:'', guidedSummaryId:null };
 let guidedTimerInterval=null;
 let focusClock = { remaining:1500, endsAt:null, interval:null, running:false };
 
@@ -478,7 +478,7 @@ function lineChart(points, title='demo') {
   const d=coords.map((c,i)=>`${i?'L':'M'}${c.x.toFixed(1)},${c.y.toFixed(1)}`).join(' ');
   const area=`${d} L${coords[coords.length-1].x},${h-pad} L${coords[0].x},${h-pad} Z`;
   const labels=['-30D','-25D','-20D','-15D','-10D','-5D','NOW'];
-  return `<svg class="line-chart" viewBox="0 0 ${w} ${h}" role="img" aria-label="${esc(title)}"><defs><linearGradient id="chartFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="var(--accent)" stop-opacity=".22"/><stop offset="100%" stop-color="var(--accent)" stop-opacity="0"/></linearGradient></defs>${[.15,.38,.61,.84].map(y=>`<line x1="0" y1="${h*y}" x2="${w}" y2="${h*y}" stroke="var(--grid)" stroke-dasharray="3 5"/>`).join('')}<path d="${area}" fill="url(#chartFill)"/><path d="${d}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>${coords.filter((c,i)=>i===coords.length-1).map(c=>`<circle cx="${c.x}" cy="${c.y}" r="4" fill="var(--accent)" stroke="var(--surface)" stroke-width="3"/>`).join('')}${labels.map((l,i)=>`<text x="${pad+i*(w-pad*2)/(labels.length-1)}" y="${h-1}" fill="var(--muted)" font-size="10" font-family="DM Mono, monospace" text-anchor="${i===0?'start':i===labels.length-1?'end':'middle'}">${l}</text>`).join('')}</svg>`;
+  return `<svg class="line-chart" viewBox="0 0 ${w} ${h}" role="img" aria-label="${esc(title)}"><defs><linearGradient id="chartFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="var(--accent)" stop-opacity=".22"/><stop offset="100%" stop-color="var(--accent)" stop-opacity="0"/></linearGradient></defs>${[.15,.38,.61,.84].map(y=>`<line x1="0" y1="${h*y}" x2="${w}" y2="${h*y}" stroke="var(--grid)" stroke-dasharray="3 5"/>`).join('')}<path d="${area}" fill="url(#chartFill)"/><path d="${d}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>${coords.filter((c,i)=>i===coords.length-1).map(c=>`<circle cx="${c.x}" cy="${c.y}" r="4" fill="var(--accent)" stroke="var(--surface)" stroke-width="3"/>`).join('')}${labels.map((l,i)=>`<text x="${pad+i*(w-pad*2)/(labels.length-1)}" y="${h-1}" fill="var(--muted)" font-size="11" font-family="DM Mono, monospace" text-anchor="${i===0?'start':i===labels.length-1?'end':'middle'}">${l}</text>`).join('')}</svg>`;
 }
 function allocationBars(rows, valueKey='target', max=100) {
   return `<div class="allocation-bars">${rows.slice(0,8).map(r=>{const val=n(r[valueKey]); return `<div class="allocation-row"><div class="allocation-name">${esc(r.name)}</div><div class="progress-track"><div class="progress-fill" style="width:${clamp(val,0,max)/max*100}%"></div></div><div class="allocation-pct">${fmt(val,1)}%</div></div>`;}).join('')}</div>`;
@@ -812,19 +812,90 @@ function renderHomeSheet() {
     <div class="fit-panel home-sheet-panel" data-tab-panel="calendar">${renderCalendar()}<div class="home-side-by-side home-habit-row">${renderPomodoro()}</div></div>
   </div>`;
 }
-function renderHome() {
+
+function homeRangeBuckets(range='7'){
+  const total={7:7,30:30,90:90}[range]||7;
+  const buckets=total===7?7:total===30?6:9;
+  const span=total/buckets, tasks=focusTasks();
+  return Array.from({length:buckets},(_,i)=>{
+    const start=addDaysKey(-(total-1)+Math.floor(i*span));
+    const end=addDaysKey(-(total-1)+Math.floor((i+1)*span)-1);
+    const count=tasks.filter(t=>t.dueDate&&t.dueDate>=start&&t.dueDate<=end).length;
+    const dd=new Date(start+'T12:00:00');
+    return {count,label:`${dd.getMonth()+1}/${dd.getDate()}`,start,end};
+  });
+}
+function homeTrendSvg(series){
+  const w=760,h=174,pad=18,max=Math.max(1,...series.map(x=>x.count));
+  const coords=series.map((x,i)=>({x:pad+i*(w-pad*2)/Math.max(1,series.length-1),y:h-pad-(x.count/max)*(h-pad*2)}));
+  const line=coords.map((c,i)=>`${i?'L':'M'}${c.x.toFixed(1)},${c.y.toFixed(1)}`).join(' ');
+  const area=`${line} L${coords[coords.length-1].x},${h-pad} L${coords[0].x},${h-pad} Z`;
+  return `<svg class="home-trend-svg" viewBox="0 0 ${w} ${h}" role="img" aria-label="近期任务负载趋势">${[.18,.42,.66,.9].map(y=>`<line x1="${pad}" y1="${h*y}" x2="${w-pad}" y2="${h*y}" stroke="var(--grid)" stroke-dasharray="3 5"/>`).join('')}<path d="${area}" fill="var(--accent)" opacity=".13"/><path d="${line}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>${coords.map(c=>`<circle cx="${c.x}" cy="${c.y}" r="2.6" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/>`).join('')}${series.map((x,i)=>`<text x="${coords[i].x}" y="${h-2}" fill="var(--muted)" font-size="11" font-family="DM Mono, monospace" text-anchor="${i===0?'start':i===series.length-1?'end':'middle'}">${x.label}</text>`).join('')}</svg>`;
+}
+function homeRingSvg(pct,size=52){
+  const c=138.2, dash=Math.max(0,Math.min(100,pct))/100*c;
+  return `<svg viewBox="0 0 56 56" width="${size}" height="${size}" aria-hidden="true"><circle cx="28" cy="28" r="22" fill="none" stroke="currentColor" stroke-opacity=".16" stroke-width="4"/><circle cx="28" cy="28" r="22" fill="none" stroke="var(--accent)" stroke-width="4" stroke-linecap="round" stroke-dasharray="${dash.toFixed(1)} ${c}" transform="rotate(-90 28 28)"/></svg>`;
+}
+function homeDonutSvg(parts,total){
+  const c=251.3; let offset=0;
+  return `<svg class="home-donut-svg" viewBox="0 0 120 120" role="img" aria-label="今日任务优先级构成"><circle cx="60" cy="60" r="40" fill="none" stroke="var(--grid)" stroke-width="12"/>${parts.map(p=>{const len=total?p.count/total*c:0; const seg=`<circle cx="60" cy="60" r="40" fill="none" stroke="${p.color}" stroke-width="12" stroke-dasharray="${len.toFixed(1)} ${(c-len).toFixed(1)}" stroke-dashoffset="${(-offset).toFixed(1)}" transform="rotate(-90 60 60)"/>`; offset+=len; return seg;}).join('')}</svg>`;
+}
+function renderHomeDashboard(){
   const d=new Date(),theme=document.body.dataset.theme==='light'?'light':'dark';
-  return `<div class="home-canvas">
-    <div class="home-appbar">
-      <div class="home-appbrand"><span class="home-appmark">W</span><div><h1>工作台</h1><p>${d.getFullYear()} 年 ${d.getMonth()+1} 月 ${d.getDate()} 日 · 今日执行与资产关注</p></div></div>
-      <div class="home-appbar-actions"><span class="home-local"><i></i>本地数据</span><div class="theme-switch" role="group" aria-label="界面外观"><button type="button" data-action="theme-dark" class="theme-option ${theme==='dark'?'selected':''}" aria-pressed="${theme==='dark'}">深色</button><button type="button" data-action="theme-light" class="theme-option ${theme==='light'?'selected':''}" aria-pressed="${theme==='light'}">浅色</button></div></div>
+  const all=focusTasks(), homeTasks=focusTaskFilter('home');
+  const openTasks=homeTasks.filter(t=>!t.done), doneHome=homeTasks.filter(t=>t.done).length;
+  const today=todayKey(), overdue=openTasks.filter(t=>t.dueDate&&t.dueDate<today).length;
+  const dueToday=openTasks.filter(t=>t.dueDate===today).length;
+  const completion=homeTasks.length?Math.round(doneHome/homeTasks.length*100):0;
+  const balance=agentBalance(), nd=state.nasdaq||{};
+  const cash=globalTargets().find(r=>r.group==='Cash')?.dynamicTarget||state.profile.cashTarget||17;
+  const habits=Object.values(state.habitChecks?.[today]||{}).filter(Boolean).length;
+  const priorityRank={高:0,中:1,低:2};
+  const lead=[...openTasks].sort((a,b)=>{const ao=a.dueDate&&a.dueDate<today?0:1,bo=b.dueDate&&b.dueDate<today?0:1;return ao-bo||(priorityRank[a.priority]??3)-(priorityRank[b.priority]??3)||String(a.dueDate||'9999').localeCompare(String(b.dueDate||'9999'));})[0];
+  const queue=[...openTasks].filter(t=>t!==lead).sort((a,b)=>String(a.dueDate||'9999').localeCompare(String(b.dueDate||'9999'))).slice(0,3);
+  const load=homeRangeBuckets(ui.homeRange||'7');
+  const due7=all.filter(t=>t.dueDate&&t.dueDate>=addDaysKey(-6)&&t.dueDate<=today).length;
+  const duePrev7=all.filter(t=>t.dueDate&&t.dueDate>=addDaysKey(-13)&&t.dueDate<=addDaysKey(-7)).length;
+  const delta=duePrev7?Math.round((due7-duePrev7)/duePrev7*100):null;
+  const rangeLabel={7:'近 7 天',30:'近 30 天',90:'近 90 天'}[ui.homeRange||'7']||'近 7 天';
+  const parts=[['高',openTasks.filter(t=>t.priority==='高').length,'var(--accent)'],['中',openTasks.filter(t=>t.priority==='中').length,'#8A8A96'],['低',openTasks.filter(t=>t.priority==='低'||!t.priority).length,'#3C3C48']];
+  const donutParts=parts.map(([label,count,color])=>({label,count,color}));
+  const recs=[];
+  if(overdue) recs.push({tag:'执行',title:`先处理 ${overdue} 件逾期`,impact:`${overdue} 项`,text:'逾期项会挤占今天的判断力；先清掉一件，再打开资产面板。',page:'today',cta:'打开执行'});
+  if(n(nd.bubble)>=55) recs.push({tag:'风险',title:'纳指泡沫信号偏高',impact:`泡沫 ${fmt(nd.bubble,1)}`,text:'核对 2000 相似度、10Y 与 VIX，不因单日反弹提高杠杆。',page:'nasdaq',cta:'查看纳指'});
+  if(!balance.busy) recs.push({tag:'精力',title:'当前没有忙碌角色',impact:`平衡 ${balance.score}`,text:'把今天的深度任务只交给一个角色；其余保持空闲或暂停。',page:'agents',cta:'查看角色'});
+  while(recs.length<3) recs.push({tag:'配置',title:'核对现金目标与真实持仓',impact:`现金 ${fmt(cash,1)}%`,text:'先确认应急金、负债和真实仓位，再讨论目标比例。',page:'allocation',cta:'查看配置'});
+  return `<div class="home-dash">
+    <header class="home-dash-head">
+      <div class="home-dash-title"><span class="home-dash-mark">W</span><div><h1>工作台</h1><p>${d.getFullYear()} 年 ${d.getMonth()+1} 月 ${d.getDate()} 日 · 今日执行与资产关注</p></div></div>
+      <div class="home-dash-actions"><button class="home-search" data-action="home-search" aria-label="搜索页面">⌕</button><span class="home-live"><i></i>本地数据</span><button class="home-head-btn" data-action="home-share">分享</button><button class="home-head-btn" data-action="export-json">导出</button><button class="btn btn-primary btn-small" data-action="focus-add-focus">＋ 新任务</button><div class="theme-switch" role="group" aria-label="界面外观"><button type="button" data-action="theme-dark" class="theme-option ${theme==='dark'?'selected':''}" aria-pressed="${theme==='dark'}">深色</button><button type="button" data-action="theme-light" class="theme-option ${theme==='light'?'selected':''}" aria-pressed="${theme==='light'}">浅色</button></div></div>
+    </header>
+    <div class="home-kpi-row">
+      <article class="home-kpi"><div class="home-kpi-top"><span>今日待办</span><b>01</b></div><strong>${openTasks.length}</strong><small class="${overdue?'is-down':''}">${overdue?`${overdue} 项逾期`:'没有逾期'}</small></article>
+      <article class="home-kpi home-kpi-ring"><div class="home-kpi-top"><span>今日完成</span><b>02</b></div><div class="home-kpi-ring-wrap">${homeRingSvg(completion)}<strong>${doneHome}<em>/${homeTasks.length}</em></strong></div><small>完成率 ${completion}%</small></article>
+      <article class="home-kpi"><div class="home-kpi-top"><span>平衡指数</span><b>03</b></div><strong>${balance.score}</strong><small>忙碌 ${balance.busy} · 暂停 ${balance.paused}</small></article>
+      <article class="home-kpi"><div class="home-kpi-top"><span>纳指配置分</span><b>04</b></div><strong>${fmt(nd.entry,1)}</strong><small>泡沫 ${fmt(nd.bubble,1)}</small></article>
+      <article class="home-kpi"><div class="home-kpi-top"><span>7 日负载</span><b>05</b></div><strong>${due7}</strong><small class="${delta!==null&&delta>0?'is-up':delta!==null&&delta<0?'is-down':''}">较前 7 日 ${delta===null?'—':`${delta>0?'↑':delta<0?'↓':'·'} ${Math.abs(delta)}%`}</small></article>
     </div>
-    <div class="home-canvas-body">
-      ${renderAttentionCards()}
-      ${renderHomeSheet()}
+    <div class="home-dash-grid">
+      <section class="home-panel home-trend-panel">
+        <div class="home-panel-head"><div><span class="home-overline">今日主线</span><h2>${lead?esc(lead.title):'今天还没有任务'}</h2><p>${lead?`${overdue} 件逾期 · ${dueToday} 件今天到期`:'先添加一件今天要做的事；不要把项目进度当成今天的任务。'}</p></div><button class="btn btn-small btn-outline" data-action="go-page" data-page="today">执行清单 →</button></div>
+        ${lead?`<div class="home-lead-meta"><span class="project-chip">${esc(lead.project||'收集箱')}</span><span class="${lead.dueDate&&lead.dueDate<today?'is-overdue':''}">${esc(lead.dueDate===today?'今天到期':lead.dueDate||'未排期')}</span><span>${Math.max(0,n(lead.estimate,0))} 分钟</span></div>`:''}
+        <div class="home-chart-head"><span>任务负载</span><div class="home-range-tabs" role="group" aria-label="趋势时间范围">${[['7','7D'],['30','30D'],['90','90D']].map(([v,l])=>`<button class="${(ui.homeRange||'7')===v?'active':''}" data-action="home-range" data-range="${v}">${l}</button>`).join('')}</div></div>
+        <div class="home-chart">${homeTrendSvg(load)}</div>
+        <div class="home-chart-foot"><span>${rangeLabel}到期任务 · 共 ${load.reduce((a,b)=>a+b.count,0)} 项</span><button data-action="go-page" data-page="today">打开执行 ↗</button></div>
+        ${queue.length?`<div class="home-queue"><span>接下来</span>${queue.map(t=>`<button data-action="go-page" data-page="today"><b>${esc(t.title)}</b><small>${esc(t.dueDate||'未排期')}</small></button>`).join('')}</div>`:''}
+      </section>
+      <div class="home-dash-side">
+        <section class="home-panel home-donut-panel"><div class="home-panel-head"><div><span class="home-overline">任务构成</span><h2>优先级分布</h2></div><span class="home-count">${openTasks.length}</span></div><div class="home-donut-wrap">${homeDonutSvg(donutParts,openTasks.length)}<div class="home-donut-center"><strong>${openTasks.length}</strong><small>待办</small></div></div><div class="home-legend">${donutParts.map(p=>`<span><i style="background:${p.color}"></i>${p.label} <b>${p.count}</b></span>`).join('')}</div></section>
+        <section class="home-panel home-sim-panel"><div class="home-panel-head"><div><span class="home-overline">策略模拟器</span><h2>现金目标预览</h2></div><span class="home-count">仅预览</span></div><div class="home-sim-value"><strong id="homeCashValue">${fmt(cash,1)}%</strong><span>当前目标</span></div><input id="homeCashSlider" data-home-cash type="range" min="5" max="40" step="1" value="${Math.round(cash)}" aria-label="预览现金目标比例" style="--v:${(cash-5)/35*100}%"><div class="home-sim-scale"><span>5%</span><span>40%</span></div><p id="homeCashNote">调整只影响预览，不写入配置。降低现金目标会提高风险预算。</p><button class="btn btn-small btn-outline" data-action="go-page" data-page="allocation">查看配置 →</button></section>
+      </div>
     </div>
+    <section class="home-reco"><div class="home-reco-head"><div><span class="home-overline">建议</span><h2>接下来可以做什么</h2></div><span class="home-count">基于当前任务与持仓</span></div><div class="home-reco-grid">${recs.slice(0,3).map((r,i)=>`<article class="home-reco-card"><div class="home-reco-top"><span class="tag neutral">${r.tag}</span><b>0${i+1}</b></div><h3>${esc(r.title)}</h3><p>${esc(r.text)}</p><div class="home-reco-foot"><span>影响 · ${esc(r.impact)}</span><button data-action="go-page" data-page="${r.page}">${r.cta} ↗</button></div></article>`).join('')}</div></section>
+    ${renderHomeSheet()}
   </div>`;
 }
+function renderHome() { return renderHomeDashboard(); }
 function renderInbox() { return renderTaskWorkspace('inbox'); }
 function renderUpcoming() { return renderTaskWorkspace('upcoming'); }
 function renderImportant() { return renderTaskWorkspace('important'); }
@@ -2178,6 +2249,9 @@ function bindDelegatedEvents() {
     if(a==='schedule-toggle'){const j=scheduleJobsCache.find(x=>String(x.id)===String(action.dataset.id));if(!j)return;j.enabled=!j.enabled;try{await api('/api/scheduler/jobs',{method:'PUT',body:JSON.stringify({jobs:scheduleJobsCache})});await loadSchedules();renderPage('schedules');toast('定时任务状态已更新')}catch(e){toast(e.message,true)}return;}
     if(a==='schedule-run'||a==='schedule-run-all'){try{const res=await api('/api/scheduler/run',{method:'POST',body:JSON.stringify({id:a==='schedule-run'?action.dataset.id:null})});toast(res.message||'任务已执行');await loadSchedules();renderPage('schedules')}catch(e){toast('执行失败：'+e.message,true)}return;}
     if(a==='agent-cycle') { const id=action.dataset.agent, all=agentStatuses(), seq=['idle','busy','paused'];all[id]=seq[(seq.indexOf(all[id]||'idle')+1)%seq.length];try{localStorage.setItem('wealth-os-agent-statuses',JSON.stringify(all))}catch(_){}renderPage('agents');return; }
+    if(a==='home-search') { document.querySelector('#tasteSearch')?.click(); return; }
+    if(a==='home-share') { const done=()=>toast('当前页面链接已复制'); if(navigator.clipboard?.writeText){navigator.clipboard.writeText(location.href).then(done).catch(()=>toast('复制失败，请手动复制地址栏',true));}else{toast('请手动复制地址栏链接');} return; }
+    if(a==='home-range') { ui.homeRange=action.dataset.range||'7'; renderPage('home',{transition:false,animate:false}); return; }
     if(a==='agents-stop-busy') { const all=agentStatuses(), busy=AGENT_DEFS.filter(x=>(all[x.id]||'idle')==='busy'); if(!busy.length){toast('当前没有忙碌的角色');return;} busy.forEach(x=>{all[x.id]='paused'}); try{localStorage.setItem('wealth-os-agent-statuses',JSON.stringify(all))}catch(_){} renderPage('agents'); toast(`已暂停 ${busy.length} 个忙碌角色`); return; }
     if(a==='agents-reset') { try{localStorage.removeItem('wealth-os-agent-statuses')}catch(_){}renderPage('agents');toast('角色状态已重置');return; }
     if(a==='agents-spin'){ui.agentSpinPaused=!ui.agentSpinPaused;const stage=document.querySelector('.agent-balance-stage');stage?.classList.toggle('agent-stage-paused',!!ui.agentSpinPaused);action.textContent=ui.agentSpinPaused?'继续旋转':'暂停旋转';toast(ui.agentSpinPaused?'已暂停旋转，方便查看单个角色':'已继续旋转');return;}
@@ -2189,7 +2263,7 @@ function bindDelegatedEvents() {
     if(a==='agent-open') { renderPage(action.dataset.page||'home',{autoRefresh:true});return; }
     if(a==='alpha-focus-form'){document.getElementById('alphaSignalFormCard')?.scrollIntoView({behavior:'smooth',block:'start'});setTimeout(()=>document.querySelector('#alphaSignalForm input[name=title]')?.focus(),80);return;}
     if(a==='alpha-delete'){const i=n(action.dataset.index,-1);if(i>=0&&state.alphaRadarSignals[i]&&confirm('删除这条 Alpha Radar 信号？')){state.alphaRadarSignals.splice(i,1);await persist({quiet:true});renderPage('alpharadar');toast('信号已删除');}return;}
-    if(a==='theme-light'||a==='theme-dark') { const theme=a==='theme-light'?'light':'dark';document.documentElement.dataset.theme=theme;document.body.dataset.theme=theme;syncThemeColor();try{localStorage.setItem('wealth-os-theme-v2',theme)}catch(_){};$$('.theme-option').forEach(btn=>{const on=btn.dataset.action===a;btn.classList.toggle('selected',on);btn.setAttribute('aria-pressed',on?'true':'false');});toast(theme==='light'?'已切换为浅色主题':'已切换为深色主题');return; }
+    if(a==='theme-light'||a==='theme-dark') { const theme=a==='theme-light'?'light':'dark';document.documentElement.dataset.theme=theme;document.body.dataset.theme=theme;syncThemeColor();try{localStorage.setItem('wealth-os-theme-v3',theme)}catch(_){};$$('.theme-option').forEach(btn=>{const on=btn.dataset.action===a;btn.classList.toggle('selected',on);btn.setAttribute('aria-pressed',on?'true':'false');});toast(theme==='light'?'已切换为浅色主题':'已切换为深色主题');return; }
     if(a==='watch-filter') { ui.homeWatchScope=action.dataset.scope||'all'; renderPage('home',{transition:false,animate:false}); return; }
     if(a==='go-page') return renderPage(action.dataset.page||'home',{autoRefresh:true});
     if(a==='newconfig-anchor') { const target=action.dataset.target||'capability-pyramid'; if(currentPage!=='newconfig') renderPage('newconfig'); setTimeout(()=>document.getElementById(target)?.scrollIntoView({behavior:'smooth',block:'start'}),40); return; }
