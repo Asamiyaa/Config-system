@@ -27,7 +27,7 @@
     { page: 'skin', label: '皮肤护理', hint: '健康' },
     { page: 'sleep', label: '睡眠与恢复', hint: '健康' },
     { page: 'style', label: '发型与穿搭', hint: '健康' },
-    { page: 'agents', label: '分身', hint: '精力与平衡' },
+    { page: 'agents', label: '角色', hint: '精力与平衡' },
     { page: 'newconfig', label: '新登', hint: '90 天执行' },
     { page: 'english', label: '外语', hint: '输入与输出' },
     { page: 'reading', label: '书单', hint: '阅读与笔记' },
@@ -378,7 +378,7 @@
     rail.setAttribute('aria-label','快捷操作');
     rail.innerHTML=`
       <button type="button" data-rail="search" data-label="搜索页面" aria-label="搜索页面">${icon('i-search')}</button>
-      <button type="button" data-rail="theme" data-label="切换主题" aria-label="切换主题">${icon('i-spark')}</button>
+      <button type="button" data-rail="theme" data-label="切换主题" aria-label="切换主题">${icon('i-sun')}</button>
       <button type="button" data-rail="top" data-label="回到顶部" aria-label="回到顶部">${icon('i-up')}</button>
       <button type="button" data-rail="menu" data-label="打开菜单" aria-label="打开菜单">${icon('i-more')}</button>`;
     rail.addEventListener('click', (e) => {

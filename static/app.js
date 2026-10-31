@@ -10,6 +10,7 @@ const stateUrl = '/api/state';
 let state = null;
 const savedTheme = (()=>{try{return localStorage.getItem('wealth-os-theme-v2')==='dark'?'dark':'light'}catch(_){return 'light'}})();
 document.documentElement.dataset.theme=savedTheme;document.body.dataset.theme=savedTheme;
+const syncThemeColor=()=>{const m=document.querySelector('meta[name="theme-color"]');if(m)m.content=document.body.dataset.theme==='dark'?'#000':'#f5f5f7';};syncThemeColor();
 let currentPage = 'home';
 let authMode = 'login';
 let saveTimer = null;
@@ -29,7 +30,7 @@ const WORKBOOKS = [
 ];
 function shiftDateKey(key, days) { if(!key) return ''; const d=new Date(`${key}T12:00:00`); d.setDate(d.getDate()+days); return todayKey(d); }
 function dayDiff(start,end) { if(!start||!end) return 0; return Math.round((new Date(`${end}T12:00:00`)-new Date(`${start}T12:00:00`))/86400000); }
-const PAGE_NAMES = {schedules:'自动化',agents:'分身',mistakes:'避坑',home:'工作台',inbox:'今日任务',upcoming:'未来 7 天',calendar:'周历 / 日程',matrix:'任务四象限',stats:'执行统计',important:'重要事项',alltasks:'全部任务',dashboard:'资产总览',allocation:'全球资产配置',nasdaq:'纳斯达克 AI 策略',ashare:'A股 ETF 轮动',newconfig:'新登',health:'健康',checkin:'打卡与统计',diet:'饮食饮水',fitness:'健身管理',skin:'皮肤护理',sleep:'睡眠与恢复',style:'发型与穿搭',english:'外语',reading:'书单',execution:'每日执行与日志',archive:'归档',dailyflow:'流程',flowstats:'流程统计',alpharadar:'Alpha Radar'};
+const PAGE_NAMES = {schedules:'自动化',agents:'角色',mistakes:'避坑',home:'工作台',inbox:'今日任务',upcoming:'未来 7 天',calendar:'周历 / 日程',matrix:'任务四象限',stats:'执行统计',important:'重要事项',alltasks:'全部任务',dashboard:'资产总览',allocation:'全球资产配置',nasdaq:'纳斯达克 AI 策略',ashare:'A股 ETF 轮动',newconfig:'新登',health:'健康',checkin:'打卡与统计',diet:'饮食饮水',fitness:'健身管理',skin:'皮肤护理',sleep:'睡眠与恢复',style:'发型与穿搭',english:'外语',reading:'书单',execution:'每日执行与日志',archive:'归档',dailyflow:'流程',flowstats:'流程统计',alpharadar:'Alpha Radar'};
 
 async function api(path, options={}) {
   const res = await fetch(path, {credentials:'same-origin', headers:{'Content-Type':'application/json', ...(options.headers||{})}, ...options});
@@ -658,11 +659,11 @@ function renderAttentionCards() {
   const p0=roadmap.filter(t=>t.priority==='P0'&&t.status!=='已完成').length;
   const leverage=['L1','L2'].includes(nd.leverageLevel)&&nd.leverageEnabled===true;
   const cards=[
-    {icon:'◉',key:'GLOBAL ALLOCATION',scope:'market',title:'全球资产配置',value:`现金目标 ${fmt(cash,1)}%`,status:state.profile.riskOverlay||'Caution',tone:(state.profile.riskOverlay||'Caution')==='Caution'?'warn':'good',desc:'先核对真实持仓、应急金与负债；比较动态目标和实际比例差额。',page:'allocation',cta:'查看配置'},
-    {icon:'⌁',key:'NASDAQ / AI RISK',scope:'market',title:'纳指风险与入场',value:`配置 ${fmt(nd.entry,1)} · 泡沫 ${fmt(nd.bubble,1)}`,status:leverage?'通过部分闸门':'默认不加杠杆',tone:n(nd.bubble)>=55?'warn':'good',desc:'盯住 2000 相似度、AI CapEx/FCF、VIX、10Y、趋势与回撤触发；Core 不做波段。',page:'nasdaq',cta:'查看纳指策略'},
-    {icon:'▥',key:'A-SHARE ETF ROTATION',scope:'market',title:'A 股 ETF 轮动',value:`${state.etfs?.length||0} 只观察 · ${weak} 只低于55分`,status:top?`领先 ${top.code} / ${fmt(top.score,1)}分`:'待更新',tone:weak?'warn':'good',desc:'复核 MA20/MA60、评分质量、市场广度和风险组上限。',page:'ashare',cta:'查看 ETF 池'},
-    {icon:'↗',key:'90-DAY BUILD',scope:'exec',title:'新登 90 天项目',value:`${done}/${roadmap.length} 个里程碑完成`,status:p0?'下一里程碑待推进':'项目节奏正常',tone:p0?'warn':'good',desc:'这是项目进度，不计入“今天”的任务账；今天要做什么以左侧主卡为准。',page:'newconfig',cta:'打开项目路线'},
-    {icon:'◎',key:'GLOBAL OPTIONALITY',scope:'exec',title:'跨境 / AI 订阅 / 技能',value:`AI 月费 ${money(state.profile.aiMonthlyCost||0)}`,status:'先核验收益与合规',tone:'neutral',desc:'跟踪全球银行/券商、保险、居留/签证、公司与房产的真实用途及维护成本。',page:'newconfig',cta:'查看基础设施'}
+    {key:'GLOBAL ALLOCATION',scope:'market',title:'全球资产配置',value:`现金目标 ${fmt(cash,1)}%`,status:state.profile.riskOverlay||'Caution',tone:(state.profile.riskOverlay||'Caution')==='Caution'?'warn':'good',desc:'先核对真实持仓、应急金与负债；比较动态目标和实际比例差额。',page:'allocation',cta:'查看配置'},
+    {key:'NASDAQ / AI RISK',scope:'market',title:'纳指风险与入场',value:`配置 ${fmt(nd.entry,1)} · 泡沫 ${fmt(nd.bubble,1)}`,status:leverage?'通过部分闸门':'默认不加杠杆',tone:n(nd.bubble)>=55?'warn':'good',desc:'盯住 2000 相似度、AI CapEx/FCF、VIX、10Y、趋势与回撤触发；Core 不做波段。',page:'nasdaq',cta:'查看纳指策略'},
+    {key:'A-SHARE ETF ROTATION',scope:'market',title:'A 股 ETF 轮动',value:`${state.etfs?.length||0} 只观察 · ${weak} 只低于55分`,status:top?`领先 ${top.code} / ${fmt(top.score,1)}分`:'待更新',tone:weak?'warn':'good',desc:'复核 MA20/MA60、评分质量、市场广度和风险组上限。',page:'ashare',cta:'查看 ETF 池'},
+    {key:'90-DAY BUILD',scope:'exec',title:'新登 90 天项目',value:`${done}/${roadmap.length} 个里程碑完成`,status:p0?'下一里程碑待推进':'项目节奏正常',tone:p0?'warn':'good',desc:'这是项目进度，不计入“今天”的任务账；今天要做什么以左侧主卡为准。',page:'newconfig',cta:'打开项目路线'},
+    {key:'GLOBAL OPTIONALITY',scope:'exec',title:'跨境 / AI 订阅 / 技能',value:`AI 月费 ${money(state.profile.aiMonthlyCost||0)}`,status:'先核验收益与合规',tone:'neutral',desc:'跟踪全球银行/券商、保险、居留/签证、公司与房产的真实用途及维护成本。',page:'newconfig',cta:'查看基础设施'}
   ];
   let watchOrder=[];
   try { watchOrder=JSON.parse(localStorage.getItem('wealth-os-watch-order')||'[]'); } catch(_) {}
@@ -699,12 +700,12 @@ function renderAttentionCards() {
   </div>`;
 }
 const AGENT_DEFS = [
- {id:'work',name:'工作分身',role:'计划 · 任务 · 项目推进',icon:'◈',page:'home',energy:22,image:'/static/agents/work.png',accent:'#8cb8ff',meaning:'推进力',balance:'把目标拆成今天可完成的动作，但不让工作吞掉恢复。',risk:'失衡信号：所有时间都被工作占满。'},
- {id:'invest',name:'投资分身',role:'行情 · 风险 · 资产配置',icon:'↗',page:'dashboard',energy:24,image:'/static/agents/invest.png',accent:'#b9ef73',meaning:'风险预算',balance:'先活着，再复利；收益焦虑不能绑架生活节奏。',risk:'失衡信号：频繁看盘、追涨、加杠杆。'},
- {id:'travel',name:'旅行分身',role:'行程 · 签证 · 目的地',icon:'✈',page:'newconfig',energy:8,image:'/static/agents/travel.png',accent:'#8cb7e8',meaning:'选择权',balance:'用真实移动扩展生活半径；不是逃避，是校准。',risk:'失衡信号：只收藏目的地，不核验签证与资金路径。'},
- {id:'health',name:'健康分身',role:'健身 · 饮食 · 皮肤管理',icon:'♡',page:'health',energy:18,image:'/static/agents/health.png',accent:'#f2b65f',meaning:'底盘',balance:'睡眠、训练、饮食决定其他分身的续航；所有产出的前提。',risk:'失衡信号：靠咖啡因和熬夜换短期产出。'},
- {id:'reading',name:'阅读分身',role:'书籍计划 · 知识沉淀',icon:'▤',page:'reading',energy:13,image:'/static/agents/reading.png',accent:'#c9a7ff',meaning:'判断力',balance:'把信息变成判断；慢下来，避免被噪音牵着走。',risk:'失衡信号：只收藏不阅读，只输入不输出。'},
- {id:'english',name:'英语分身',role:'输入训练 · 可复用输出',icon:'Aa',page:'english',energy:15,image:'/static/agents/english.png',accent:'#7fe3c8',meaning:'表达',balance:'把能力变成可复用的输出，让世界听见你。',risk:'失衡信号：连续学习但没有一次真实表达。'}
+ {id:'work',name:'工作角色',role:'计划 · 任务 · 项目推进',page:'home',energy:22,accent:'#8cb8ff',meaning:'推进力',balance:'把目标拆成今天可完成的动作，但不让工作吞掉恢复。',risk:'失衡信号：所有时间都被工作占满。'},
+ {id:'invest',name:'投资角色',role:'行情 · 风险 · 资产配置',page:'dashboard',energy:24,accent:'#b9ef73',meaning:'风险预算',balance:'先活着，再复利；收益焦虑不能绑架生活节奏。',risk:'失衡信号：频繁看盘、追涨、加杠杆。'},
+ {id:'travel',name:'旅行角色',role:'行程 · 签证 · 目的地',page:'newconfig',energy:8,accent:'#8cb7e8',meaning:'选择权',balance:'用真实移动扩展生活半径；不是逃避，是校准。',risk:'失衡信号：只收藏目的地，不核验签证与资金路径。'},
+ {id:'health',name:'健康角色',role:'健身 · 饮食 · 皮肤管理',page:'health',energy:18,accent:'#f2b65f',meaning:'底盘',balance:'睡眠、训练、饮食决定其他角色的续航；所有产出的前提。',risk:'失衡信号：靠咖啡因和熬夜换短期产出。'},
+ {id:'reading',name:'阅读角色',role:'书籍计划 · 知识沉淀',page:'reading',energy:13,accent:'#c9a7ff',meaning:'判断力',balance:'把信息变成判断；慢下来，避免被噪音牵着走。',risk:'失衡信号：只收藏不阅读，只输入不输出。'},
+ {id:'english',name:'英语角色',role:'输入训练 · 可复用输出',page:'english',energy:15,accent:'#7fe3c8',meaning:'表达',balance:'把能力变成可复用的输出，让世界听见你。',risk:'失衡信号：连续学习但没有一次真实表达。'}
 ];
 function agentStatuses(){try{return JSON.parse(localStorage.getItem('wealth-os-agent-statuses')||'{}')}catch(_){return {}}}
 function agentBalance(){
@@ -717,39 +718,55 @@ function agentBalance(){
  return {score:Math.round(distribution*.7+availability*.3),distribution,availability,busy,paused,unallocated:100-AGENT_DEFS.reduce((s,a)=>s+a.energy,0)};
 }
 function agentAvatar(a){
- return `<span class="agent-avatar"><img src="${a.image}" alt="${esc(a.name)} 3D 形象" loading="lazy" onerror="this.remove()"><i>${esc(a.icon)}</i></span>`;
+ const initial=(a.name||'?').replace('角色','').slice(0,1);
+ return `<span class="agent-avatar agent-avatar-mono" aria-hidden="true"><b>${esc(initial)}</b></span>`;
 }
 function agentInsights(balance){
  const out=[];
- if(balance.busy>2) out.push({tone:'warn',title:'同时忙碌的分身过多',text:'超过 2 个分身同时忙碌，注意力会被切碎。先暂停低优先级分身，只保留 1–2 个主线。'});
- if(balance.paused>0) out.push({tone:'neutral',title:`${balance.paused} 个分身已暂停`,text:'暂停不是失败；如果暂停的是健康或睡眠，设置一个恢复日期。'});
+ if(balance.busy>2) out.push({tone:'warn',title:'同时忙碌的角色过多',text:'超过 2 个角色同时忙碌，注意力会被切碎。先暂停低优先级角色，只保留 1–2 个主线。'});
+ if(balance.paused>0) out.push({tone:'neutral',title:`${balance.paused} 个角色已暂停`,text:'暂停不是失败；如果暂停的是健康或睡眠，设置一个恢复日期。'});
  if(balance.unallocated>=10) out.push({tone:'neutral',title:`${balance.unallocated}% 精力未分配`,text:'未分配预算不是必须填满；它可以是缓冲、休息或应对突发。'});
  const high=[...AGENT_DEFS].sort((a,b)=>b.energy-a.energy)[0];
  const low=[...AGENT_DEFS].sort((a,b)=>a.energy-b.energy)[0];
  if(high) out.push({tone:'neutral',title:`${high.name}预算最高（${high.energy}%）`,text:`${high.balance} 检查它是否真的在服务主线，而不是占用注意力。`});
  if(low&&low.energy<10) out.push({tone:'neutral',title:`${low.name}预算最低（${low.energy}%）`,text:'低预算可以是阶段性选择；只要它是主动选择，而不是长期忽略。'});
- if(!out.length) out.push({tone:'good',title:'六个分身处于可调度状态',text:'继续保持：底盘优先、一次只忙 1–2 个、每周再平衡。'});
+ if(!out.length) out.push({tone:'good',title:'六个角色处于可调度状态',text:'继续保持：底盘优先、一次只忙 1–2 个、每周再平衡。'});
  return out.slice(0,4);
+}
+function agentConsoleBlock(){
+  const statuses=agentStatuses();
+  const queue=(focusTasks()||[]).filter(t=>!t.done).sort((a,b)=>String(a.dueDate||'9999').localeCompare(String(b.dueDate||'9999'))||({'高':0,'中':1,'低':2}[a.priority]??3)-({'高':0,'中':1,'低':2}[b.priority]??3)).slice(0,3);
+  const finished=(focusTasks()||[]).filter(t=>t.done).slice(-3).reverse();
+  const busyAgents=AGENT_DEFS.filter(a=>(statuses[a.id]||'idle')==='busy');
+  return `<section class="agent-console" aria-label="角色调度台">
+    <div class="agent-console-head"><div><span class="eyebrow">DELEGATION · THREE TENSES</span><h3>角色调度台</h3><p>未来、当前、过去同时可见；只读取真实任务和角色状态，不伪造运行记录。</p></div><button class="btn btn-small btn-outline" data-action="go-page" data-page="today">打开执行 →</button></div>
+    <div class="agent-console-grid">
+      <div class="agent-console-col"><div class="agent-console-col-head"><span>待调度</span><b>${queue.length}</b></div>${queue.length?queue.map(t=>`<div class="agent-console-row"><span>${esc(t.title)}</span><small>${esc(t.project||'收集箱')} · ${esc(t.dueDate||'未排期')}</small></div>`).join(''):'<div class="agent-console-empty">今天没有待调度任务。</div>'}</div>
+      <div class="agent-console-col agent-console-live"><div class="agent-console-col-head"><span><i class="agent-live-dot"></i>当前运行</span><b>${busyAgents.length}</b></div>${busyAgents.length?busyAgents.map(a=>`<div class="agent-console-row"><span>${esc(a.name)}</span><small>忙碌中 · ${a.energy}% 精力预算</small></div>`).join(''):'<div class="agent-console-empty">当前没有忙碌的角色；都在空闲或暂停。</div>'}<button class="agent-stop" data-action="agents-stop-busy" ${busyAgents.length?'':'disabled'}>${busyAgents.length?'暂停全部忙碌角色':'没有正在运行的角色'}</button></div>
+      <div class="agent-console-col"><div class="agent-console-col-head"><span>最近完成</span><b>${finished.length}</b></div>${finished.length?finished.map(t=>`<div class="agent-console-row"><span>${esc(t.title)}</span><small>${esc(t.project||'收集箱')} · ${esc(t.dueDate||'已完成')}</small></div>`).join(''):'<div class="agent-console-empty">还没有完成记录；先完成今天的一件。</div>'}</div>
+    </div>
+  </section>`;
 }
 function renderAgents(){
  const statuses=agentStatuses(), labels={idle:'空闲',busy:'忙碌',paused:'暂停'}, cls={idle:'idle',busy:'busy',paused:'paused'}, balance=agentBalance();
  const cards=AGENT_DEFS.map((a,i)=>{const st=statuses[a.id]||'idle';return `<button class="agent-node agent-node-${cls[st]}" style="--i:${i};--start:${((i*100)/AGENT_DEFS.length).toFixed(2)}%;--delay:-${((i*46)/AGENT_DEFS.length).toFixed(2)}s;--accent:${a.accent}" data-action="agent-cycle" data-agent="${a.id}" title="点击切换 空闲 / 忙碌 / 暂停" aria-label="${esc(a.name)}，${labels[st]}，精力 ${a.energy}%"><span class="agent-node-card">${agentAvatar(a)}<span class="agent-node-copy"><strong>${esc(a.name)}</strong><small>${esc(a.meaning)}</small><em><i></i>${labels[st]} · ${a.energy}%</em></span></span></button>`}).join('');
- return `${sectionHead('PERSONAL MULTI-AGENT OS · BALANCE','分身','不是六个独立的人，而是同一个人的六类精力预算。六个分身绕中心转动，中心 OS 负责调度与平衡；点击任一分身切换 空闲 / 忙碌 / 暂停。',`<button class="btn btn-outline" data-action="agents-reset">重置状态</button><button class="btn btn-primary" data-action="go-page" data-page="home">进入今日工作台 →</button>`)}
+ return `${sectionHead('PERSONAL MULTI-AGENT OS · BALANCE','角色','不是六个独立的人，而是同一个人的六类精力预算。六个角色绕中心转动，中心 OS 负责调度与平衡；点击任一角色切换 空闲 / 忙碌 / 暂停。',`<button class="btn btn-outline" data-action="agents-reset">重置状态</button><button class="btn btn-primary" data-action="go-page" data-page="home">进入今日工作台 →</button>`)}
  <section class="agent-balance-hero">
-  <div class="agent-balance-copy"><span class="eyebrow">BALANCE · NOT EQUALITY</span><h2>一个中心，<em>六个分身</em></h2><p>平衡不是平均分配，而是动态调度：底盘（健康与睡眠）先稳住，再让工作、投资、表达和选择权轮流占用注意力。六个分身围绕中心转动，中心 OS 负责让它们不互相挤压。</p>
-   <div class="agent-summary"><div><strong>${balance.score}</strong><span>平衡指数</span></div><div><strong>${AGENT_DEFS.length}</strong><span>分身总数</span></div><div><strong>${balance.busy}</strong><span>忙碌中</span></div><div><strong>${balance.unallocated}%</strong><span>未分配缓冲</span></div></div>
-   <div class="agent-balance-actions"><button class="btn btn-primary" data-action="go-page" data-page="home">回到今日主线</button><button class="btn btn-outline" data-action="agents-spin">${ui.agentSpinPaused?'继续旋转':'暂停旋转'}</button><button class="btn btn-outline" data-action="agents-reset">重置分身状态</button></div>
+  <div class="agent-balance-copy"><span class="eyebrow">BALANCE · NOT EQUALITY</span><h2>一个中心，<em>六个角色</em></h2><p>平衡不是平均分配，而是动态调度：底盘（健康与睡眠）先稳住，再让工作、投资、表达和选择权轮流占用注意力。六个角色围绕中心转动，中心 OS 负责让它们不互相挤压。</p>
+   <div class="agent-summary"><div><strong>${balance.score}</strong><span>平衡指数</span></div><div><strong>${AGENT_DEFS.length}</strong><span>角色总数</span></div><div><strong>${balance.busy}</strong><span>忙碌中</span></div><div><strong>${balance.unallocated}%</strong><span>未分配缓冲</span></div></div>
+   <div class="agent-balance-actions"><button class="btn btn-primary" data-action="go-page" data-page="home">回到今日主线</button><button class="btn btn-outline" data-action="agents-spin">${ui.agentSpinPaused?'继续旋转':'暂停旋转'}</button><button class="btn btn-outline" data-action="agents-reset">重置角色状态</button></div>
   </div>
   <div class="agent-balance-stage ${ui.agentSpinPaused?'agent-stage-paused':''}">
    <div class="agent-orbit-ring ring-a"></div><div class="agent-orbit-ring ring-b"></div><div class="agent-orbit-glow"></div>
-   <div class="agent-balance-core"><img src="/static/agents/balance.png" alt="3D 平衡秤，代表中心 OS 的平衡" loading="eager" onerror="this.remove()"><span>BALANCE OS</span><strong>${balance.score}</strong><small>平衡指数</small><i>调度 · 优先级 · 再平衡</i></div>
+   <div class="agent-balance-core"><span class="agent-balance-mark">OS</span><strong>${balance.score}</strong><small>平衡指数</small><i>调度 · 优先级 · 再平衡</i></div>
    <div class="agent-orbit-track">${cards}</div>
-   <div class="agent-balance-caption"><span>动态平衡</span><small>中心 OS = 平衡；外围分身 = 可调度的精力预算</small></div>
+   <div class="agent-balance-caption"><span>动态平衡</span><small>中心 OS = 平衡；外围角色 = 可调度的精力预算</small></div>
   </div>
  </section>
+ ${agentConsoleBlock()}
  <div class="agent-balance-grid"><section class="card agent-balance-insights"><div class="card-head"><div><span class="eyebrow">BALANCE CHECK</span><h3>现在的平衡状态</h3><p>根据精力预算与忙碌/暂停状态计算，不是绩效评分。</p></div><span class="tag ${balance.score>=70?'good':balance.score>=50?'warn':'bad'}">${balance.score}/100</span></div>${hosInsightCards(agentInsights(balance))}</section>
- <article class="card agent-playbook"><div class="card-head"><div><h3>平衡规则</h3><p>让分身协作，而不是同时争抢注意力。</p></div></div><div class="agent-rule"><b>01 · 不追求平均</b><p>不同阶段允许不同预算；关键是主动选择，而不是被最吵的分身拖走。</p></div><div class="agent-rule"><b>02 · 先保底盘</b><p>健康与睡眠是基础资源；底盘失守时，工作与投资收益都不可持续。</p></div><div class="agent-rule"><b>03 · 一次只忙 1–2 个</b><p>同时忙碌的分身越多，切换成本越高；其余分身保持空闲或暂停。</p></div><div class="agent-rule"><b>04 · 每周再平衡</b><p>按真实完成量重新分配精力；恢复一个被忽略的分身，暂停一个过度占用的分身。</p></div></article></div>
- <section class="agent-meaning-section"><div class="agent-section-head"><div><span class="eyebrow">MEANING OF EACH AGENT</span><h2>每个分身代表什么</h2><p>3D 形象不是装饰：每一个对应一种能力、一个失衡信号和一个可执行入口。</p><small class="agent-credit">3D 图标：<a href="https://github.com/microsoft/fluentui-emoji" target="_blank" rel="noopener noreferrer">Microsoft Fluent Emoji</a> · MIT License</small></div><span class="tag neutral">6 个分身 · 1 个中心</span></div><div class="agent-meaning-grid">${AGENT_DEFS.map((a)=>{const st=statuses[a.id]||'idle';return `<article class="agent-meaning-card" style="--accent:${a.accent}"><header>${agentAvatar(a)}<div><strong>${esc(a.name)}</strong><small>${esc(a.meaning)}</small></div><span class="tag ${st==='busy'?'warn':st==='paused'?'bad':'neutral'}">${labels[st]}</span></header><p>${esc(a.balance)}</p><small class="agent-risk">${esc(a.risk)}</small><footer><span>${a.energy}% 精力预算</span><button class="btn btn-small btn-outline" data-action="agent-open" data-page="${a.page}">进入${esc(a.name.replace('分身',''))} →</button></footer></article>`}).join('')}</div></section>
+ <article class="card agent-playbook"><div class="card-head"><div><h3>平衡规则</h3><p>让角色协作，而不是同时争抢注意力。</p></div></div><div class="agent-rule"><b>01 · 不追求平均</b><p>不同阶段允许不同预算；关键是主动选择，而不是被最吵的角色拖走。</p></div><div class="agent-rule"><b>02 · 先保底盘</b><p>健康与睡眠是基础资源；底盘失守时，工作与投资收益都不可持续。</p></div><div class="agent-rule"><b>03 · 一次只忙 1–2 个</b><p>同时忙碌的角色越多，切换成本越高；其余角色保持空闲或暂停。</p></div><div class="agent-rule"><b>04 · 每周再平衡</b><p>按真实完成量重新分配精力；恢复一个被忽略的角色，暂停一个过度占用的角色。</p></div></article></div>
+ <section class="agent-meaning-section"><div class="agent-section-head"><div><span class="eyebrow">MEANING OF EACH AGENT</span><h2>每个角色代表什么</h2><p>六个角色对应六类精力预算、一个失衡信号和一个可执行入口。</p></div><span class="tag neutral">6 个角色 · 1 个中心</span></div><div class="agent-meaning-grid">${AGENT_DEFS.map((a)=>{const st=statuses[a.id]||'idle';return `<article class="agent-meaning-card" style="--accent:${a.accent}"><header>${agentAvatar(a)}<div><strong>${esc(a.name)}</strong><small>${esc(a.meaning)}</small></div><span class="tag ${st==='busy'?'warn':st==='paused'?'bad':'neutral'}">${labels[st]}</span></header><p>${esc(a.balance)}</p><small class="agent-risk">${esc(a.risk)}</small><footer><span>${a.energy}% 精力预算</span><button class="btn btn-small btn-outline" data-action="agent-open" data-page="${a.page}">进入${esc(a.name.replace('角色',''))} →</button></footer></article>`}).join('')}</div></section>
  <section class="card agent-allocation-card"><div class="card-head"><div><h3>精力分配建议</h3><p>建议预算为起始值；可在每周复盘时调整，目标是可持续的平衡。</p></div><span class="soft-badge">100% 基准</span></div>${AGENT_DEFS.map(a=>`<div class="agent-budget-row"><span>${agentAvatar(a)} ${esc(a.name)}<small>${esc(a.meaning)}</small></span><div class="agent-budget-track"><i style="width:${a.energy}%;background:${a.accent}"></i></div><b>${a.energy}%</b><button data-action="agent-open" data-page="${a.page}">打开 →</button></div>`).join('')}</section>`;
 }
 
@@ -869,8 +886,8 @@ function renderDashboardRaw() {
     ${metricCard('90 天项目进度',`${Math.round(tasks.length?done/tasks.length*100:0)}<small>%</small>`,`已完成 ${done} 项 / 优先处理 P0`,'✓',done?'good':'','/static/covers/milestone.svg')}
   </div>
   <div class="grid grid-2" style="margin-top:14px">
-    <section class="card">${cardHead('策略状态与风险预算','示范曲线仅用于验证仪表盘交互，不是历史净值曲线',tag('ILLUSTRATIVE','warn'))}<div class="card-body"><div class="chart-wrap">${lineChart(curve,'示范净值曲线')}</div><div class="chart-legend"><span><i class="legend-dot" style="background:var(--accent)"></i>演示轨迹</span><span><i class="legend-dot" style="background:#607866"></i>需导入真实净值日志后启用收益统计</span></div><div class="subtle-divider"></div><div class="grid grid-3"><div class="metric-mini"><span>现金目标</span><strong>${pct(globalTargets().find(r=>r.group==='Cash')?.dynamicTarget||17,1)}</strong></div><div class="metric-mini"><span>战略权重合计</span><strong>${pct(sumT,0)}</strong></div><div class="metric-mini"><span>市场风险参考</span><strong>${fmt(marketRisk,0)}/100</strong></div></div></div></section>
-    <section class="card">${cardHead('今日执行建议','根据已有的规则骨架生成；执行前先核验新鲜行情与真实持仓',tag('RULE-BASED','good'))}<div class="card-body"><div class="recommendation"><div class="recommendation-icon">✳</div><div><div class="recommendation-label">NEXT BEST ACTION</div><strong>先补齐真实持仓、应急金和数据质量，再提高风险预算。</strong><p>全球组合优先现金/中短久期高质量债与低成本宽基；VOO/QQQ是倾斜仓而非独立分散资产。A股示范快照部分趋势字段缺失，不能把空值当成0或实时评分。</p></div></div><div class="subtle-divider"></div><div class="decision-box"><div class="eyebrow">NASDAQ LEVERAGE GATE</div><h3>${nd.leverageEnabled?'已开启手动偏好，闸门仍需重新评估':'当前默认不加杠杆（L0）'}</h3><p>需同时满足：配置分≥70、AI泡沫分&lt;55、2000相似度&lt;50、趋势向上；强主升还需考虑VIX、信用与融资成本。杠杆只作用于Swing，不用于Core。</p><div class="decision-footer"><span>当前有效敞口</span><strong>${fmt(nd.effectiveExposure||1,2)}x</strong></div></div><div class="subtle-divider"></div><div class="timeline">${(state.cadence||[]).slice(0,3).map(c=>`<div class="timeline-item"><div class="timeline-time">${esc(c.when.split(' ')[0])}</div><div class="timeline-rail"><span class="timeline-dot"></span></div><div class="timeline-copy"><strong>${esc(c.when)}</strong><p>${esc(c.what)}</p></div></div>`).join('')}</div></div></section>
+    <section class="card">${cardHead('策略状态与风险预算','示范曲线仅用于验证仪表盘交互，不是历史净值曲线',tag('示意','warn'))}<div class="card-body"><div class="chart-wrap">${lineChart(curve,'示范净值曲线')}</div><div class="chart-legend"><span><i class="legend-dot" style="background:var(--accent)"></i>演示轨迹</span><span><i class="legend-dot" style="background:#607866"></i>需导入真实净值日志后启用收益统计</span></div><div class="subtle-divider"></div><div class="grid grid-3"><div class="metric-mini"><span>现金目标</span><strong>${pct(globalTargets().find(r=>r.group==='Cash')?.dynamicTarget||17,1)}</strong></div><div class="metric-mini"><span>战略权重合计</span><strong>${pct(sumT,0)}</strong></div><div class="metric-mini"><span>市场风险参考</span><strong>${fmt(marketRisk,0)}/100</strong></div></div></div></section>
+    <section class="card">${cardHead('今日执行建议','根据已有的规则骨架生成；执行前先核验新鲜行情与真实持仓',tag('规则生成','good'))}<div class="card-body"><div class="recommendation"><div class="recommendation-icon">✳</div><div><div class="recommendation-label">下一步</div><strong>先补齐真实持仓、应急金和数据质量，再提高风险预算。</strong><p>全球组合优先现金/中短久期高质量债与低成本宽基；VOO/QQQ是倾斜仓而非独立分散资产。A股示范快照部分趋势字段缺失，不能把空值当成0或实时评分。</p></div></div><div class="subtle-divider"></div><div class="decision-box"><div class="eyebrow">NASDAQ LEVERAGE GATE</div><h3>${nd.leverageEnabled?'已开启手动偏好，闸门仍需重新评估':'当前默认不加杠杆（L0）'}</h3><p>需同时满足：配置分≥70、AI泡沫分&lt;55、2000相似度&lt;50、趋势向上；强主升还需考虑VIX、信用与融资成本。杠杆只作用于Swing，不用于Core。</p><div class="decision-footer"><span>当前有效敞口</span><strong>${fmt(nd.effectiveExposure||1,2)}x</strong></div></div><div class="subtle-divider"></div><div class="timeline">${(state.cadence||[]).slice(0,3).map(c=>`<div class="timeline-item"><div class="timeline-time">${esc(c.when.split(' ')[0])}</div><div class="timeline-rail"><span class="timeline-dot"></span></div><div class="timeline-copy"><strong>${esc(c.when)}</strong><p>${esc(c.what)}</p></div></div>`).join('')}</div></div></section>
   </div>
   <div class="grid grid-2" style="margin-top:14px">
     <section class="card">${cardHead('全球战略配置｜动态目标','当前起点来自已有工作簿，目标可修改、实际权重需本人录入',`<button class="btn btn-quiet" data-action="go-page" data-page="allocation">打开配置 →</button>`)}<div class="card-body">${allocationBars(target.map(r=>({name:r.name,target:r.dynamicTarget})).sort((a,b)=>b.target-a.target),'target',100)}<div class="subtle-divider"></div><div class="recommendation"><div class="recommendation-icon">↗</div><div><strong>${riskOverlayText()}</strong><p>动态目标是模型参考；偏离阈值达到设定值后才形成调仓候选，仍需考虑费用、税务、流动性及逻辑是否失效。</p></div></div></div></section>
@@ -2145,8 +2162,9 @@ function bindDelegatedEvents() {
     if(a==='schedule-toggle'){const j=scheduleJobsCache.find(x=>String(x.id)===String(action.dataset.id));if(!j)return;j.enabled=!j.enabled;try{await api('/api/scheduler/jobs',{method:'PUT',body:JSON.stringify({jobs:scheduleJobsCache})});await loadSchedules();renderPage('schedules');toast('定时任务状态已更新')}catch(e){toast(e.message,true)}return;}
     if(a==='schedule-run'||a==='schedule-run-all'){try{const res=await api('/api/scheduler/run',{method:'POST',body:JSON.stringify({id:a==='schedule-run'?action.dataset.id:null})});toast(res.message||'任务已执行');await loadSchedules();renderPage('schedules')}catch(e){toast('执行失败：'+e.message,true)}return;}
     if(a==='agent-cycle') { const id=action.dataset.agent, all=agentStatuses(), seq=['idle','busy','paused'];all[id]=seq[(seq.indexOf(all[id]||'idle')+1)%seq.length];try{localStorage.setItem('wealth-os-agent-statuses',JSON.stringify(all))}catch(_){}renderPage('agents');return; }
-    if(a==='agents-reset') { try{localStorage.removeItem('wealth-os-agent-statuses')}catch(_){}renderPage('agents');toast('分身状态已重置');return; }
-    if(a==='agents-spin'){ui.agentSpinPaused=!ui.agentSpinPaused;const stage=document.querySelector('.agent-balance-stage');stage?.classList.toggle('agent-stage-paused',!!ui.agentSpinPaused);action.textContent=ui.agentSpinPaused?'继续旋转':'暂停旋转';toast(ui.agentSpinPaused?'已暂停旋转，方便查看单个分身':'已继续旋转');return;}
+    if(a==='agents-stop-busy') { const all=agentStatuses(), busy=AGENT_DEFS.filter(x=>(all[x.id]||'idle')==='busy'); if(!busy.length){toast('当前没有忙碌的角色');return;} busy.forEach(x=>{all[x.id]='paused'}); try{localStorage.setItem('wealth-os-agent-statuses',JSON.stringify(all))}catch(_){} renderPage('agents'); toast(`已暂停 ${busy.length} 个忙碌角色`); return; }
+    if(a==='agents-reset') { try{localStorage.removeItem('wealth-os-agent-statuses')}catch(_){}renderPage('agents');toast('角色状态已重置');return; }
+    if(a==='agents-spin'){ui.agentSpinPaused=!ui.agentSpinPaused;const stage=document.querySelector('.agent-balance-stage');stage?.classList.toggle('agent-stage-paused',!!ui.agentSpinPaused);action.textContent=ui.agentSpinPaused?'继续旋转':'暂停旋转';toast(ui.agentSpinPaused?'已暂停旋转，方便查看单个角色':'已继续旋转');return;}
     if(a==='close-interaction-modal'){ $('#interactionModal')?.remove(); return; }
     if(a==='toggle-flow-nav'){const box=$('#flowSubnav'),open=box?.classList.contains('hidden');if(box)box.classList.toggle('hidden',!open);action.setAttribute('aria-expanded',String(!!open));const k=action.querySelector('kbd');if(k)k.textContent=open?'−':'＋';try{localStorage.setItem('wealth-os-flow-open',open?'1':'0')}catch(_){}return;}
     if(a==='toggle-investing') { const box=$('#investingSubnav'), open=box?.classList.contains('hidden'); if(box)box.classList.toggle('hidden',!open); action.setAttribute('aria-expanded',String(!!open)); const k=action.querySelector('kbd');if(k)k.textContent=open?'−':'＋'; try{localStorage.setItem('wealth-os-investing-open',open?'1':'0')}catch(_){} return; }
@@ -2155,7 +2173,7 @@ function bindDelegatedEvents() {
     if(a==='agent-open') { renderPage(action.dataset.page||'home',{autoRefresh:true});return; }
     if(a==='alpha-focus-form'){document.getElementById('alphaSignalFormCard')?.scrollIntoView({behavior:'smooth',block:'start'});setTimeout(()=>document.querySelector('#alphaSignalForm input[name=title]')?.focus(),80);return;}
     if(a==='alpha-delete'){const i=n(action.dataset.index,-1);if(i>=0&&state.alphaRadarSignals[i]&&confirm('删除这条 Alpha Radar 信号？')){state.alphaRadarSignals.splice(i,1);await persist({quiet:true});renderPage('alpharadar');toast('信号已删除');}return;}
-    if(a==='theme-light'||a==='theme-dark') { const theme=a==='theme-light'?'light':'dark';document.documentElement.dataset.theme=theme;document.body.dataset.theme=theme;try{localStorage.setItem('wealth-os-theme-v2',theme)}catch(_){};$$('.theme-option').forEach(btn=>{const on=btn.dataset.action===a;btn.classList.toggle('selected',on);btn.setAttribute('aria-pressed',on?'true':'false');});toast(theme==='light'?'已切换为浅色主题':'已切换为深色主题');return; }
+    if(a==='theme-light'||a==='theme-dark') { const theme=a==='theme-light'?'light':'dark';document.documentElement.dataset.theme=theme;document.body.dataset.theme=theme;syncThemeColor();try{localStorage.setItem('wealth-os-theme-v2',theme)}catch(_){};$$('.theme-option').forEach(btn=>{const on=btn.dataset.action===a;btn.classList.toggle('selected',on);btn.setAttribute('aria-pressed',on?'true':'false');});toast(theme==='light'?'已切换为浅色主题':'已切换为深色主题');return; }
     if(a==='watch-filter') { ui.homeWatchScope=action.dataset.scope||'all'; renderPage('home',{transition:false,animate:false}); return; }
     if(a==='go-page') return renderPage(action.dataset.page||'home',{autoRefresh:true});
     if(a==='newconfig-anchor') { const target=action.dataset.target||'capability-pyramid'; if(currentPage!=='newconfig') renderPage('newconfig'); setTimeout(()=>document.getElementById(target)?.scrollIntoView({behavior:'smooth',block:'start'}),40); return; }
