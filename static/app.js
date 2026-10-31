@@ -197,16 +197,41 @@ function saveAndRender(message) { persist({quiet:true}).then(()=>{ if(message) t
 function tag(text, type='neutral') { return `<span class="tag ${type}">${esc(text)}</span>`; }
 function sectionHead(kicker, title, desc, actions='', level='h1') { return `<div class="page-head"><div><div class="eyebrow">${esc(kicker)}</div><${level}>${esc(title)}</${level}><p>${esc(desc)}</p></div><div class="page-actions">${actions}</div></div>`; }
 function cardHead(title, desc='', right='') { return `<div class="card-head"><div><h3>${title}</h3>${desc?`<p>${desc}</p>`:''}</div>${right}</div>`; }
-function metricCard(label, value, foot, icon='◦', footType='') { return `<div class="card metric-card"><div class="metric-label"><span>${label}</span><span class="metric-icon">${icon}</span></div><div class="metric-value">${value}</div><div class="metric-foot ${footType}">${foot}</div></div>`; }
+function metricCard(label, value, foot, icon='◦', footType='', cover='') { return `<div class="card metric-card ${cover?'has-cover':''}">${cover?`<div class="metric-cover"><img src="${cover}" alt="" loading="lazy"></div>`:''}<div class="metric-label"><span>${label}</span><span class="metric-icon">${icon}</span></div><div class="metric-value">${value}</div><div class="metric-foot ${footType}">${foot}</div></div>`; }
 function scoreType(score, inverse=false) { const x=n(score); if (inverse) return x>=70?'bad':x>=55?'warn':'good'; return x>=70?'good':x>=55?'warn':'neutral'; }
 function formatDelta(v) { const x=n(v); const cls=x>0?'market-gain':x<0?'market-loss':'market-flat'; const color=x>0?'var(--market-up)':x<0?'var(--market-down)':'inherit'; return `<span class="${cls}" style="color:${color}!important;font-weight:700">${x>0?'+':''}${fmt(x,2)}%</span>`; }
+function cleanPageSections(page, root) {
+  const foldExtras=(extras,label)=>{
+    if(!extras.length) return;
+    const fold=document.createElement('details');
+    fold.className='page-fold';
+    fold.innerHTML=`<summary><span>${label}</span><small>${extras.length} 个区块</small></summary><div class="page-fold-body"></div>`;
+    const body=fold.querySelector('.page-fold-body');
+    extras.forEach((el)=>body.appendChild(el));
+    root.appendChild(fold);
+  };
+  if (page === 'home') {
+    const calendarHead=[...root.children].find((el)=>el.classList.contains('page-head') && /周历/.test(el.textContent));
+    if (calendarHead) {
+      const extras=[];
+      let node=calendarHead;
+      while(node){ extras.push(node); node=node.nextElementSibling; }
+      foldExtras(extras,'展开周历与专注');
+    }
+    return;
+  }
+  const keep = {allocation:3,nasdaq:4,ashare:4,execution:3,archive:2,health:3,agents:2,schedules:2,mistakes:2}[page];
+  if (!keep) return;
+  const children=[...root.children].filter((el)=>!el.classList.contains('page-head')&&!el.classList.contains('home-welcome'));
+  if (children.length <= keep) return;
+  foldExtras(children.slice(keep),'展开其余内容');
+}
 function setHeader(page) {
   // Redundant global topbar removed; keep navigation selection only.
   $$('.nav-item[data-page]').forEach(el=>el.classList.toggle('active',el.dataset.page===page));
 }
 
-function renderPage(page, {autoRefresh=false}={}) {
-  if (!state) return;
+function renderPage(page, {autoRefresh=false, transition=true, animate=true}={}) {  if (!state) return;
   currentPage=page;
   setHeader(page);
   const root=$('#viewRoot');
@@ -214,18 +239,31 @@ function renderPage(page, {autoRefresh=false}={}) {
   const map={schedules:renderSchedules,agents:renderAgents,mistakes:renderMistakes,home:renderHome,inbox:renderInbox,upcoming:renderUpcoming,calendar:renderCalendar,matrix:renderMatrix,stats:renderFocusStats,important:renderImportant,alltasks:renderAllFocusTasks,dashboard:renderDashboard,allocation:renderAllocation,nasdaq:renderNasdaq,ashare:renderAshare,newconfig:()=> (typeof renderNewConfigV2==='function'?renderNewConfigV2():renderNewConfig()),health:renderHealth,checkin:renderHealthCheckin,diet:()=>renderHealthSection('diet'),fitness:()=>renderHealthSection('fitness'),skin:()=>renderHealthSection('skin'),sleep:()=>renderHealthSection('sleep'),style:()=>renderHealthSection('style'),english:()=> (typeof renderEnglishV2==='function'?renderEnglishV2():renderEnglish()),reading:()=> (typeof renderReadingV2==='function'?renderReadingV2():renderReading()),execution:renderExecution,archive:renderArchive,dailyflow:renderDailyFlow,flowstats:renderFlowStats,alpharadar:renderAlphaRadar};
   const investingPages=['dashboard','allocation','nasdaq','ashare','execution'];
   const body=(map[page]||renderHome)();
-  root.innerHTML=body;
-  if (investingPages.includes(page)) {
-    const marketPanel=renderMarketActionPanel(page);
-    const head=root.querySelector('.page-head');
-    if (head) head.insertAdjacentHTML('afterend', marketPanel);
-    else root.insertAdjacentHTML('afterbegin', marketPanel);
+  const commit = () => {
+    root.innerHTML=body;
+    if (investingPages.includes(page) && page !== 'dashboard') {
+      const marketPanel=renderMarketActionPanel(page);
+      const head=root.querySelector('.page-head');
+      const panel=`<details class="page-fold market-fold"><summary><span>展开数据可信度与市场建议</span><small>REFRESH / CONFIDENCE</small></summary><div class="page-fold-body">${marketPanel}</div></details>`;
+      if (head) head.insertAdjacentHTML('afterend', panel);
+      else root.insertAdjacentHTML('afterbegin', panel);
+    }
+    updateFocusCounts();
+    closeSidebar();
+    cleanPageSections(page, root);
+  };
+  const reduceMotion=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  if (document.startViewTransition && !reduceMotion && transition) {
+    root.classList.remove('page-enter');
+    document.startViewTransition(commit);
+  } else {
+    commit();
+    if (animate) {
+      root.classList.remove('page-enter');
+      void root.offsetWidth;
+      root.classList.add('page-enter');
+    }
   }
-  updateFocusCounts();
-  closeSidebar();
-  root.classList.remove('page-enter');
-  void root.offsetWidth;
-  root.classList.add('page-enter');
   if(page==='schedules') loadSchedules().then(()=>{if(currentPage==='schedules'){const r=$('#viewRoot');if(r)r.innerHTML=renderSchedules();}});
   if(page==='archive') loadMarketRefreshLogs();
   if(page==='fitness') hydrateGymLibrary();
@@ -504,7 +542,12 @@ function renderAttentionCards() {
       ? (p0?'90-DAY BUILD':'GLOBAL OPTIONALITY')
       : (p0?'90-DAY BUILD':weak?'A-SHARE ETF ROTATION':n(nd.bubble)>=55?'NASDAQ / AI RISK':'GLOBAL ALLOCATION');
   const lead=scoped.find(c=>c.key===leadKey)||scoped[0];
-  const rest=scoped.filter(c=>c!==lead);
+  let watchOrder=[];
+  try { watchOrder=JSON.parse(localStorage.getItem('wealth-os-watch-order')||'[]'); } catch(_) {}
+  const rest=scoped.filter(c=>c!==lead).sort((a,b)=>{
+    const ia=watchOrder.indexOf(a.key), ib=watchOrder.indexOf(b.key);
+    return (ia<0?999:ia)-(ib<0?999:ib);
+  });
   const scopeLabel={all:'全部',market:'市场',exec:'执行'};
   return `<div class="attention-section-head"><div><div class="eyebrow">WEALTH OS · WATCHLIST</div><h2>关注点</h2><p>首页不只列任务，也把必须持续检查的市场、合规与长期建设事项放在同一处。</p></div>
   <div class="attention-tools"><div class="watch-filter" role="group" aria-label="关注范围">${['all','market','exec'].map(k=>`<button class="${scope===k?'active':''}" data-action="watch-filter" data-scope="${k}" aria-pressed="${scope===k}">${scopeLabel[k]} <span>${String(k==='all'?cards.length:cards.filter(c=>c.scope===k).length).padStart(2,'0')}</span></button>`).join('')}</div><button class="btn btn-quiet" data-action="go-page" data-page="dashboard">完整资产总览 →</button></div></div>
@@ -519,7 +562,7 @@ function renderAttentionCards() {
     </article>
     <aside class="home-watch">
       <div class="watch-head"><span>其余关注</span><span>${String(rest.length).padStart(2,'0')}</span></div>
-      ${rest.map((c,i)=>`<button class="watch-row" data-action="go-page" data-page="${c.page}"><span class="watch-index">${String(i+2).padStart(2,'0')}</span><span class="watch-copy"><b>${c.title}</b><small>${c.value}</small></span><span class="watch-status"><i class="attention-light ${c.tone}"></i>${esc(c.status)}</span><span class="watch-arrow">↗</span></button>`).join('')}
+      ${rest.map((c,i)=>`<button class="watch-row" data-action="go-page" data-page="${c.page}" data-watch-key="${esc(c.key)}" draggable="false"><span class="watch-index">${String(i+2).padStart(2,'0')}</span><span class="watch-copy"><b>${c.title}</b><small>${c.value}</small></span><span class="watch-status"><i class="attention-light ${c.tone}"></i>${esc(c.status)}</span><span class="watch-arrow">↗</span></button>`).join('')}
     </aside>
   </div>`;
 }
@@ -666,7 +709,7 @@ function renderFlowStats(){
 function openFlowRunModal(item,kind){let m=$('#flowModalMount');if(!m){m=document.createElement('div');m.id='flowModalMount';document.body.appendChild(m);}m.innerHTML=`<div class="flow-modal-backdrop" data-action="flow-modal-close"></div><section class="flow-modal" role="dialog" aria-modal="true"><div class="focus-modal-head"><div><div class="eyebrow">FLOW SESSION</div><h2>${esc(item.title)}</h2></div><button class="task-delete" data-action="flow-modal-close">×</button></div><p>已记录一次打开。完成后可点击下方按钮记为完成，统计页会同步更新。</p><label class="field-label">本次备注<textarea id="flowRunNote" rows=3 placeholder="记录执行情况、时长、感受或偏差"></textarea></label><div class="button-row"><button class="btn btn-primary" data-action="flow-complete" data-id="${esc(item.id)}" data-kind="${kind}">标记本次完成</button><button class="btn btn-quiet" data-action="flow-modal-close">关闭</button></div></section>`;}
 function flowEditor(kind,item={}){const editing=!!item.id;return `<div class="flow-modal-backdrop" data-action="flow-modal-close"></div><section class="flow-modal" role="dialog" aria-modal="true"><div class="focus-modal-head"><div><div class="eyebrow">DAILY FLOW EDITOR</div><h2>${editing?'编辑流程块':'新增流程块'}</h2></div><button class="task-delete" data-action="flow-modal-close">×</button></div><form id="flowEditForm" data-kind="${kind}" data-id="${esc(item.id||'')}"><label class="field-label">要做的事情<input name="title" required maxlength="160" value="${esc(item.title||'')}" placeholder="例如：晨间运动、深度工作、英语输入"></label><div class="composer-two"><label class="field-label">开始时间<input name="start" type="time" required value="${flowClock(item.start??480)}"></label><label class="field-label">结束时间<input name="end" type="time" required value="${flowClock(item.end??540)}"></label></div><div class="composer-two"><label class="field-label">流程类型<select name="kind"><option value="weekday" ${kind==='weekday'?'selected':''}>工作日</option><option value="restday" ${kind==='restday'?'selected':''}>休息日</option></select></label><label class="field-label">分类<input name="category" value="${esc(item.category||'日常')}" placeholder="工作 / 健康 / 学习 / 家庭"></label></div><label class="field-label">备注<textarea name="note" rows="3">${esc(item.note||'')}</textarea></label><label class="field-label">显示颜色<input name="color" type="color" value="${esc(item.color||'#6e9c79')}"></label><div class="button-row">${editing?`<button class="btn btn-quiet" type="button" data-action="flow-delete" data-kind="${kind}" data-id="${esc(item.id)}">删除</button>`:''}<button class="btn btn-primary" type="submit">保存流程块</button><button class="btn btn-quiet" type="button" data-action="flow-modal-close">取消</button></div></form></section>`;}
 function openFlowEditor(kind,id=''){const item=id?(state.dailyFlows[kind]||[]).find(x=>String(x.id)===String(id)):{};let mount=$('#flowModalMount');if(!mount){mount=document.createElement('div');mount.id='flowModalMount';document.body.appendChild(mount);}mount.innerHTML=flowEditor(kind,item||{});}
-function renderDashboard() {
+function renderDashboardRaw() {
   const nd=state.nasdaq, tasks=state.tasks||[], done=tasks.filter(t=>t.status==='已完成').length;
   const target=globalTargets();
   const sumT=weightSum(state.globalAllocation,'target');
@@ -678,10 +721,10 @@ function renderDashboard() {
   <section class="card obsidian-link-card"><div><div class="eyebrow">LOCAL OBSIDIAN · DOUYIN REVIEW</div><h3>抖音复盘导航台</h3><p>打开本机 Obsidian SiliconEra 库中的本地复盘导航页面。此链接只适用于 E: 盘路径存在的这台电脑。</p></div><a class="btn btn-outline" href="file:///E:/obsidian/SiliconEra/%E6%8A%95%E8%B5%84%E4%B8%8E%E4%BA%A4%E6%98%93/%E6%8A%96%E9%9F%B3%E5%A4%8D%E7%9B%98_%E5%AF%BC%E8%88%AA%E5%8F%B0.html" target="_blank" rel="noopener noreferrer">打开本地复盘导航 ↗</a></section>
   <div class="status-strip"><span class="status-chip"><span class="status-dot muted"></span><b>模式</b> ${state.meta.marketRefreshOk?'公开数据部分更新':state.meta.lastRefresh?'刷新未取得有效数据':'演示 / 历史参考'}</span><span class="status-chip"><b>执行清单</b> ${done}/${tasks.length} 完成</span><span class="status-chip"><b>风险覆盖</b> ${esc(state.profile.riskOverlay||'Caution')}</span><span class="status-chip"><b>杠杆</b> ${nd.leverageEnabled?'手动启用偏好 / 待闸门核验':'关闭'}</span><span class="status-chip"><b>自动交易</b> 关闭</span></div>
   <div class="grid grid-4 dashboard-kpis">
-    ${metricCard('组合规模（示范值）',`<span>${money(state.profile.portfolioValue||100000)}</span>`,`<span class="warning">非真实账户净值 · 请录入</span>`,'◫')}
-    ${metricCard('纳指配置分',`${fmt(nd.entry,1)}<small>/100</small>`,`AI泡沫 ${fmt(nd.bubble,1)} · 2000相似度 ${fmt(nd.similarity,1)}`,'⌁',scoreType(nd.entry))}
-    ${metricCard('A股风险观察',`${highRisk}<small> / ${state.etfs.length}只</small>`,`评分低于55的观察标的数量`,'▥','warning')}
-    ${metricCard('90天里程碑',`${Math.round(tasks.length?done/tasks.length*100:0)}<small>%</small>`,`已完成 ${done} 项 / 优先处理 P0`,'✓',done?'good':'')}
+    ${metricCard('组合规模（示范值）',`<span>${money(state.profile.portfolioValue||100000)}</span>`,`<span class="warning">非真实账户净值 · 请录入</span>`,'◫','','/static/covers/finance.svg')}
+    ${metricCard('纳指配置分',`${fmt(nd.entry,1)}<small>/100</small>`,`AI泡沫 ${fmt(nd.bubble,1)} · 2000相似度 ${fmt(nd.similarity,1)}`,'⌁',scoreType(nd.entry),'/static/covers/risk.svg')}
+    ${metricCard('A股风险观察',`${highRisk}<small> / ${state.etfs.length}只</small>`,`评分低于55的观察标的数量`,'▥','warning','/static/covers/market.svg')}
+    ${metricCard('90天里程碑',`${Math.round(tasks.length?done/tasks.length*100:0)}<small>%</small>`,`已完成 ${done} 项 / 优先处理 P0`,'✓',done?'good':'','/static/covers/milestone.svg')}
   </div>
   <div class="grid grid-2" style="margin-top:14px">
     <section class="card">${cardHead('策略状态与风险预算','示范曲线仅用于验证仪表盘交互，不是历史净值曲线',tag('ILLUSTRATIVE','warn'))}<div class="card-body"><div class="chart-wrap">${lineChart(curve,'示范净值曲线')}</div><div class="chart-legend"><span><i class="legend-dot" style="background:var(--accent)"></i>演示轨迹</span><span><i class="legend-dot" style="background:#607866"></i>需导入真实净值日志后启用收益统计</span></div><div class="subtle-divider"></div><div class="grid grid-3"><div class="metric-mini"><span>现金目标</span><strong>${pct(globalTargets().find(r=>r.group==='Cash')?.dynamicTarget||17,1)}</strong></div><div class="metric-mini"><span>战略权重合计</span><strong>${pct(sumT,0)}</strong></div><div class="metric-mini"><span>市场风险参考</span><strong>${fmt(marketRisk,0)}/100</strong></div></div></div></section>
@@ -694,6 +737,35 @@ function renderDashboard() {
   <div class="grid grid-2" style="margin-top:14px"><section class="card">${cardHead('新登配置｜现金流优先','账户、技能、健康、AI工具与跨境基础设施')}<div class="card-body"><div class="metric-mini"><span>应急金目标月数</span><strong>${fmt(state.profile.emergencyMonths||6,0)} 个月</strong></div><div class="subtle-divider"></div><p class="rule-explanation">先把应急金、高息债、储蓄率及合规资金路径建立起来，再扩大投资、账户、身份或房产。身份是选择权，不是收藏指标。</p><button class="btn btn-outline" data-action="go-page" data-page="newconfig">打开90天落地 →</button></div></section><section class="card">${cardHead('内容归档与来源','聊天目录 + 原工作簿/代码工具包')}<div class="card-body"><div class="metric-mini"><span>当前可定位的项目聊天</span><strong>${state.chatArchive.length} 个</strong></div><div class="subtle-divider"></div><p class="rule-explanation">可读取的工作簿、ETF程序和策略规则已随网站源码打包。完整逐字聊天记录仍需从原始聊天导出后补齐。</p><button class="btn btn-outline" data-action="go-page" data-page="archive">检查覆盖范围 →</button></div></section></div>`;
 }
 
+function renderDashboard() {
+  const source=document.createElement('div');
+  source.innerHTML=renderDashboardRaw();
+  const head=source.querySelector('.page-head')?.outerHTML||'';
+  const kpis=source.querySelector('.dashboard-kpis')?.outerHTML||'';
+  const grids=[...source.querySelectorAll(':scope > .grid.grid-2')];
+  const overview=grids[0]?.outerHTML||'';
+  const config=grids[1]?.outerHTML||'';
+  const more=`${source.querySelector('.obsidian-link-card')?.outerHTML||''}${grids[2]?.outerHTML||''}`;
+  const status=source.querySelector('.status-strip')?.outerHTML||'';
+  const risk=`${status}${renderMarketActionPanel('risk')}`;
+  const execution=`${renderDetailedEtfActions()}`;
+  return `${head}
+  ${kpis}
+  <div class="dashboard-workbench" data-tab-shell data-tab-key="dashboard" data-default-tab="overview">
+    <div class="fit-tabs dashboard-tabs" data-tabs role="tablist">
+      <button class="fit-tab active" data-tab="overview" role="tab" aria-selected="true">概览</button>
+      <button class="fit-tab" data-tab="risk" role="tab" aria-selected="false">风险</button>
+      <button class="fit-tab" data-tab="config" role="tab" aria-selected="false">配置</button>
+      <button class="fit-tab" data-tab="execution" role="tab" aria-selected="false">执行</button>
+      <button class="fit-tab" data-tab="more" role="tab" aria-selected="false">更多</button>
+    </div>
+    <div class="fit-panel active dashboard-panel" data-tab-panel="overview">${overview}</div>
+    <div class="fit-panel dashboard-panel" data-tab-panel="risk">${risk}</div>
+    <div class="fit-panel dashboard-panel" data-tab-panel="config">${config}</div>
+    <div class="fit-panel dashboard-panel" data-tab-panel="execution">${execution}</div>
+    <div class="fit-panel dashboard-panel" data-tab-panel="more">${more}</div>
+  </div>`;
+}
 function renderAllocation() {
   const mode=ui.allocationMode;
   const rows=mode==='starter' ? state.starterAllocation : globalTargets();
@@ -1941,7 +2013,7 @@ function bindDelegatedEvents() {
     if(a==='alpha-focus-form'){document.getElementById('alphaSignalFormCard')?.scrollIntoView({behavior:'smooth',block:'start'});setTimeout(()=>document.querySelector('#alphaSignalForm input[name=title]')?.focus(),80);return;}
     if(a==='alpha-delete'){const i=n(action.dataset.index,-1);if(i>=0&&state.alphaRadarSignals[i]&&confirm('删除这条 Alpha Radar 信号？')){state.alphaRadarSignals.splice(i,1);await persist({quiet:true});renderPage('alpharadar');toast('信号已删除');}return;}
     if(a==='theme-light'||a==='theme-dark') { const theme=a==='theme-light'?'light':'dark';document.documentElement.dataset.theme=theme;document.body.dataset.theme=theme;try{localStorage.setItem('wealth-os-theme',theme)}catch(_){};$$('.theme-option').forEach(btn=>{const on=btn.dataset.action===a;btn.classList.toggle('selected',on);btn.setAttribute('aria-pressed',on?'true':'false');});toast(theme==='light'?'已切换为浅色主题':'已切换为深色主题');return; }
-    if(a==='watch-filter') { ui.homeWatchScope=action.dataset.scope||'all'; renderPage('home'); return; }
+    if(a==='watch-filter') { ui.homeWatchScope=action.dataset.scope||'all'; renderPage('home',{transition:false,animate:false}); return; }
     if(a==='go-page') return renderPage(action.dataset.page||'home',{autoRefresh:true});
     if(a==='newconfig-anchor') { const target=action.dataset.target||'capability-pyramid'; if(currentPage!=='newconfig') renderPage('newconfig'); setTimeout(()=>document.getElementById(target)?.scrollIntoView({behavior:'smooth',block:'start'}),40); return; }
     if(a==='focus-add-focus') { renderPage(currentPage); setTimeout(()=>$('#focusTaskTitle')?.focus(),0); return; }

@@ -250,5 +250,114 @@
   document.addEventListener('click', () => setTimeout(syncTabs, 0));
   setTimeout(syncTabs, 350);
 
+  /* ---------- button-origin card growth + watchlist drag sort ---------- */
+  let lastPointer = null;
+  document.addEventListener('pointerdown', (e) => {
+    if (!e.isPrimary) return;
+    lastPointer = { x: e.clientX, y: e.clientY };
+  }, { passive: true, capture: true });
+
+  function animateDialogFromPoint(point) {
+    if (!point || !Element.prototype.animate) return;
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+    setTimeout(() => {
+      const dialogs = $$('[role="dialog"]').filter((el) => {
+        const r = el.getBoundingClientRect();
+        const s = getComputedStyle(el);
+        return r.width > 80 && r.height > 80 && s.display !== 'none' && s.visibility !== 'hidden';
+      });
+      const panel = dialogs[dialogs.length - 1];
+      if (!panel || panel.dataset.popAnimated === '1') return;
+      panel.dataset.popAnimated = '1';
+      const rect = panel.getBoundingClientRect();
+      const ox = Math.max(0, Math.min(rect.width, point.x - rect.left));
+      const oy = Math.max(0, Math.min(rect.height, point.y - rect.top));
+      const anim = panel.animate([
+        { transformOrigin: `${ox}px ${oy}px`, transform: 'scale(.3)', opacity: 0 },
+        { transformOrigin: `${ox}px ${oy}px`, transform: 'scale(1.018)', opacity: 1, offset: 0.78 },
+        { transformOrigin: `${ox}px ${oy}px`, transform: 'scale(1)', opacity: 1 }
+      ], { duration: 320, easing: 'cubic-bezier(.22,1,.36,1)' });
+      anim.onfinish = () => { delete panel.dataset.popAnimated; };
+    }, 90);
+  }
+  document.addEventListener('click', (e) => {
+    const action = e.target.closest('[data-action]');
+    if (!action) return;
+    const point = lastPointer || (() => {
+      const r = action.getBoundingClientRect();
+      return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+    })();
+    animateDialogFromPoint(point);
+  }, { capture: true });
+
+  let watchDrag = null;
+  let watchHoldTimer = null;
+  let watchSuppressClick = false;
+  function beginWatchDrag(row, pointerId) {
+    if (!watchDrag) return;
+    watchDrag.active = true;
+    row.classList.add('is-dragging');
+    document.body.classList.add('watch-sorting');
+    try { row.setPointerCapture(pointerId); } catch (_) {}
+  }
+  document.addEventListener('pointerdown', (e) => {
+    if (!e.isPrimary || e.button !== 0) return;
+    const row = e.target.closest('.home-watch .watch-row');
+    if (!row) return;
+    watchDrag = { row, pointerId: e.pointerId, x: e.clientX, y: e.clientY, active: false };
+    const start = () => beginWatchDrag(row, e.pointerId);
+    watchHoldTimer = setTimeout(start, e.pointerType === 'touch' ? 220 : 140);
+  });
+  document.addEventListener('pointermove', (e) => {
+    if (!watchDrag) return;
+    const dx = Math.abs(e.clientX - watchDrag.x);
+    const dy = Math.abs(e.clientY - watchDrag.y);
+    if (!watchDrag.active) {
+      if (e.pointerType === 'mouse' && Math.hypot(dx, dy) > 6) {
+        clearTimeout(watchHoldTimer);
+        beginWatchDrag(watchDrag.row, e.pointerId);
+      } else if (Math.hypot(dx, dy) > 10) {
+        clearTimeout(watchHoldTimer);
+        watchDrag = null;
+        return;
+      }
+      if (!watchDrag || !watchDrag.active) return;
+    }
+    e.preventDefault();
+    const over = document.elementFromPoint(e.clientX, e.clientY)?.closest('.home-watch .watch-row');
+    if (over && over !== watchDrag.row) {
+      const r = over.getBoundingClientRect();
+      if (e.clientY > r.top + r.height / 2) over.after(watchDrag.row);
+      else over.before(watchDrag.row);
+    }
+  }, { passive: false });
+  function endWatchDrag() {
+    clearTimeout(watchHoldTimer);
+    if (!watchDrag) return;
+    const active = watchDrag.active;
+    const row = watchDrag.row;
+    watchDrag = null;
+    if (!active) return;
+    row.classList.remove('is-dragging');
+    document.body.classList.remove('watch-sorting');
+    watchSuppressClick = true;
+    setTimeout(() => { watchSuppressClick = false; }, 420);
+    const order = $$('.home-watch .watch-row').map((el) => el.dataset.watchKey).filter(Boolean);
+    try { localStorage.setItem('wealth-os-watch-order', JSON.stringify(order)); } catch (_) {}
+    if (typeof window.renderPage === 'function') {
+      const y = window.scrollY;
+      window.renderPage('home', { transition: false, animate: false });
+      window.scrollTo(0, y);
+    }
+  }
+  document.addEventListener('pointerup', endWatchDrag);
+  document.addEventListener('pointercancel', endWatchDrag);
+  document.addEventListener('click', (e) => {
+    if (watchSuppressClick && e.target.closest('.home-watch .watch-row')) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  }, true);
+
   document.body.dataset.taste = 'data-terminal';
 })();
