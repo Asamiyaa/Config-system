@@ -1,3 +1,4 @@
+/* finesse · register=product · design-language=apple · apple-mode=app · A=neutral+system-blue · B=system-type · C=content-weighted-grid · D=feedback · E=clean-surface */
 /* ============================================================================
    WEALTH OS · TASTE LAYER
    Direction: data-terminal (dark), seed 1661905713.
@@ -33,47 +34,47 @@
 :root,
 html[data-theme="dark"],
 body[data-theme="dark"] {
-  --ground: #12100d;
-  --surface: #1a1713;
-  --raised: #221e18;
-  --active: #2b251e;
-  --border: #332c23;
-  --rule: #29231c;
-  --control: #4a4034;
-  --text: #f4efe6;
-  --muted: #b8aea0;
-  --faint: #8f8578;
-  --accent: #e07a43;
-  --positive: #9ab47c;
-  --negative: #e07a72;
-  --warning: #d6a65a;
-  --primary: #e07a43;
-  --primary-ink: #1b0f08;
-  --pill-positive-bg: #1e2a1a;
-  --pill-positive-ink: #9bd578;
-  --pill-negative-bg: #2c1a1c;
-  --pill-negative-ink: #ef7c86;
-  --pill-warning-bg: #2b2415;
-  --pill-warning-ink: #e3b45d;
-  --pill-neutral-bg: #1d2119;
-  --pill-neutral-ink: #b9c0b3;
-  --chart-1: #f4efe6;
-  --chart-2: #e07a43;
+  --ground: #000;
+  --surface: #1d1d1f;
+  --raised: #2c2c2e;
+  --active: #3a3a3c;
+  --border: #3a3a3c;
+  --rule: #2c2c2e;
+  --control: #8e8e93;
+  --text: #f5f5f7;
+  --muted: #b3b3b8;
+  --faint: #8e8e93;
+  --accent: #0a84ff;
+  --positive: #30d158;
+  --negative: #ff453a;
+  --warning: #ff9f0a;
+  --primary: #0a84ff;
+  --primary-ink: #fff;
+  --pill-positive-bg: #0f2e1b;
+  --pill-positive-ink: #30d158;
+  --pill-negative-bg: #3a1110;
+  --pill-negative-ink: #ff6961;
+  --pill-warning-bg: #33220a;
+  --pill-warning-ink: #ffb340;
+  --pill-neutral-bg: #2c2c2e;
+  --pill-neutral-ink: #d1d1d6;
+  --chart-1: #f5f5f7;
+  --chart-2: #0a84ff;
   --chart-3: #9ab47c;
   --grid: #3a3127;
   --chart-span: 0.12;
-  --sans: "Public Sans", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
-  --mono: "DM Mono", "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
-  --fs-title: 26px;
+  --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Public Sans", sans-serif;
+  --mono: "DM Mono", "SF Mono", "IBM Plex Mono", ui-monospace, Consolas, monospace;
+  --fs-title: 34px;
   --fs-section: 16px;
   --fs-kpi: 20px;
-  --fs-body: 13.5px;
-  --fs-small: 12px;
-  --radius-card: 12px;
-  --radius-control: 8px;
-  --gap: 24px;
-  --card-pad: 20px;
-  --pad: 32px;
+  --fs-body: 14px;
+  --fs-small: 13px;
+  --radius-card: 18px;
+  --radius-control: 10px;
+  --gap: 26px;
+  --card-pad: 22px;
+  --pad: 38px;
   --nav-row: 34px;
   --control-height: 32px;
   --row-height: 42px;
@@ -86,34 +87,34 @@ body[data-theme="dark"] {
 
 html[data-theme="light"],
 body[data-theme="light"] {
-  --ground: #f2f1ed;
-  --surface: #fdfcf9;
-  --raised: #f5f3ee;
-  --active: #eae6dd;
-  --border: #ddd8cd;
-  --rule: #e8e3d8;
-  --control: #c8c1b5;
-  --text: #1b1814;
-  --muted: #5f574c;
-  --faint: #756c60;
-  --accent: #a94c22;
-  --positive: #4f7452;
-  --negative: #8f2d20;
-  --warning: #9a6b20;
-  --primary: #a94c22;
-  --primary-ink: #fffdf9;
-  --pill-positive-bg: #e6efdd;
-  --pill-positive-ink: #35553a;
-  --pill-negative-bg: #f8e3dc;
-  --pill-negative-ink: #8f2d20;
-  --pill-warning-bg: #f8ecd4;
-  --pill-warning-ink: #7f5719;
-  --pill-neutral-bg: #eee7dc;
-  --pill-neutral-ink: #5f574c;
-  --chart-1: #1c1915;
-  --chart-2: #c25d2c;
-  --chart-3: #4f7452;
-  --grid: #ded3c2;
+  --ground: #f5f5f7;
+  --surface: #fff;
+  --raised: #f5f5f7;
+  --active: #e8e8ed;
+  --border: #e5e5ea;
+  --rule: #f0f0f2;
+  --control: #86868b;
+  --text: #1d1d1f;
+  --muted: #66666b;
+  --faint: #6e6e73;
+  --accent: #0071e3;
+  --positive: #1d8a4b;
+  --negative: #d70015;
+  --warning: #b25000;
+  --primary: #0071e3;
+  --primary-ink: #fff;
+  --pill-positive-bg: #e8f8ed;
+  --pill-positive-ink: #0f6b36;
+  --pill-negative-bg: #ffe8e6;
+  --pill-negative-ink: #a3000f;
+  --pill-warning-bg: #fff4e5;
+  --pill-warning-ink: #8a4b00;
+  --pill-neutral-bg: #f5f5f7;
+  --pill-neutral-ink: #6e6e73;
+  --chart-1: #1d1d1f;
+  --chart-2: #0071e3;
+  --chart-3: #1d8a4b;
+  --grid: #e5e5ea;
   --chart-span: 0.06;
   --sidebar-shadow: 0 8px 24px rgba(40, 30, 20, 0.06);
 }
@@ -126,7 +127,7 @@ body {
   background: var(--ground) !important;
   background-image: none !important;
   color: var(--text);
-  font: 13.5px/20px var(--sans) !important;
+  font: 14px/21px var(--sans) !important;
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
 }
@@ -1496,16 +1497,16 @@ body[data-theme="light"] .sidebar-brand .brand-mark {
 
 /* dark command header, warm body */
 #viewRoot[data-page="dashboard"] > .page-head:has(h1) {
-  background: #1c1915 !important;
-  border-color: #1c1915 !important;
+  background: #1d1d1f !important;
+  border-color: #1d1d1f !important;
   box-shadow: 0 18px 40px rgba(38, 28, 18, .12);
 }
-#viewRoot[data-page="dashboard"] > .page-head:has(h1) h1 { color: #f4efe6 !important; }
-#viewRoot[data-page="dashboard"] > .page-head:has(h1) p { color: #b8aea0 !important; }
+#viewRoot[data-page="dashboard"] > .page-head:has(h1) h1 { color: #f5f5f7 !important; }
+#viewRoot[data-page="dashboard"] > .page-head:has(h1) p { color: #b3b3b8 !important; }
 #viewRoot[data-page="dashboard"] > .page-head:has(h1)::after { border-left-color: rgba(244, 239, 230, .12); }
 #viewRoot[data-page="dashboard"] > .page-head:has(h1) .btn-outline {
   background: transparent !important;
-  color: #f4efe6 !important;
+  color: #f5f5f7 !important;
   border-color: rgba(244, 239, 230, .26) !important;
 }
 #viewRoot[data-page="dashboard"] > .page-head:has(h1) .btn-outline:hover {
@@ -1748,3 +1749,48 @@ body[data-theme="light"] .nav-item[aria-current="page"] { box-shadow: none !impo
 }
 
 #viewRoot[data-hub="health"] .page-cover-media img { object-position: 68% 48%; }
+
+/* apple-design · app mode: system type, larger titles, continuous surfaces */
+#viewRoot > .page-head:has(h1),
+#viewRoot > .home-welcome:has(h1) { border-radius: 20px !important; }
+.page-head h1,
+.home-welcome h1 { font: 600 34px/1.16 var(--sans) !important; letter-spacing: -0.025em !important; }
+.page-head p,
+.home-welcome p { font-size: 14px !important; line-height: 1.55 !important; }
+.home-feature h2 { font-size: 30px !important; line-height: 1.18 !important; letter-spacing: -0.025em !important; }
+.home-feature .feature-value { font-size: 32px !important; line-height: 1.12 !important; }
+.metric-value { font-size: 24px !important; line-height: 1.1 !important; }
+.card { border-radius: var(--radius-card) !important; }
+.btn { border-radius: 12px !important; }
+.btn-primary { border-radius: 980px !important; padding-left: 16px !important; padding-right: 16px !important; }
+@media (max-width: 860px) {
+  .page-head h1, .home-welcome h1 { font-size: 28px !important; }
+  .home-feature h2 { font-size: 25px !important; }
+  .home-feature .feature-value { font-size: 27px !important; }
+}
+
+#viewRoot .recommendation-label { color: #0066cc !important; }
+#viewRoot .hos-step,
+#viewRoot .hos-step * { color: var(--text) !important; }
+#viewRoot .notice-panel,
+#viewRoot .notice-panel * { color: var(--muted) !important; }
+
+@media (prefers-reduced-transparency: reduce) {
+  .sidebar, .right-rail, .mobile-tabbar, .ui-sheet-panel, .taste-palette {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: var(--surface) !important;
+  }
+}
+@media (prefers-contrast: more) {
+  .card, .page-head, .sidebar, .right-rail, .mobile-tabbar { border-color: var(--text) !important; }
+}
+
+/* Apple hairline: panel boundaries stay a whisper */
+#viewRoot .card,
+#viewRoot > .page-head,
+#viewRoot .matrix-card,
+#viewRoot .task-list-card,
+#viewRoot .source-item,
+#viewRoot .notice-panel,
+.sidebar, .right-rail, .mobile-tabbar { border-color: var(--border) !important; }
