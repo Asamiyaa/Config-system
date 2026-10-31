@@ -699,9 +699,10 @@ hr, .subtle-divider { border: 0 !important; border-top: 1px solid var(--border) 
   display: grid !important;
   grid-template-columns: minmax(0, 1.55fr) minmax(300px, 0.82fr) !important;
   gap: 24px !important;
-  align-items: start !important;
+  align-items: stretch !important;
 }
 .home-feature {
+  height: 100%;
   display: flex !important;
   flex-direction: column !important;
   min-height: 300px;
@@ -1538,3 +1539,34 @@ body:has(#authScreen:not(.hidden)) .right-rail { display: none !important; }
 body[data-theme="light"] .nav-item.active,
 body[data-theme="light"] .nav-item[aria-current="page"] { box-shadow: none !important; }
 .app-footer span:first-child { color: var(--muted) !important; }
+
+/* seven-hub second-level navigation */
+.hub-tabs {
+  display: flex; align-items: center; gap: 4px; flex-wrap: wrap;
+  margin: 0 0 20px; padding: 0;
+  border: 0;
+}
+.hub-tab {
+  border: 0; background: transparent; border-radius: 6px;
+  padding: 5px 9px; color: var(--muted); font: 500 11px/1.2 var(--sans);
+  cursor: pointer;
+}
+.hub-tab:hover { color: var(--text); background: var(--raised); }
+.hub-tab.active { color: var(--text); background: var(--active); }
+@media (max-width: 860px) {
+  .hub-tabs { gap: 2px; overflow-x: auto; flex-wrap: nowrap; scrollbar-width: none; }
+  .hub-tabs::-webkit-scrollbar { display: none; }
+  .hub-tab { flex: 0 0 auto; }
+}
+
+.feature-queue { margin-top: 18px; padding-top: 10px; border-top: 1px solid var(--rule); }
+.feature-queue-head { display: flex; justify-content: space-between; color: var(--faint); font: 400 11px/1 var(--mono); letter-spacing: .08em; margin-bottom: 4px; }
+.feature-queue-row { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; border-bottom: 1px solid var(--rule); color: var(--muted); font-size: 11px; }
+.feature-queue-row:last-child { border-bottom: 0; }
+.feature-queue-row span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.feature-queue-row span:last-child { flex: 0 0 auto; font-family: var(--mono); font-size: 11px; }
+
+@media (max-width: 900px) {
+  .task-content-grid .task-list-card { order: 1; }
+  .task-content-grid .task-add-card { order: 2; }
+}

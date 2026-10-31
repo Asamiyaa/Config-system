@@ -152,19 +152,26 @@
     }
     nodes.forEach((n) => { n.nodeValue = n.nodeValue.replace(n.nodeValue.trim(), LABEL_MAP[n.nodeValue.trim()]); });
   }
+  const HUB_OF = {
+    home:'home', today:'today', inbox:'today', schedules:'today', dailyflow:'today', mistakes:'today',
+    calendar:'today', matrix:'today', stats:'today', important:'today', alltasks:'today', flowstats:'today',
+    dashboard:'dashboard', allocation:'dashboard', nasdaq:'dashboard', ashare:'dashboard', execution:'dashboard', alpharadar:'dashboard',
+    health:'health', checkin:'health', diet:'health', fitness:'health', skin:'health', sleep:'health', style:'health',
+    agents:'agents', newconfig:'newconfig', english:'newconfig', reading:'newconfig', archive:'archive'
+  };
   function syncActive() {
     const page = (typeof currentPage !== 'undefined' ? currentPage : '') || '';
+    const hub = HUB_OF[page] || page;
     localizeLabels($('#viewRoot') || document);
     restoreBento();
     $$('#mainNav .nav-item').forEach((item) => {
-      const on = item.dataset.page === page;
+      const on = item.dataset.page === hub;
       item.classList.toggle('active', on);
       if (on) item.setAttribute('aria-current', 'page');
       else item.removeAttribute('aria-current');
     });
-    const healthPages = new Set(['health','checkin','diet','fitness','skin','sleep','style']);
     $$('.mobile-tab[data-page]').forEach((item) => {
-      const on = item.dataset.page === page || (item.dataset.page === 'health' && healthPages.has(page));
+      const on = item.dataset.page === hub;
       item.classList.toggle('active', on);
       if (on) item.setAttribute('aria-current', 'page');
       else item.removeAttribute('aria-current');
@@ -181,9 +188,9 @@
 
   /* ---------- app shell: bottom tab bar + hamburger morph ---------- */
   const MOBILE_TABS = [
-    { page: 'home', label: '首页', icon: 'i-home' },
-    { page: 'schedules', label: '待办', icon: 'i-check' },
-    { page: 'dailyflow', label: '流程', icon: 'i-clock' },
+    { page: 'home', label: '今日', icon: 'i-home' },
+    { page: 'today', label: '执行', icon: 'i-check' },
+    { page: 'dashboard', label: '资产', icon: 'i-shield' },
     { page: 'health', label: '健康', icon: 'i-heart' }
   ];
   function icon(id) {

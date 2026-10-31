@@ -29,7 +29,7 @@ const WORKBOOKS = [
 ];
 function shiftDateKey(key, days) { if(!key) return ''; const d=new Date(`${key}T12:00:00`); d.setDate(d.getDate()+days); return todayKey(d); }
 function dayDiff(start,end) { if(!start||!end) return 0; return Math.round((new Date(`${end}T12:00:00`)-new Date(`${start}T12:00:00`))/86400000); }
-const PAGE_NAMES = {schedules:'待办',agents:'分身',mistakes:'切记',home:'工作台',inbox:'收集箱',upcoming:'未来 7 天',calendar:'周历 / 日程',matrix:'任务四象限',stats:'执行统计',important:'重要事项',alltasks:'全部任务',dashboard:'资产总览',allocation:'全球资产配置',nasdaq:'纳斯达克 AI 策略',ashare:'A股 ETF 轮动',newconfig:'新登',health:'健康',checkin:'打卡与统计',diet:'饮食饮水',fitness:'健身管理',skin:'皮肤护理',sleep:'睡眠与恢复',style:'发型与穿搭',english:'外语',reading:'书单',execution:'每日执行与日志',archive:'归档',dailyflow:'流程',flowstats:'流程统计',alpharadar:'Alpha Radar'};
+const PAGE_NAMES = {schedules:'自动化',agents:'分身',mistakes:'避坑',home:'工作台',inbox:'今日任务',upcoming:'未来 7 天',calendar:'周历 / 日程',matrix:'任务四象限',stats:'执行统计',important:'重要事项',alltasks:'全部任务',dashboard:'资产总览',allocation:'全球资产配置',nasdaq:'纳斯达克 AI 策略',ashare:'A股 ETF 轮动',newconfig:'新登',health:'健康',checkin:'打卡与统计',diet:'饮食饮水',fitness:'健身管理',skin:'皮肤护理',sleep:'睡眠与恢复',style:'发型与穿搭',english:'外语',reading:'书单',execution:'每日执行与日志',archive:'归档',dailyflow:'流程',flowstats:'流程统计',alpharadar:'Alpha Radar'};
 
 async function api(path, options={}) {
   const res = await fetch(path, {credentials:'same-origin', headers:{'Content-Type':'application/json', ...(options.headers||{})}, ...options});
@@ -220,15 +220,38 @@ function cleanPageSections(page, root) {
     }
     return;
   }
-  const keep = {allocation:3,nasdaq:4,ashare:4,execution:3,archive:2,health:3,agents:2,schedules:2,mistakes:2}[page];
+  const keep = {allocation:4,nasdaq:4,ashare:4,execution:4,archive:2,health:3,agents:2,schedules:2,mistakes:2}[page];
   if (!keep) return;
-  const children=[...root.children].filter((el)=>!el.classList.contains('page-head')&&!el.classList.contains('home-welcome'));
+  const children=[...root.children].filter((el)=>!el.classList.contains('page-head')&&!el.classList.contains('home-welcome')&&!el.classList.contains('hub-tabs'));
   if (children.length <= keep) return;
   foldExtras(children.slice(keep),'展开其余内容');
 }
 function setHeader(page) {
-  // Redundant global topbar removed; keep navigation selection only.
-  $$('.nav-item[data-page]').forEach(el=>el.classList.toggle('active',el.dataset.page===page));
+  // Seven hubs own the sidebar; subpages keep the same parent selected.
+  const hub=HUB_OF[page]||page;
+  $$('.nav-item[data-page]').forEach(el=>el.classList.toggle('active',el.dataset.page===hub));
+}
+
+const HUB_OF={
+  home:'home',
+  today:'today',inbox:'today',schedules:'today',dailyflow:'today',mistakes:'today',calendar:'today',matrix:'today',stats:'today',important:'today',alltasks:'today',flowstats:'today',
+  dashboard:'dashboard',allocation:'dashboard',nasdaq:'dashboard',ashare:'dashboard',execution:'dashboard',alpharadar:'dashboard',
+  health:'health',checkin:'health',diet:'health',fitness:'health',skin:'health',sleep:'health',style:'health',
+  agents:'agents',newconfig:'newconfig',english:'newconfig',reading:'newconfig',archive:'archive'
+};
+const HUB_TABS={
+  today:{label:'执行',items:[['today','今日'],['schedules','自动化'],['dailyflow','流程'],['mistakes','避坑'],['calendar','周历'],['stats','统计']]},
+  dashboard:{label:'资产',items:[['dashboard','总览'],['allocation','配置'],['nasdaq','纳指'],['ashare','A股'],['execution','执行'],['alpharadar','实验']]},
+  newconfig:{label:'成长',items:[['newconfig','新登'],['english','外语'],['reading','书单']]},
+  health:{label:'健康',items:[['health','总览'],['checkin','打卡'],['diet','饮食'],['fitness','健身'],['skin','皮肤'],['sleep','睡眠'],['style','穿搭']]}
+};
+function renderHubTabs(page){
+  const hub=HUB_OF[page];
+  if(!hub) return '';
+  const def=HUB_TABS[hub];
+  if(!def) return '';
+  if(page==='dashboard'||page==='health') return '';
+  return `<div class="hub-tabs" role="navigation" aria-label="${esc(def.label)}导航">${def.items.map(([key,label])=>`<button class="hub-tab ${key===page?'active':''}" data-action="go-page" data-page="${key}" aria-current="${key===page?'page':'false'}">${label}</button>`).join('')}</div>`;
 }
 
 function renderPage(page, {autoRefresh=false, transition=true, animate=true}={}) {  if (!state) return;
@@ -236,7 +259,7 @@ function renderPage(page, {autoRefresh=false, transition=true, animate=true}={})
   setHeader(page);
   const root=$('#viewRoot');
   root.dataset.page=page;
-  const map={schedules:renderSchedules,agents:renderAgents,mistakes:renderMistakes,home:renderHome,inbox:renderInbox,upcoming:renderUpcoming,calendar:renderCalendar,matrix:renderMatrix,stats:renderFocusStats,important:renderImportant,alltasks:renderAllFocusTasks,dashboard:renderDashboard,allocation:renderAllocation,nasdaq:renderNasdaq,ashare:renderAshare,newconfig:()=> (typeof renderNewConfigV2==='function'?renderNewConfigV2():renderNewConfig()),health:renderHealth,checkin:renderHealthCheckin,diet:()=>renderHealthSection('diet'),fitness:()=>renderHealthSection('fitness'),skin:()=>renderHealthSection('skin'),sleep:()=>renderHealthSection('sleep'),style:()=>renderHealthSection('style'),english:()=> (typeof renderEnglishV2==='function'?renderEnglishV2():renderEnglish()),reading:()=> (typeof renderReadingV2==='function'?renderReadingV2():renderReading()),execution:renderExecution,archive:renderArchive,dailyflow:renderDailyFlow,flowstats:renderFlowStats,alpharadar:renderAlphaRadar};
+  const map={today:()=>renderTaskWorkspace('home'),schedules:renderSchedules,agents:renderAgents,mistakes:renderMistakes,home:renderHome,inbox:renderInbox,upcoming:renderUpcoming,calendar:renderCalendar,matrix:renderMatrix,stats:renderFocusStats,important:renderImportant,alltasks:renderAllFocusTasks,dashboard:renderDashboard,allocation:renderAllocation,nasdaq:renderNasdaq,ashare:renderAshare,newconfig:()=> (typeof renderNewConfigV2==='function'?renderNewConfigV2():renderNewConfig()),health:renderHealth,checkin:renderHealthCheckin,diet:()=>renderHealthSection('diet'),fitness:()=>renderHealthSection('fitness'),skin:()=>renderHealthSection('skin'),sleep:()=>renderHealthSection('sleep'),style:()=>renderHealthSection('style'),english:()=> (typeof renderEnglishV2==='function'?renderEnglishV2():renderEnglish()),reading:()=> (typeof renderReadingV2==='function'?renderReadingV2():renderReading()),execution:renderExecution,archive:renderArchive,dailyflow:renderDailyFlow,flowstats:renderFlowStats,alpharadar:renderAlphaRadar};
   const investingPages=['dashboard','allocation','nasdaq','ashare','execution'];
   const body=(map[page]||renderHome)();
   const commit = () => {
@@ -247,6 +270,12 @@ function renderPage(page, {autoRefresh=false, transition=true, animate=true}={})
       const panel=`<details class="page-fold market-fold"><summary><span>展开数据可信度与市场建议</span><small>REFRESH / CONFIDENCE</small></summary><div class="page-fold-body">${marketPanel}</div></details>`;
       if (head) head.insertAdjacentHTML('afterend', panel);
       else root.insertAdjacentHTML('afterbegin', panel);
+    }
+    const hubTabs=renderHubTabs(page);
+    if (hubTabs) {
+      const head=root.querySelector('.page-head');
+      if (head) head.insertAdjacentHTML('afterend',hubTabs);
+      else root.insertAdjacentHTML('afterbegin',hubTabs);
     }
     updateFocusCounts();
     closeSidebar();
@@ -444,7 +473,7 @@ function openFocusTaskEditor(task) {
   setTimeout(()=>$('#focusEditName')?.focus(),0);
 }
 function renderTaskWorkspace(view) {
-  const title={home:'今日任务',inbox:'收集箱',upcoming:'未来 7 天',important:'重要事项',alltasks:'全部任务'}[view]||'任务';
+  const title={home:'今日任务',inbox:'今日任务',upcoming:'未来 7 天',important:'重要事项',alltasks:'全部任务'}[view]||'任务';
   const subtitle={home:'把投资研究、系统建设和个人成长拆成今天可以完成的动作。',inbox:'先快速收集，再分配模块、优先级和日期。',upcoming:'提前看一周任务，避免资产复盘和长期建设互相挤占。',important:'优先处理高优先级、明确风险或合规依赖的事项。',alltasks:'搜索、完成、标记重点或清理所有工作项。'}[view]||'';
   const open=focusTaskFilter(view).filter(t=>!t.done).length;
   return `${sectionHead('TICKFLOW · TASK MANAGEMENT',title,subtitle,`<button class="btn btn-outline" data-action="go-page" data-page="home">⌂ 今日</button><button class="btn btn-primary" data-action="focus-add-focus">＋ 添加任务</button>`)}
@@ -520,6 +549,19 @@ function renderFocusStats() {
 }
 function renderAttentionCards() {
   const nd=state.nasdaq||{}, targets=globalTargets(), cash=targets.find(r=>r.group==='Cash')?.dynamicTarget||state.profile.cashTarget||17;
+  const today=todayKey();
+  const todayRows=focusTaskFilter('home').filter(t=>!t.done);
+  const overdue=todayRows.filter(t=>t.dueDate&&t.dueDate<today).length;
+  const dueToday=todayRows.filter(t=>t.dueDate===today).length;
+  const priorityRank={高:0,中:1,低:2};
+  const lead=[...todayRows].sort((a,b)=>{
+    const ao=a.dueDate&&a.dueDate<today?0:1, bo=b.dueDate&&b.dueDate<today?0:1;
+    return ao-bo || (priorityRank[a.priority]??3)-(priorityRank[b.priority]??3) || String(a.dueDate||'9999').localeCompare(String(b.dueDate||'9999')) || String(a.sortOrder||0).localeCompare(String(b.sortOrder||0));
+  })[0];
+  const remaining=[...todayRows].filter(t=>t!==lead).sort((a,b)=>{
+    const ao=a.dueDate&&a.dueDate<today?0:1, bo=b.dueDate&&b.dueDate<today?0:1;
+    return ao-bo || (priorityRank[a.priority]??3)-(priorityRank[b.priority]??3) || String(a.dueDate||'9999').localeCompare(String(b.dueDate||'9999'));
+  }).slice(0,3);
   const done=(state.tasks||[]).filter(t=>t.status==='已完成').length, roadmap=state.tasks||[];
   const top=[...(state.etfs||[])].sort((a,b)=>n(b.score)-n(a.score)).slice(0,1)[0];
   const weak=(state.etfs||[]).filter(e=>n(e.score)<55).length;
@@ -529,44 +571,43 @@ function renderAttentionCards() {
     {icon:'◉',key:'GLOBAL ALLOCATION',scope:'market',title:'全球资产配置',value:`现金目标 ${fmt(cash,1)}%`,status:state.profile.riskOverlay||'Caution',tone:(state.profile.riskOverlay||'Caution')==='Caution'?'warn':'good',desc:'先核对真实持仓、应急金与负债；比较动态目标和实际比例差额。',page:'allocation',cta:'查看配置'},
     {icon:'⌁',key:'NASDAQ / AI RISK',scope:'market',title:'纳指风险与入场',value:`配置 ${fmt(nd.entry,1)} · 泡沫 ${fmt(nd.bubble,1)}`,status:leverage?'通过部分闸门':'默认不加杠杆',tone:n(nd.bubble)>=55?'warn':'good',desc:'盯住 2000 相似度、AI CapEx/FCF、VIX、10Y、趋势与回撤触发；Core 不做波段。',page:'nasdaq',cta:'查看纳指策略'},
     {icon:'▥',key:'A-SHARE ETF ROTATION',scope:'market',title:'A 股 ETF 轮动',value:`${state.etfs?.length||0} 只观察 · ${weak} 只低于55分`,status:top?`领先 ${top.code} / ${fmt(top.score,1)}分`:'待更新',tone:weak?'warn':'good',desc:'复核 MA20/MA60、评分质量、市场广度和风险组上限。',page:'ashare',cta:'查看 ETF 池'},
-    {icon:'↗',key:'90-DAY BUILD',scope:'exec',title:'新登配置 / 90 天',value:`${done}/${roadmap.length} 项路线图完成`,status:p0?'优先处理 P0':'节奏正常',tone:p0?'warn':'good',desc:'优先现金流与应急金、合规资金路径、低成本核心资产，再扩展账户/身份。',page:'newconfig',cta:'打开路线图'},
+    {icon:'↗',key:'90-DAY BUILD',scope:'exec',title:'新登 90 天项目',value:`${done}/${roadmap.length} 个里程碑完成`,status:p0?'下一里程碑待推进':'项目节奏正常',tone:p0?'warn':'good',desc:'这是项目进度，不计入“今天”的任务账；今天要做什么以左侧主卡为准。',page:'newconfig',cta:'打开项目路线'},
     {icon:'◎',key:'GLOBAL OPTIONALITY',scope:'exec',title:'跨境 / AI 订阅 / 技能',value:`AI 月费 ${money(state.profile.aiMonthlyCost||0)}`,status:'先核验收益与合规',tone:'neutral',desc:'跟踪全球银行/券商、保险、居留/签证、公司与房产的真实用途及维护成本。',page:'newconfig',cta:'查看基础设施'}
   ];
-  if(!ui.homeWatchScope) ui.homeWatchScope='all';
-  const scope=ui.homeWatchScope;
-  const scoped=scope==='all'?cards:cards.filter(c=>c.scope===scope);
-  // Content-driven lead: the filtered view chooses its own most urgent item.
-  const leadKey = scope==='market'
-    ? (weak?'A-SHARE ETF ROTATION':n(nd.bubble)>=55?'NASDAQ / AI RISK':'GLOBAL ALLOCATION')
-    : scope==='exec'
-      ? (p0?'90-DAY BUILD':'GLOBAL OPTIONALITY')
-      : (p0?'90-DAY BUILD':weak?'A-SHARE ETF ROTATION':n(nd.bubble)>=55?'NASDAQ / AI RISK':'GLOBAL ALLOCATION');
-  const lead=scoped.find(c=>c.key===leadKey)||scoped[0];
   let watchOrder=[];
   try { watchOrder=JSON.parse(localStorage.getItem('wealth-os-watch-order')||'[]'); } catch(_) {}
-  const rest=scoped.filter(c=>c!==lead).sort((a,b)=>{
+  const rest=[...cards].sort((a,b)=>{
     const ia=watchOrder.indexOf(a.key), ib=watchOrder.indexOf(b.key);
     return (ia<0?999:ia)-(ib<0?999:ib);
   });
-  const scopeLabel={all:'全部',market:'市场',exec:'执行'};
-  return `<div class="attention-section-head"><div><div class="eyebrow">WEALTH OS · WATCHLIST</div><h2>关注点</h2><p>首页不只列任务，也把必须持续检查的市场、合规与长期建设事项放在同一处。</p></div>
-  <div class="attention-tools"><div class="watch-filter" role="group" aria-label="关注范围">${['all','market','exec'].map(k=>`<button class="${scope===k?'active':''}" data-action="watch-filter" data-scope="${k}" aria-pressed="${scope===k}">${scopeLabel[k]} <span>${String(k==='all'?cards.length:cards.filter(c=>c.scope===k).length).padStart(2,'0')}</span></button>`).join('')}</div><button class="btn btn-quiet" data-action="go-page" data-page="dashboard">完整资产总览 →</button></div></div>
+  const dueText=!lead?'':lead.dueDate?(lead.dueDate<today?`逾期 ${Math.max(1,Math.round((new Date(today)-new Date(lead.dueDate))/86400000))} 天`:lead.dueDate===today?'今天到期':`截止 ${lead.dueDate}`):'未排期';
+  const leadTone=lead&&lead.dueDate&&lead.dueDate<today?'warn':'good';
+  const leadBlock=lead?`
+      <div class="feature-kicker"><span>今天先做</span><span>01 / ${String(todayRows.length).padStart(2,'0')}</span></div>
+      <h2>${esc(lead.title)}</h2>
+      <div class="feature-value">${overdue} 件逾期 · ${dueToday} 件今天到期</div>
+      <div class="feature-status"><span class="attention-status ${leadTone}">${esc(lead.project||'任务')}</span><span class="feature-source">${dueText}</span></div>
+      <p class="feature-desc">${esc(lead.note||'先完成这一件，再处理其余关注；不要把项目进度当成今天的任务。')}</p>
+      ${remaining.length?`<div class="feature-queue"><div class="feature-queue-head"><span>接下来</span><span>${String(remaining.length).padStart(2,'0')}</span></div>${remaining.map(t=>`<div class="feature-queue-row"><span>${esc(t.title)}</span><span>${t.dueDate||'未排期'}</span></div>`).join('')}</div>`:''}
+      <button class="feature-link" data-action="go-page" data-page="today">打开执行清单 <span>↗</span></button>`:`
+      <div class="feature-kicker"><span>今天先做</span><span>00 / 00</span></div>
+      <h2>今天还没有任务</h2>
+      <div class="feature-value">从第一件开始</div>
+      <div class="feature-status"><span class="attention-status good">执行 · 空清单</span><span class="feature-source">今天</span></div>
+      <p class="feature-desc">先添加第一件今天要做的事；也可以从 90 天项目里挑一个最小动作。</p>
+      <button class="feature-link" data-action="go-page" data-page="today">打开执行清单 <span>↗</span></button>`;
+  return `<div class="attention-section-head"><div><div class="eyebrow">WEALTH OS · TODAY</div><h2>关注点</h2><p>先做一件今天的事；市场与项目状态放在右侧索引，不再和“今天”混在一起。</p></div>
+  <div class="attention-tools"><button class="btn btn-quiet" data-action="go-page" data-page="today">全部任务 →</button><button class="btn btn-quiet" data-action="go-page" data-page="dashboard">资产总览 →</button></div></div>
   <div class="home-editorial">
-    <article class="home-feature tone-${lead.tone}">
-      <div class="feature-kicker"><span>今日判断</span><span>01 / ${String(scoped.length).padStart(2,'0')}</span></div>
-      <h2>${lead.title}</h2>
-      <div class="feature-value">${lead.value}</div>
-      <div class="feature-status"><span class="attention-status ${lead.tone}">${esc(lead.status)}</span><span class="feature-source">基于当前数据</span></div>
-      <p class="feature-desc">${lead.desc}</p>
-      <button class="feature-link" data-action="go-page" data-page="${lead.page}">${lead.cta} <span>↗</span></button>
+    <article class="home-feature tone-${leadTone}">
+      ${leadBlock}
     </article>
     <aside class="home-watch">
-      <div class="watch-head"><span>其余关注</span><span>${String(rest.length).padStart(2,'0')}</span></div>
-      ${rest.map((c,i)=>`<button class="watch-row" data-action="go-page" data-page="${c.page}" data-watch-key="${esc(c.key)}" draggable="false"><span class="watch-index">${String(i+2).padStart(2,'0')}</span><span class="watch-copy"><b>${c.title}</b><small>${c.value}</small></span><span class="watch-status"><i class="attention-light ${c.tone}"></i>${esc(c.status)}</span><span class="watch-arrow">↗</span></button>`).join('')}
+      <div class="watch-head"><span>状态索引</span><span>${String(rest.length).padStart(2,'0')}</span></div>
+      ${rest.map((c,i)=>`<button class="watch-row" data-action="go-page" data-page="${c.page}" data-watch-key="${esc(c.key)}" draggable="false"><span class="watch-index">${String(i+1).padStart(2,'0')}</span><span class="watch-copy"><b>${c.title}</b><small>${c.value}</small></span><span class="watch-status"><i class="attention-light ${c.tone}"></i>${esc(c.status)}</span><span class="watch-arrow">↗</span></button>`).join('')}
     </aside>
   </div>`;
 }
-
 const AGENT_DEFS = [
  {id:'work',name:'工作分身',role:'计划 · 任务 · 项目推进',icon:'◈',page:'home',energy:22,image:'/static/agents/work.png',accent:'#8cb8ff',meaning:'推进力',balance:'把目标拆成今天可完成的动作，但不让工作吞掉恢复。',risk:'失衡信号：所有时间都被工作占满。'},
  {id:'invest',name:'投资分身',role:'行情 · 风险 · 资产配置',icon:'↗',page:'dashboard',energy:24,image:'/static/agents/invest.png',accent:'#b9ef73',meaning:'风险预算',balance:'先活着，再复利；收益焦虑不能绑架生活节奏。',risk:'失衡信号：频繁看盘、追涨、加杠杆。'},
@@ -624,7 +665,7 @@ function renderAgents(){
 
 
 function renderMistakes(){
- return `${sectionHead('REVIEW / LESSONS','切记','独立记录曾经犯过的错误、错过的机会与复盘资料。每天回看关键条目，减少重复犯错。','')}
+ return `${sectionHead('REVIEW / LESSONS','避坑','独立记录曾经犯过的错误、错过的机会与复盘资料。每天回看关键条目，减少重复犯错。','')}
  <section class="card daily-mustread-card"><div class="card-head"><div><h3>每日必读 · 错误与错过清单</h3><p>把曾经犯过的错误、错过的机会和复盘资料保存为标题 + URL，每天回看，避免重复付学费。</p></div><span class="tag neutral">${(state.dailyMustReads||[]).length} 条</span></div><form id="mustReadForm" class="mustread-form"><input name="title" required placeholder="标题：例如忽视止损条件 / 错过的机会复盘"><input name="url" type="url" required placeholder="https://... 链接地址"><input name="note" placeholder="一句话提醒（可选）"><button class="btn btn-primary" type="button" data-action="add-mustread">＋ 添加必读</button></form><div class="mustread-list">${(state.dailyMustReads||[]).map((x,i)=>`<article class="mustread-item"><span class="mustread-check">◎</span><div><a href="${esc(x.url)}" target="_blank" rel="noopener noreferrer">${esc(x.title)}</a><p>${esc(x.note||'每日复盘时打开，检查是否再次出现同类风险。')}</p><small>加入于 ${esc(x.created||'')}</small></div><button class="btn btn-small btn-ghost" data-action="delete-mustread" data-index="${i}">删除</button></article>`).join('')||'<div class="empty-state">还没有必读条目。建议先添加最重要的 3 条历史错误或错过复盘。</div>'}</div></section>`;
 }
 
@@ -635,7 +676,7 @@ function personalVaultCard(){
 }
 function renderSchedules(){
  const jobs=scheduleJobsCache;
- return `${sectionHead('AUTOMATION / DAILY DATA PIPELINE','待办','自定义执行时间、频率、任务内容与每日 Excel 归档。默认任务会拉取公开行情、追加数据快照并保存历史副本；数据源失败时保留空值，不伪造数据。',`<button class="btn btn-outline" data-action="schedule-refresh">刷新任务状态</button>`)}
+ return `${sectionHead('AUTOMATION / DAILY DATA PIPELINE','自动化','自定义执行时间、频率、任务内容与每日 Excel 归档。默认任务会拉取公开行情、追加数据快照并保存历史副本；数据源失败时保留空值，不伪造数据。',`<button class="btn btn-outline" data-action="schedule-refresh">刷新任务状态</button>`)}
  <section class="card schedule-intro"><div class="card-head"><div><h3>第一条任务：全球配置 + 纳斯达克 + A股数据预热</h3><p>在你进入投资页面前，先尽可能准备好公开行情、计算字段和 Excel 历史文件。</p></div><span class="tag good">已预置</span></div><div class="schedule-kpis"><div><small>执行频率</small><strong>每日</strong></div><div><small>默认时间</small><strong>07:30</strong></div><div><small>数据原则</small><strong>不造数</strong></div><div><small>历史归档</small><strong>按日保存</strong></div></div><p class="schedule-note">注意：日线行情以数据源最近可得交易日为准，不保证盘中实时；宏观、估值、财报和人工评分若无可靠来源则保持空白。Excel 原始模板不会被覆盖，归档写入副本。</p></section>
  <section class="card" style="margin-top:14px"><div class="card-head"><div><h3>任务列表</h3><p>可以新增、编辑、启用/暂停或立即执行。</p></div><button class="btn btn-primary" data-action="schedule-new">＋ 新建定时任务</button></div><div class="table-wrap"><table class="data-table"><thead><tr><th>任务</th><th>频率</th><th>时间</th><th>状态</th><th>上次执行</th><th>操作</th></tr></thead><tbody>${jobs.map(j=>`<tr><td><strong>${esc(j.name)}</strong><div class="table-sub">${esc(j.description||'')}</div></td><td>${esc(j.frequency||'daily')}</td><td>${esc(j.time||'07:30')}</td><td><span class="tag ${j.enabled?'good':'neutral'}">${j.enabled?'启用':'暂停'}</span></td><td>${esc(j.lastRun||'尚未执行')}</td><td><div class="button-row"><button class="btn btn-small btn-outline" data-action="schedule-edit" data-id="${esc(j.id)}">编辑</button><button class="btn btn-small btn-outline" data-action="schedule-run" data-id="${esc(j.id)}">立即运行</button><button class="btn btn-small btn-quiet" data-action="schedule-toggle" data-id="${esc(j.id)}">${j.enabled?'暂停':'启用'}</button></div></td></tr>`).join('')||'<tr><td colspan="6">暂无定时任务</td></tr>'}</tbody></table></div></section>
  
@@ -735,7 +776,7 @@ function renderDashboardRaw() {
     ${metricCard('组合规模（示范值）',`<span>${money(state.profile.portfolioValue||100000)}</span>`,`<span class="warning">非真实账户净值 · 请录入</span>`,'◫','','/static/img/desk.jpg')}
     ${metricCard('纳指配置分',`${fmt(nd.entry,1)}<small>/100</small>`,`AI泡沫 ${fmt(nd.bubble,1)} · 2000相似度 ${fmt(nd.similarity,1)}`,'⌁',scoreType(nd.entry),'/static/covers/risk.svg')}
     ${metricCard('A股风险观察',`${highRisk}<small> / ${state.etfs.length}只</small>`,`评分低于55的观察标的数量`,'▥','warning','/static/covers/market.svg')}
-    ${metricCard('90天里程碑',`${Math.round(tasks.length?done/tasks.length*100:0)}<small>%</small>`,`已完成 ${done} 项 / 优先处理 P0`,'✓',done?'good':'','/static/covers/milestone.svg')}
+    ${metricCard('90 天项目进度',`${Math.round(tasks.length?done/tasks.length*100:0)}<small>%</small>`,`已完成 ${done} 项 / 优先处理 P0`,'✓',done?'good':'','/static/covers/milestone.svg')}
   </div>
   <div class="grid grid-2" style="margin-top:14px">
     <section class="card">${cardHead('策略状态与风险预算','示范曲线仅用于验证仪表盘交互，不是历史净值曲线',tag('ILLUSTRATIVE','warn'))}<div class="card-body"><div class="chart-wrap">${lineChart(curve,'示范净值曲线')}</div><div class="chart-legend"><span><i class="legend-dot" style="background:var(--accent)"></i>演示轨迹</span><span><i class="legend-dot" style="background:#607866"></i>需导入真实净值日志后启用收益统计</span></div><div class="subtle-divider"></div><div class="grid grid-3"><div class="metric-mini"><span>现金目标</span><strong>${pct(globalTargets().find(r=>r.group==='Cash')?.dynamicTarget||17,1)}</strong></div><div class="metric-mini"><span>战略权重合计</span><strong>${pct(sumT,0)}</strong></div><div class="metric-mini"><span>市场风险参考</span><strong>${fmt(marketRisk,0)}/100</strong></div></div></div></section>
@@ -1256,7 +1297,7 @@ function renderNewConfig() {
     ${renderCapabilityQuickNav()}
     <div class="workbook-inline-note"><strong>新登配置原始 Excel</strong><span>查看完整的个人资产台账、90 天路线图、跨境基础设施、每周跟踪与 AI 订阅 ROI。</span><button class="btn btn-small btn-outline" data-action="open-workbook" data-workbook-id="newconfig-90d">预览新登配置 Excel ↗</button></div>
     ${renderCapabilityPyramid()}
-    <div class="grid grid-4">${metricCard('90天任务',`${done}/${tasks.length}`,'完成任务需留存可验证证据','✓')}${metricCard('应急金目标',money(emergencyTarget),'必要月支出 × 应急月数（应急金独立于投资组合）','◫')}${metricCard('应急金缺口',money(gap),gap>0?'先补安全垫，再扩大风险仓':'参考目标已覆盖','⌁',gap>0?'warning':'good')}${metricCard('当前储蓄/投资率',pct(rate,1),`目标 ${pct(n(p.savingsRateTarget,20),0)}；收入未录入时显示0`,'↗')}</div>
+    <div class="grid grid-4">${metricCard('90 天里程碑',`${done}/${tasks.length}`,'完成任务需留存可验证证据','✓')}${metricCard('应急金目标',money(emergencyTarget),'必要月支出 × 应急月数（应急金独立于投资组合）','◫')}${metricCard('应急金缺口',money(gap),gap>0?'先补安全垫，再扩大风险仓':'参考目标已覆盖','⌁',gap>0?'warning':'good')}${metricCard('当前储蓄/投资率',pct(rate,1),`目标 ${pct(n(p.savingsRateTarget,20),0)}；收入未录入时显示0`,'↗')}</div>
     <div class="grid grid-2" style="margin-top:14px"><section class="card">${cardHead('个人现金流与执行参数','可编辑默认目标；录入真实数据之后仪表盘会重新计算')}<div class="card-body"><div class="input-grid"><div class="field"><label>税后月收入（元）</label><input type="number" min="0" data-profile="monthlyIncome" value="${n(p.monthlyIncome)}" /></div><div class="field"><label>必要月支出（元）</label><input type="number" min="0" data-profile="necessaryExpense" value="${n(p.necessaryExpense)}" /></div><div class="field"><label>每月计划投资/储蓄额（元）</label><input type="number" min="0" data-profile="monthlyInvest" value="${n(p.monthlyInvest)}" /></div><div class="field"><label>当前负债余额（元）</label><input type="number" min="0" data-profile="currentDebt" value="${n(p.currentDebt)}" /></div><div class="field"><label>应急金现金余额（元）</label><input type="number" min="0" data-profile="emergencyCash" value="${n(p.emergencyCash)}" /></div><div class="field"><label>应急月数目标</label><select data-profile="emergencyMonths"><option value="6" ${n(p.emergencyMonths,6)===6?'selected':''}>6个月</option><option value="9" ${n(p.emergencyMonths,6)===9?'selected':''}>9个月</option><option value="12" ${n(p.emergencyMonths,6)===12?'selected':''}>12个月</option></select></div><div class="field"><label>储蓄/投资率目标（%）</label><input type="number" min="0" max="100" data-profile="savingsRateTarget" value="${n(p.savingsRateTarget,20)}" /></div><div class="field"><label>AI订阅成本合计/月（元）</label><input type="number" min="0" data-profile="aiMonthlyCost" value="${n(p.aiMonthlyCost)}" /></div><div class="field"><label>当前粉丝数</label><input type="number" min="0" data-profile="followers" value="${n(p.followers)}" /></div><div class="field"><label>近12周副业收入（元）</label><input type="number" min="0" data-profile="sideIncome12w" value="${n(p.sideIncome12w)}" /></div><div class="field"><label>近12周执行均分</label><input type="number" min="0" max="100" data-profile="executionScore" value="${n(p.executionScore)}" /></div></div><div class="subtle-divider"></div><p class="rule-explanation">先稳现金流、应急金与高息债；投资资产与应急金分开。VOO/QQQ是全球宽基上的倾斜，不代表额外分散；BTC目标默认0%，境内数字资产与跨境资金需逐项做法域与渠道核验。</p></div></section>
 </div>
     <section class="card" id="roadmap-section" style="margin-top:14px">${cardHead('90天行动路线图','按顺序执行；状态、证据和退出条件必须能持续跟踪',`<span class="tag ${done===tasks.length?'good':'neutral'}">完成 ${done}/${tasks.length}</span>`)}<div class="table-wrap"><table class="data-table"><thead><tr><th>阶段</th><th>任务</th><th>具体动作</th><th>完成证据</th><th>优先级</th><th>状态</th><th>退出/复盘标准</th></tr></thead><tbody>${tasks.map((t,i)=>`<tr><td>${esc(t.phase)}</td><td><div class="table-main">${esc(t.task)}</div></td><td class="table-sub">${esc(t.action)}${String(t.task||'').includes('英语')?`<div class="roadmap-nested-menu"><span>英语 · 二级菜单</span><a href="https://typewords.cc/" target="_blank" rel="noopener noreferrer">TypeWords：单词与文章练习 ↗</a></div>`:''}</td><td class="table-sub">${esc(t.evidence)}</td><td>${tag(t.priority,t.priority==='P0'?'warn':'neutral')}</td><td><select class="table-select" data-task-status="${i}">${['未开始','进行中','已完成','阻塞','暂缓'].map(s=>`<option ${t.status===s?'selected':''}>${s}</option>`).join('')}</select></td><td class="table-sub">${esc(t.exit)}</td></tr>`).join('')}</tbody></table></div></section>
