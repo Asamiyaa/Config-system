@@ -29,7 +29,7 @@
 
 - 原方向给的是 50px 图标 rail；
 - 本项目有 11 个一级目的地，中文标签需要可读；
-- 因此保留 **232px labelled sidebar**，仍保持 data-terminal 的 1px accent selection line、dark neutral ground、mono figures 与 density。
+- 因此保留 **232px labelled sidebar**，现在是离边缘 12px 的悬浮岛式卡片；仍保持 data-terminal 的 1px accent selection line、dark neutral ground、mono figures 与 density。
 
 ## 视觉系统
 
