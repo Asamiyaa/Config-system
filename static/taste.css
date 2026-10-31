@@ -1713,3 +1713,7 @@ body[data-theme="light"] .nav-item[aria-current="page"] { box-shadow: none !impo
 @media (prefers-reduced-motion: reduce) {
   .agent-balance-stage { transition: none !important; }
 }
+
+@media (max-width: 860px) {
+  .agent-balance-stage.is-depth { transform: none !important; }
+}
