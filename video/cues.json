@@ -1,0 +1,55 @@
+{
+  "fps": 30,
+  "duration": 10.0,
+  "frames": 300,
+  "width": 1920,
+  "height": 1080,
+  "events": [
+    {
+      "frame": 0,
+      "kind": "intro",
+      "label": "WEALTH OS",
+      "title": "私人操作系统",
+      "sub": "资产 / 健康 / 流程 / 学习",
+      "index": "00"
+    },
+    {
+      "frame": 42,
+      "kind": "screen",
+      "screen": "home",
+      "index": "01",
+      "label": "WORKBENCH",
+      "title": "工作台",
+      "line1": "把资产、健康、流程和学习",
+      "line2": "收进同一个工作台"
+    },
+    {
+      "frame": 120,
+      "kind": "screen",
+      "screen": "health",
+      "index": "02",
+      "label": "HEALTH",
+      "title": "健康",
+      "line1": "先看身体，再看数字",
+      "line2": "睡眠、饮食、训练与恢复"
+    },
+    {
+      "frame": 198,
+      "kind": "screen",
+      "screen": "newconfig",
+      "index": "03",
+      "label": "NEXT",
+      "title": "新登",
+      "line1": "把判断，变成下一步",
+      "line2": "从资产标签到真实选择权"
+    },
+    {
+      "frame": 264,
+      "kind": "outro",
+      "label": "WEALTH OS",
+      "title": "一个系统，全部上下文",
+      "sub": "11 MODULES / 6 AGENTS / 1 LEDGER",
+      "index": "04"
+    }
+  ]
+}

@@ -1,0 +1,476 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920, initial-scale=1">
+<title>Wealth OS · Product Reel</title>
+<style>
+  @font-face {
+    font-family: "Public Sans";
+    src: url("/static/fonts/public-sans.woff2") format("woff2");
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: block;
+  }
+  @font-face {
+    font-family: "DM Mono";
+    src: url("/static/fonts/dm-mono-400.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+    font-display: block;
+  }
+  @font-face {
+    font-family: "DM Mono";
+    src: url("/static/fonts/dm-mono-500.woff2") format("woff2");
+    font-weight: 500;
+    font-style: normal;
+    font-display: block;
+  }
+
+  :root {
+    --ground: #0d0d0f;
+    --surface: #131217;
+    --raised: #1d1c20;
+    --line: #29292c;
+    --line-bright: #3a3a3e;
+    --text: #ffffff;
+    --muted: #b4b6ba;
+    --faint: #85878d;
+    --accent: #4a8ad6;
+    --sans: "Public Sans", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+    --mono: "DM Mono", "SFMono-Regular", Consolas, monospace;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--ground); }
+  body { color: var(--text); font-family: var(--sans); -webkit-font-smoothing: antialiased; }
+
+  #stage {
+    position: relative;
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    background: var(--ground);
+    isolation: isolate;
+  }
+
+  .shot {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    will-change: opacity, transform;
+  }
+  .shot img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+    display: block;
+    transform-origin: 50% 45%;
+  }
+  .shot::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(10, 10, 12, 0.12);
+    pointer-events: none;
+  }
+
+  #scrim {
+    position: absolute;
+    inset: 0;
+    background: rgba(10, 10, 12, 0.72);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  #topbar { display: none; }
+
+  #intro {
+    position: absolute;
+    left: 120px;
+    top: 190px;
+    width: 900px;
+    z-index: 10;
+    opacity: 0;
+  }
+  #intro .eyebrow,
+  #outro .eyebrow,
+  #caption .eyebrow {
+    color: var(--accent);
+    font: 500 11px/1 var(--mono);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  #intro h1 {
+    margin: 26px 0 0;
+    font: 600 96px/0.96 var(--sans);
+    letter-spacing: -0.045em;
+  }
+  #intro h1 em {
+    display: block;
+    margin-top: 16px;
+    color: var(--muted);
+    font: 400 30px/1.35 var(--sans);
+    letter-spacing: -0.01em;
+    font-style: normal;
+  }
+  #intro .meta {
+    margin-top: 44px;
+    display: flex;
+    gap: 28px;
+    color: var(--faint);
+    font: 400 12px/1 var(--mono);
+    letter-spacing: 0.06em;
+  }
+  #intro .mark {
+    width: 96px;
+    height: 3px;
+    background: var(--accent);
+    margin-top: 28px;
+  }
+
+  #caption {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    min-height: 164px;
+    padding: 22px 64px 24px;
+    background: var(--ground);
+    border-top: 1px solid var(--line);
+    z-index: 12;
+    opacity: 0;
+  }
+  #caption::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: -1px;
+    width: 160px;
+    height: 2px;
+    background: var(--accent);
+  }
+  #caption .cap-index {
+    position: absolute;
+    right: 64px;
+    top: 24px;
+    display: flex;
+    gap: 24px;
+    color: var(--faint);
+    font: 400 10px/1 var(--mono);
+    letter-spacing: 0.12em;
+  }
+  #caption .cap-index b { color: var(--accent); font-weight: 500; }
+  #caption h2 {
+    margin: 12px 0 8px;
+    font: 600 36px/1.1 var(--sans);
+    letter-spacing: -0.025em;
+  }
+  #caption p {
+    display: inline;
+    margin: 0 24px 0 0;
+    color: var(--muted);
+    font: 400 16px/1.55 var(--sans);
+  }
+  #caption .cap-line {
+    position: absolute;
+    left: 64px;
+    bottom: 20px;
+    width: 48px;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  #outro {
+    position: absolute;
+    left: 120px;
+    top: 208px;
+    width: 1000px;
+    z-index: 14;
+    opacity: 0;
+  }
+  #outro .outro-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--line);
+    color: var(--faint);
+    font: 400 10px/1 var(--mono);
+    letter-spacing: 0.12em;
+  }
+  #outro h2 {
+    margin: 54px 0 0;
+    font: 600 74px/1.02 var(--sans);
+    letter-spacing: -0.04em;
+  }
+  #outro .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    margin-top: 44px;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+  #outro .stats > div {
+    padding: 18px 0 20px;
+    border-left: 1px solid var(--line);
+  }
+  #outro .stats > div:first-child { border-left: 0; }
+  #outro .stats strong {
+    display: block;
+    color: var(--text);
+    font: 500 40px/1 var(--mono);
+    letter-spacing: -0.02em;
+  }
+  #outro .stats span {
+    display: block;
+    margin-top: 8px;
+    color: var(--faint);
+    font: 400 10px/1 var(--mono);
+    letter-spacing: 0.12em;
+  }
+  #outro .foot {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 24px;
+    color: var(--faint);
+    font: 400 11px/1 var(--mono);
+    letter-spacing: 0.08em;
+  }
+  .outro-index {
+    position: absolute;
+    right: 120px;
+    top: 300px;
+    width: 540px;
+    z-index: 14;
+    border-top: 1px solid var(--line);
+    opacity: 0;
+  }
+  .outro-index div {
+    display: grid;
+    grid-template-columns: 52px 1fr auto;
+    gap: 16px;
+    align-items: baseline;
+    min-height: 58px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .outro-index b {
+    color: var(--accent);
+    font: 500 11px/1 var(--mono);
+    letter-spacing: 0.08em;
+  }
+  .outro-index span {
+    color: var(--text);
+    font: 500 16px/1 var(--sans);
+  }
+  .outro-index i {
+    color: var(--faint);
+    font: 400 10px/1 var(--mono);
+    font-style: normal;
+    letter-spacing: 0.08em;
+  }
+
+  #frame {
+    position: absolute;
+    inset: 0;
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    pointer-events: none;
+    z-index: 20;
+  }
+  #edge {
+    display: none;
+    position: absolute;
+    left: 64px;
+    top: 94px;
+    width: 0;
+    height: 1px;
+    background: var(--accent);
+    z-index: 21;
+  }
+  .hidden { opacity: 0 !important; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="scrim"></div>
+
+  <div class="shot" data-screen="home"><img src="assets/home.png" alt=""></div>
+  <div class="shot" data-screen="health"><img src="assets/health.png" alt=""></div>
+  <div class="shot" data-screen="newconfig"><img src="assets/newconfig.png" alt=""></div>
+  <div class="shot" data-screen="agents"><img src="assets/agents.png" alt=""></div>
+
+  <div id="topbar">
+    <div class="brand">WEALTH OS <span>PRIVATE OPERATING SYSTEM</span></div>
+    <div class="rule"></div>
+    <div class="stamp">PRODUCT REEL / 2026</div>
+  </div>
+
+  <div id="intro">
+    <div class="eyebrow">WEALTH OS</div>
+    <h1>私人<br>操作系统<em>资产 / 健康 / 流程 / 学习</em></h1>
+    <div class="mark"></div>
+    <div class="meta"><span>11 MODULES</span><span>6 AGENTS</span><span>1 LEDGER</span></div>
+  </div>
+
+  <div id="caption">
+    <div class="cap-index"><span id="capIndex">01 / WORKBENCH</span><b id="capCount">01 — 04</b></div>
+    <h2 id="capTitle">工作台</h2>
+    <p id="capLine1">把资产、健康、流程和学习</p>
+    <p id="capLine2">收进同一个工作台</p>
+    <div class="cap-line"></div>
+  </div>
+
+  <div id="outro">
+    <div class="outro-meta"><span>WEALTH OS</span><span>PRODUCT REEL / 2026</span></div>
+    <div class="eyebrow">PRIVATE OPERATING SYSTEM</div>
+    <h2>一个系统，<br>全部上下文。</h2>
+    <div class="stats">
+      <div><strong>11</strong><span>MODULES</span></div>
+      <div><strong>6</strong><span>AGENTS</span></div>
+      <div><strong>1</strong><span>LEDGER</span></div>
+    </div>
+    <div class="foot"><span>PRIVATE · LOCAL · DELIBERATE</span><span>wealth-os.local</span></div>
+  </div>
+
+  <div class="outro-index">
+    <div><b>01</b><span>WORKBENCH</span><i>ASSETS / HEALTH / ROUTINE</i></div>
+    <div><b>02</b><span>HEALTH</span><i>SLEEP / FOOD / TRAINING</i></div>
+    <div><b>03</b><span>NEXT</span><i>90-DAY EXECUTION</i></div>
+    <div><b>04</b><span>LEDGER</span><i>ONE SOURCE OF TRUTH</i></div>
+  </div>
+
+  <div id="edge"></div>
+  <div id="frame"></div>
+</div>
+
+<script>
+(() => {
+  const stage = document.getElementById('stage');
+  const shots = [...document.querySelectorAll('.shot')];
+  const scrim = document.getElementById('scrim');
+  const topbar = document.getElementById('topbar');
+  const intro = document.getElementById('intro');
+  const caption = document.getElementById('caption');
+  const outro = document.getElementById('outro');
+  const outroIndex = document.querySelector('.outro-index');
+  const edge = document.getElementById('edge');
+  const capIndex = document.getElementById('capIndex');
+  const capCount = document.getElementById('capCount');
+  const capTitle = document.getElementById('capTitle');
+  const capLine1 = document.getElementById('capLine1');
+  const capLine2 = document.getElementById('capLine2');
+
+  let cues = null;
+
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const ease = (t) => t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+  const seg = (t, a, b) => clamp((t - a) / (b - a), 0, 1);
+  const smooth = (t, a, b) => ease(seg(t, a, b));
+
+  function screenFor(name) {
+    return shots.find((s) => s.dataset.screen === name);
+  }
+
+  function setShot(name, t, t0, t1) {
+    shots.forEach((s) => {
+      const active = s.dataset.screen === name;
+      s.style.opacity = active ? '1' : '0';
+      s.style.zIndex = active ? '2' : '1';
+      if (!active) return;
+      const p = smooth(t, t0, t1);
+      const img = s.querySelector('img');
+      const scale = 1.035 - 0.035 * p;
+      const x = -8 + 8 * p;
+      img.style.transform = `translate3d(${x}px,0,0) scale(${scale})`;
+    });
+  }
+
+  function setCaption(ev, t) {
+    const start = ev.frame / cues.fps;
+    const inP = smooth(t, start - 0.30, start - 0.05);
+    const outP = 1 - smooth(t, start + 1.85, start + 2.15);
+    caption.style.opacity = String(clamp(inP * outP, 0, 1));
+    caption.style.transform = `translate3d(0, ${(1 - inP) * 8}px, 0)`;
+    capIndex.textContent = `${ev.index} / ${ev.label}`;
+    capCount.textContent = `${ev.index} — 04`;
+    capTitle.textContent = ev.title;
+    capLine1.textContent = ev.line1;
+    capLine2.textContent = ev.line2;
+  }
+
+  function renderAt(frame) {
+    if (!cues) return;
+    const t = frame / cues.fps;
+
+    const introOut = smooth(t, 1.04, 1.34);
+    const introIn = 1;
+    intro.style.opacity = String(clamp(introIn * (1 - introOut), 0, 1));
+    intro.style.transform = `translate3d(0, ${(1 - introIn) * 18}px, 0)`;
+
+    scrim.style.opacity = String(clamp(1 - smooth(t, 1.18, 1.42), 0, 1) * 0.72);
+    topbar.style.opacity = '0';
+    edge.style.width = `${Math.round(1920 - 128) * smooth(t, 0.1, 0.9)}px`;
+
+    const events = cues.events;
+    let current = events[0];
+    for (const ev of events) if (frame >= ev.frame) current = ev;
+
+    if (current.kind === 'intro') {
+      shots.forEach((s) => { s.style.opacity = '0'; s.style.zIndex = '1'; });
+      setShot('home', t, 0, 1.4);
+      shots.forEach((s) => { s.style.opacity = '0'; });
+      scrim.style.opacity = '0';
+      caption.style.opacity = '0';
+      outro.style.opacity = '0';
+      outroIndex.style.opacity = '0';
+    } else if (current.kind === 'screen') {
+      const next = events[events.indexOf(current) + 1];
+      const end = next ? next.frame / cues.fps : cues.duration;
+      setShot(current.screen, t, current.frame / cues.fps, end);
+      setCaption(current, t);
+      outro.style.opacity = '0';
+      outroIndex.style.opacity = '0';
+    } else {
+      shots.forEach((s) => { s.style.opacity = '0'; s.style.zIndex = '1'; });
+      caption.style.opacity = '0';
+      const oIn = smooth(t, 8.58, 8.78);
+      const breathe = smooth(t, 9.12, 10.0);
+      outro.style.opacity = String(oIn);
+      outro.style.transform = `translate3d(0, ${(1 - oIn) * 16}px, 0) scale(${1 + 0.006 * breathe})`;
+      const iIn = smooth(t, 8.68, 9.0);
+      outroIndex.style.opacity = String(iIn);
+      outroIndex.style.transform = `translate3d(0, ${(1 - iIn) * 10}px, 0)`;
+      edge.style.opacity = String(1 - smooth(t, 8.7, 8.95));
+    }
+
+    if (current.kind !== 'outro') {
+      outro.style.opacity = '0';
+      edge.style.opacity = '1';
+    }
+    if (current.kind === 'intro') {
+      intro.style.zIndex = '10';
+    } else {
+      intro.style.zIndex = '0';
+    }
+  }
+
+  async function boot() {
+    cues = await fetch('cues.json', { cache: 'no-store' }).then((r) => r.json());
+    await Promise.all([...document.images].map((img) => img.decode().catch(() => {})));
+    await document.fonts.ready;
+    await document.fonts.load('600 96px "Public Sans"');
+    await document.fonts.load('400 13px "DM Mono"');
+    await document.fonts.load('500 13px "DM Mono"');
+    renderAt(0);
+    window.renderAt = renderAt;
+    window.__ready = true;
+  }
+  boot();
+})();
+</script>
+</body>
+</html>

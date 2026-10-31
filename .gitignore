@@ -12,6 +12,10 @@ android/
 _ui_*/
 .tmp_taste/
 .taste-skill/
+video/_frames/
+video/out/preview/
+video/assets/score.wav
+video/assets/score_mastered.wav
 *.log
 .DS_Store
 Thumbs.db
