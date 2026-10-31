@@ -1695,3 +1695,21 @@ body[data-theme="light"] .nav-item[aria-current="page"] { box-shadow: none !impo
 
 #viewRoot .task-due { color: var(--negative) !important; }
 #viewRoot .fit-ex .fit-ex-note { color: var(--muted) !important; }
+
+/* one depth moment on 分身: the orbit stage tilts in 3D around the core */
+.agent-balance-stage {
+  --stage-x: 0deg; --stage-y: 0deg;
+  transform-style: preserve-3d;
+  transition: transform 520ms var(--ease-out);
+  will-change: transform;
+}
+.agent-balance-stage.is-depth {
+  transform: perspective(1400px) rotateX(var(--stage-x)) rotateY(var(--stage-y));
+}
+.agent-balance-stage .agent-orbit-track { transform: translateZ(22px); }
+.agent-balance-stage .agent-balance-core { transform: translate(-50%, -50%) translateZ(56px); }
+.agent-balance-stage .agent-balance-core img { transform: translateZ(24px); }
+.agent-balance-stage .agent-orbit-ring { will-change: transform; }
+@media (prefers-reduced-motion: reduce) {
+  .agent-balance-stage { transition: none !important; }
+}

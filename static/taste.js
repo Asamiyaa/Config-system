@@ -164,6 +164,7 @@
     const hub = HUB_OF[page] || page;
     localizeLabels($('#viewRoot') || document);
     restoreBento();
+    mountAgentDepth();
     $$('#mainNav .nav-item').forEach((item) => {
       const on = item.dataset.page === hub;
       item.classList.toggle('active', on);
@@ -465,6 +466,34 @@
     if (tiltCard === card) tiltCard=null;
   }
   document.addEventListener('pointerleave', () => { if (tiltCard) resetTilt(tiltCard); });
+
+  /* ---------- agents depth stage: pointer parallax ---------- */
+  function mountAgentDepth() {
+    const stage=document.querySelector('.agent-balance-stage');
+    if(!stage || stage.dataset.depthBound==='1') return;
+    stage.dataset.depthBound='1';
+    const reduce=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    const fine=window.matchMedia?.('(hover: hover) and (pointer: fine)').matches;
+    if(reduce || !fine) return;
+    stage.classList.add('is-depth');
+    let raf=0;
+    stage.addEventListener('pointermove', (e) => {
+      if(raf) return;
+      raf=requestAnimationFrame(()=>{
+        raf=0;
+        const r=stage.getBoundingClientRect();
+        const x=(e.clientX-r.left)/Math.max(1,r.width)-.5;
+        const y=(e.clientY-r.top)/Math.max(1,r.height)-.5;
+        stage.style.setProperty('--stage-x', `${(-y*2.6).toFixed(2)}deg`);
+        stage.style.setProperty('--stage-y', `${(x*3.2).toFixed(2)}deg`);
+      });
+    }, {passive:true});
+    stage.addEventListener('pointerleave', () => {
+      cancelAnimationFrame(raf); raf=0;
+      stage.style.setProperty('--stage-x','0deg');
+      stage.style.setProperty('--stage-y','0deg');
+    });
+  }
 
   /* ---------- Bento KPI reorder ---------- */
   const BENTO_KEY='wealth-os-bento-order';
