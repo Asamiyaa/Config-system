@@ -1570,3 +1570,125 @@ body[data-theme="light"] .nav-item[aria-current="page"] { box-shadow: none !impo
   .task-content-grid .task-list-card { order: 1; }
   .task-content-grid .task-add-card { order: 2; }
 }
+
+/* real page-cover image element (alt text + responsive image slot) */
+#viewRoot > .page-head:has(h1) .page-cover-media {
+  position: absolute; inset: 0 0 0 auto; width: 224px;
+  overflow: hidden; border-left: 1px solid var(--border); z-index: 0;
+}
+#viewRoot > .page-head:has(h1) .page-cover-media img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  filter: saturate(.9) contrast(.98);
+}
+#viewRoot > .page-head:has(h1):has(.page-cover-media)::after { display: none; }
+#viewRoot[data-page="dashboard"] > .page-head:has(h1) .page-cover-media { width: 276px; }
+#viewRoot[data-page="allocation"] > .page-head:has(h1) .page-cover-media,
+#viewRoot[data-page="nasdaq"] > .page-head:has(h1) .page-cover-media,
+#viewRoot[data-page="ashare"] > .page-head:has(h1) .page-cover-media,
+#viewRoot[data-page="execution"] > .page-head:has(h1) .page-cover-media,
+#viewRoot[data-page="archive"] > .page-head:has(h1) .page-cover-media,
+#viewRoot[data-page="schedules"] > .page-head:has(h1) .page-cover-media,
+#viewRoot[data-page="health"] > .page-head:has(h1) .page-cover-media,
+#viewRoot[data-page="newconfig"] > .page-head:has(h1) .page-cover-media,
+#viewRoot[data-page="english"] > .page-head:has(h1) .page-cover-media,
+#viewRoot[data-page="reading"] > .page-head:has(h1) .page-cover-media,
+#viewRoot[data-page="agents"] > .page-head:has(h1) .page-cover-media,
+#viewRoot[data-page="dailyflow"] > .page-head:has(h1) .page-cover-media { width: 190px; }
+@media (max-width: 860px) {
+  #viewRoot > .page-head:has(h1) .page-cover-media { width: 94px !important; }
+}
+
+/* readable small-text floor: no 9–10px body labels */
+#viewRoot small,
+#viewRoot .eyebrow,
+#viewRoot .tag,
+#viewRoot .pill,
+#viewRoot .metric-foot,
+#viewRoot .table-note,
+#viewRoot .table-sub,
+#viewRoot .feature-kicker,
+#viewRoot .watch-status,
+#viewRoot .project-chip,
+#viewRoot .task-due,
+#viewRoot .btn-small,
+#viewRoot .hos-kpi small,
+#viewRoot .ncfg-kpi small,
+#viewRoot .card-head p {
+  font-size: 12px !important;
+  line-height: 1.45 !important;
+}
+
+/* contrast floor + de-card the health metric row */
+#viewRoot .metric-foot:not(.good):not(.warning):not(.bad),
+#viewRoot .focus-task-note,
+#viewRoot .focus-task-meta,
+#viewRoot .timeline-time,
+#viewRoot .table-note,
+#viewRoot .table-sub,
+#viewRoot .ncfg-next-item p { color: var(--muted) !important; }
+#viewRoot .app-footer span { color: var(--muted) !important; }
+
+#viewRoot[data-page="health"] > .grid.grid-4 {
+  gap: 0 !important; overflow: hidden;
+  border: 1px solid var(--border) !important; border-radius: var(--radius-card) !important;
+  background: var(--surface) !important;
+}
+#viewRoot[data-page="health"] > .grid.grid-4 > .card {
+  border: 0 !important; border-radius: 0 !important;
+  background: transparent !important; box-shadow: none !important;
+  padding: 18px 20px !important;
+}
+#viewRoot[data-page="health"] > .grid.grid-4 > .card + .card { border-left: 1px solid var(--border) !important; }
+@media (max-width: 860px) {
+  #viewRoot[data-page="health"] > .grid.grid-4 > .card + .card { border-left: 0 !important; border-top: 1px solid var(--border) !important; }
+}
+
+/* darken dense data labels that shipped with old cool-grey tokens */
+#viewRoot .metric-foot,
+#viewRoot .score-bar-row :is(span,em,b,small),
+#viewRoot .hos-steps :is(span,em,b,small),
+#viewRoot .hos-tags :is(span,em,b,small),
+#viewRoot .hos-kpi :is(span,em,b,small,div),
+#viewRoot .hos-condition-list :is(span,em,b,small),
+#viewRoot .hos-timeline :is(span,em,b,small,time),
+#viewRoot .hos-macro-list :is(span,em,b,small),
+#viewRoot .hos-meal-empty,
+#viewRoot .hos-meal-items :is(span,em,b,small),
+#viewRoot .hos-meal-card :is(span,em,b,small),
+#viewRoot .fit-week :is(span,em,b,small),
+#viewRoot .fit-day :is(span,em,b,small),
+#viewRoot .fit-recovery :is(span,em,b,small),
+#viewRoot .fit-session :is(span,em,b,small),
+#viewRoot .fit-ex :is(span,em,b,small),
+#viewRoot .status-strip :is(span,b,small),
+#viewRoot .metric-mini span,
+#viewRoot .focus-task-meta,
+#viewRoot .focus-task-note,
+#viewRoot .app-footer span { color: var(--muted) !important; }
+#viewRoot .btn-primary {
+  background: var(--primary) !important;
+  color: var(--primary-ink) !important;
+  border-color: var(--primary) !important;
+}
+
+#viewRoot .chart-legend span,
+#viewRoot .hos-count,
+#viewRoot .score-bar-label,
+#viewRoot .score-bar-number,
+#viewRoot #saveStatus { color: var(--muted) !important; }
+#viewRoot .english-tool-mark {
+  background: var(--raised) !important;
+  color: var(--accent) !important;
+  border-color: var(--border) !important;
+}
+
+#viewRoot #saveStatus,
+#viewRoot .empty-state { color: var(--muted) !important; }
+
+#viewRoot .hos-step :is(strong,small,em,p),
+#viewRoot .hos-kpi small,
+#viewRoot .hos-chart-note,
+#viewRoot .hos-meal-empty { color: var(--muted) !important; }
+#viewRoot .english-tool-mark { color: var(--text) !important; }
+
+#saveStatus, .app-footer #saveStatus { color: var(--muted) !important; }

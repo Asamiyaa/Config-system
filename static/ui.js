@@ -359,7 +359,8 @@
     scope.querySelectorAll('[data-tab]').forEach((b) => {
       const on = b.getAttribute('data-tab') === name;
       b.classList.toggle('active', on);
-      b.setAttribute('aria-selected', on ? 'true' : 'false');
+      if (b.getAttribute('data-tab') === 'plan' && !b.closest('[role="tablist"]')) b.removeAttribute('aria-selected');
+      else b.setAttribute('aria-selected', on ? 'true' : 'false');
     });
     if (remember) {
       try { sessionStorage.setItem(tabStorageKey(scope), name); } catch (_) {}

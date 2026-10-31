@@ -59,6 +59,11 @@
 - 悬浮侧栏、右侧竖轨、Sheet、底栏使用半透明表面 + `blur(18px)`。
 - 现有 Agents 3D 形象、健康 3D 人体、动作 GIF 继续作为真实媒体卡。
 - 图片全部本地化，来源记录在 `static/img/ATTRIBUTION.md`。
+- 页面封面现在是真实 `<img>`，不是 CSS 背景：每个页面都有 `alt`，移动端 94px，桌面 190–276px。
+- 健康页 4 个指标改为一条去卡片化指标带；避免四张同构卡。
+- 小字下限 12px；所有无显式标签的表格输入和 progressbar 在渲染后补 `aria-label`。
+- 可滚动表格/时间轴补 `tabindex=0`；`data-tab` 补 `role=tab`，并修正非 tab 的 `aria-selected`。
+
 
 ### 18 / 23 / 27 · 悬浮岛式侧栏 + 大标题
 
@@ -183,12 +188,13 @@
 - 新增流程块：`.flow-modal` 打开时存在 Web Animations 生长动画
 - 关注索引拖拽：顺序改变并写入 `wealth-os-watch-order`
 - App 底栏 4 个主 tab + 更多：今日 / 执行 / 资产 / 健康；汉堡打开侧栏后变叉，底栏收起
-- 图片卡片：页面头本地摄影、资产首卡摄影、其余 KPI 中性封面、Agents/Health 媒体卡
+- 图片卡片：页面头真实摄影 `<img>`（桌面 190–276px / 移动 94px）、资产首卡摄影、其余 KPI 中性封面、Agents/Health 媒体卡
 - 归档页默认包含 Windows Excel 历史归档卡；待办页不再包含
 - 新登总览默认约 1016px；工作簿与更多入口折叠
 - 首页 sheet：2 个页签；矩阵与周历/专注可切换，默认矩阵
 - 右侧竖轨桌面显示、移动隐藏；全屏 lightbox、Bento 拖拽、长按浮起、3D 倾斜均有交互
 - 无 pageerror / console error
+- Axe（WCAG A/AA）：无 critical 违规；颜色对比仍有少量 serious 点，集中在历史数据小字
 - Taste inspector：**0 FAIL, 3 WARN**（暖白米色、81% 小字、首页 no-data-hue；均属主动取舍）
 
 ## 涉及文件

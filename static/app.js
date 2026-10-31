@@ -254,6 +254,75 @@ function renderHubTabs(page){
   return `<div class="hub-tabs" role="navigation" aria-label="${esc(def.label)}导航">${def.items.map(([key,label])=>`<button class="hub-tab ${key===page?'active':''}" data-action="go-page" data-page="${key}" aria-current="${key===page?'page':'false'}">${label}</button>`).join('')}</div>`;
 }
 
+const PAGE_COVER_MEDIA={
+  home:['/static/img/desk.jpg','窗边工作台与植物'],
+  today:['/static/img/desk.jpg','窗边工作台'],
+  dashboard:['/static/img/architecture.jpg','仰视的现代建筑与玻璃幕墙'],
+  allocation:['/static/img/architecture.jpg','城市建筑立面'],
+  nasdaq:['/static/img/city.jpg','城市街道与天际线'],
+  ashare:['/static/img/finance.jpg','屏幕上的行情图表'],
+  execution:['/static/img/architecture.jpg','现代建筑结构'],
+  alpharadar:['/static/img/city.jpg','城市天际线'],
+  health:['/static/img/health.jpg','室内训练与伸展'],
+  checkin:['/static/img/health.jpg','室内训练与伸展'],
+  diet:['/static/img/health.jpg','训练后的恢复'],
+  fitness:['/static/img/health.jpg','室内训练'],
+  skin:['/static/img/health.jpg','身体护理'],
+  sleep:['/static/img/health.jpg','休息与恢复'],
+  style:['/static/img/health.jpg','身体与形象'],
+  agents:['/static/img/desk.jpg','窗边工作台'],
+  newconfig:['/static/img/travel.jpg','公路与山野'],
+  english:['/static/img/library.jpg','书架'],
+  reading:['/static/img/library.jpg','图书馆书架'],
+  archive:['/static/img/library.jpg','图书馆书架'],
+  schedules:['/static/img/desk.jpg','工作台与自动化'],
+  dailyflow:['/static/img/desk.jpg','工作台日常'],
+  mistakes:['/static/img/architecture.jpg','建筑结构'],
+  calendar:['/static/img/desk.jpg','工作台日历'],
+  stats:['/static/img/architecture.jpg','建筑立面'],
+  matrix:['/static/img/desk.jpg','工作台'],
+  important:['/static/img/desk.jpg','工作台'],
+  alltasks:['/static/img/desk.jpg','工作台'],
+  flowstats:['/static/img/desk.jpg','工作台']
+};
+function labelControls(root=document){
+  const fields=[...root.querySelectorAll('input,select,textarea')];
+  fields.forEach((el)=>{
+    if(el.type==='hidden'||el.closest('[aria-hidden="true"]')) return;
+    if(el.getAttribute('aria-label')||el.getAttribute('aria-labelledby')||el.closest('label')) return;
+    if(el.id&&root.querySelector(`label[for="${CSS.escape(el.id)}"]`)) return;
+    let label='';
+    const table=el.closest('table');
+    if(table){
+      const td=el.closest('td'), tr=el.closest('tr');
+      const ths=[...table.querySelectorAll('thead th')];
+      const idx=tr&&td?[...tr.children].indexOf(td):-1;
+      const col=idx>=0?ths[idx]?.innerText.trim():'';
+      const row=tr?.querySelector('.table-main,.table-sub')?.innerText.trim()||'';
+      label=[row,col].filter(Boolean).join(' · ');
+    }
+    if(!label){
+      const card=el.closest('.card,.fit-panel,.ncfg-panel,.health-form');
+      label=card?.querySelector('h2,h3,.card-head')?.innerText.split('\n')[0].trim()||'';
+    }
+    el.setAttribute('aria-label',label||el.getAttribute('placeholder')||'编辑字段');
+  });
+  root.querySelectorAll('[role="progressbar"], progress').forEach((el)=>{
+    if(!el.getAttribute('aria-label')&&!el.getAttribute('aria-labelledby')) el.setAttribute('aria-label','进度');
+  });
+  root.querySelectorAll('[data-tab][aria-selected]').forEach((el)=>{
+    if(el.getAttribute('data-tab')==='plan') { el.removeAttribute('aria-selected'); el.removeAttribute('role'); return; }
+    if(!el.getAttribute('role')) el.setAttribute('role','tab');
+    const parent=el.parentElement;
+    if(parent && !parent.getAttribute('role')) parent.setAttribute('role','tablist');
+  });
+  root.querySelectorAll('.flow-timeline-scroll,.table-wrap,.calendar-board,.task-list-body').forEach((el)=>{
+    if(el.scrollWidth>el.clientWidth+2||el.scrollHeight>el.clientHeight+2){
+      el.setAttribute('tabindex','0');
+      if(!el.getAttribute('aria-label')) el.setAttribute('aria-label','可滚动内容区');
+    }
+  });
+}
 function renderPage(page, {autoRefresh=false, transition=true, animate=true}={}) {  if (!state) return;
   currentPage=page;
   setHeader(page);
@@ -277,7 +346,13 @@ function renderPage(page, {autoRefresh=false, transition=true, animate=true}={})
       if (head) head.insertAdjacentHTML('afterend',hubTabs);
       else root.insertAdjacentHTML('afterbegin',hubTabs);
     }
+    const pageHead=root.querySelector('.page-head');
+    if (pageHead && pageHead.querySelector('h1') && !pageHead.querySelector('.page-cover-media')) {
+      const [src,alt]=PAGE_COVER_MEDIA[page]||['/static/img/architecture.jpg','现代建筑封面'];
+      pageHead.insertAdjacentHTML('beforeend',`<div class="page-cover-media"><img src="${src}" alt="${esc(alt)}" loading="eager" decoding="async"></div>`);
+    }
     updateFocusCounts();
+    labelControls(root);
     closeSidebar();
     cleanPageSections(page, root);
   };
