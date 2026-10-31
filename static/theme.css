@@ -45,9 +45,9 @@
   --text-inverse: #0b110c;
 
   /* 品牌 */
-  --accent: #c9f26b;
-  --accent-2: #a8dc4b;
-  --accent-text: #c9f26b;
+  --accent: #e07a43;
+  --accent-2: #c96a38;
+  --accent-text: #e07a43;
   --accent-ink: #0d1409;
   --accent-soft: rgba(201, 242, 107, 0.1);
   --accent-line: rgba(201, 242, 107, 0.32);
@@ -146,7 +146,7 @@
   --text-3: #6a786d;
   --text-inverse: #ffffff;
 
-  --accent: #c9f26b;
+  --accent: #e07a43;
   --accent-2: #b6e654;
   --accent-text: #3d6a10;
   --accent-ink: #0d1409;

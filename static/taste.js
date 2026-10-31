@@ -381,7 +381,7 @@
         const next=document.body.dataset.theme==='light'?'dark':'light';
         document.documentElement.dataset.theme=next;
         document.body.dataset.theme=next;
-        try { localStorage.setItem('wealth-os-theme',next); } catch (_) {}
+        try { localStorage.setItem('wealth-os-theme-v2',next); } catch (_) {}
         $$('.theme-option').forEach((el) => {
           const on=el.dataset.action===`theme-${next}`;
           el.classList.toggle('selected',on);
