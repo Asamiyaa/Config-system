@@ -87,6 +87,7 @@
 ### 字体与数字
 
 - Public Sans 通过本地 `static/fonts/public-sans.woff2` 加载，不依赖 Google Fonts；
+- DM Mono 通过本地 `static/fonts/dm-mono-400.woff2` / `dm-mono-500.woff2` 加载，用于金额、分数、日期与表格数字；
 - `#appShell` 全部 figures 使用 `font-variant-numeric: tabular-nums`；
 - 金额、分数、日期、表格数字保持等宽。
 
