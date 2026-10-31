@@ -155,6 +155,7 @@
   function syncActive() {
     const page = (typeof currentPage !== 'undefined' ? currentPage : '') || '';
     localizeLabels($('#viewRoot') || document);
+    restoreBento();
     $$('#mainNav .nav-item').forEach((item) => {
       const on = item.dataset.page === page;
       item.classList.toggle('active', on);
@@ -358,6 +359,231 @@
       e.stopPropagation();
     }
   }, true);
+
+  /* ---------- right utility rail ---------- */
+  function mountRightRail() {
+    if ($('#rightRail')) return;
+    const rail=document.createElement('nav');
+    rail.id='rightRail';
+    rail.className='right-rail';
+    rail.setAttribute('aria-label','快捷操作');
+    rail.innerHTML=`
+      <button type="button" data-rail="search" data-label="搜索页面" aria-label="搜索页面">${icon('i-search')}</button>
+      <button type="button" data-rail="theme" data-label="切换主题" aria-label="切换主题">${icon('i-spark')}</button>
+      <button type="button" data-rail="top" data-label="回到顶部" aria-label="回到顶部">${icon('i-up')}</button>
+      <button type="button" data-rail="menu" data-label="打开菜单" aria-label="打开菜单">${icon('i-more')}</button>`;
+    rail.addEventListener('click', (e) => {
+      const btn=e.target.closest('[data-rail]');
+      if (!btn) return;
+      const kind=btn.dataset.rail;
+      if (kind==='search') openPalette();
+      if (kind==='theme') {
+        const next=document.body.dataset.theme==='light'?'dark':'light';
+        document.documentElement.dataset.theme=next;
+        document.body.dataset.theme=next;
+        try { localStorage.setItem('wealth-os-theme',next); } catch (_) {}
+        $$('.theme-option').forEach((el) => {
+          const on=el.dataset.action===`theme-${next}`;
+          el.classList.toggle('selected',on);
+          el.setAttribute('aria-pressed',on?'true':'false');
+        });
+      }
+      if (kind==='top') window.scrollTo({ top: 0, behavior: 'smooth' });
+      if (kind==='menu') $('#tasteCollapse')?.click();
+    });
+    document.body.appendChild(rail);
+  }
+  mountRightRail();
+
+  /* ---------- full-screen image lightbox ---------- */
+  let lightbox=null;
+  function ensureLightbox() {
+    if (lightbox) return lightbox;
+    lightbox=document.createElement('div');
+    lightbox.id='imageLightbox';
+    lightbox.className='image-lightbox';
+    lightbox.innerHTML='<button type="button" class="image-lightbox-close" aria-label="关闭大图">×</button><img alt="">';
+    lightbox.addEventListener('click', (e) => {
+      if (e.target === lightbox || e.target.closest('.image-lightbox-close')) closeLightbox();
+    });
+    document.body.appendChild(lightbox);
+    return lightbox;
+  }
+  function openLightbox(src, alt='') {
+    const box=ensureLightbox();
+    const img=box.querySelector('img');
+    img.src=src; img.alt=alt;
+    box.classList.add('is-open');
+    document.body.classList.add('ui-scroll-lock');
+  }
+  function closeLightbox() {
+    if (!lightbox) return;
+    lightbox.classList.remove('is-open');
+    document.body.classList.remove('ui-scroll-lock');
+  }
+  document.addEventListener('click', (e) => {
+    const img=e.target.closest('.metric-cover img, .agent-node-card img');
+    if (!img) return;
+    e.preventDefault();
+    e.stopPropagation();
+    openLightbox(img.currentSrc || img.src, img.alt || '');
+  }, true);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeLightbox();
+  });
+
+  /* ---------- 3D tilt ---------- */
+  let tiltCard=null;
+  document.addEventListener('pointermove', (e) => {
+    if (e.pointerType === 'touch' || document.body.classList.contains('watch-sorting') || document.body.classList.contains('bento-sorting')) return;
+    const card=e.target.closest('.home-feature, .metric-card.has-cover, .agent-node-card, #viewRoot > .page-head');
+    if (!card) {
+      if (tiltCard) resetTilt(tiltCard);
+      return;
+    }
+    if (tiltCard && tiltCard !== card) resetTilt(tiltCard);
+    tiltCard=card;
+    const r=card.getBoundingClientRect();
+    const x=(e.clientX-r.left)/Math.max(1,r.width)-.5;
+    const y=(e.clientY-r.top)/Math.max(1,r.height)-.5;
+    card.style.setProperty('--tilt-x', `${(-y*2.4).toFixed(2)}deg`);
+    card.style.setProperty('--tilt-y', `${(x*2.8).toFixed(2)}deg`);
+    card.classList.add('is-tilting');
+  }, { passive: true });
+  function resetTilt(card) {
+    if (!card) return;
+    card.style.setProperty('--tilt-x','0deg');
+    card.style.setProperty('--tilt-y','0deg');
+    card.classList.remove('is-tilting');
+    if (tiltCard === card) tiltCard=null;
+  }
+  document.addEventListener('pointerleave', () => { if (tiltCard) resetTilt(tiltCard); });
+
+  /* ---------- Bento KPI reorder ---------- */
+  const BENTO_KEY='wealth-os-bento-order';
+  function bentoCards() { return $$('.dashboard-kpis > .metric-card'); }
+  function bentoKey(card) {
+    if (!card.dataset.bentoKey) card.dataset.bentoKey=(card.querySelector('.metric-label span')?.textContent||'').trim();
+    return card.dataset.bentoKey;
+  }
+  function restoreBento() {
+    const host=$('.dashboard-kpis');
+    if (!host || host.dataset.bentoReady === '1') return;
+    host.dataset.bentoReady='1';
+    const cards=bentoCards();
+    cards.forEach(bentoKey);
+    cards.forEach((card)=>{ card.draggable=true; card.setAttribute('draggable','true'); });
+    let order=[]; try { order=JSON.parse(localStorage.getItem(BENTO_KEY)||'[]'); } catch (_) {}
+    if (!order.length) return;
+    cards.sort((a,b)=>{ const ia=order.indexOf(bentoKey(a)), ib=order.indexOf(bentoKey(b)); return (ia<0?99:ia)-(ib<0?99:ib); }).forEach((card)=>host.appendChild(card));
+  }
+  let bentoDrag=null, bentoHold=null, bentoSuppress=false;
+  let nativeBento=null;
+  document.addEventListener('dragstart', (e) => {
+    const card=e.target.closest('.dashboard-kpis > .metric-card');
+    if (!card) return;
+    nativeBento=card;
+    card.classList.add('is-dragging');
+    try { e.dataTransfer.effectAllowed='move'; e.dataTransfer.setData('text/plain', bentoKey(card)); } catch (_) {}
+  });
+  document.addEventListener('dragover', (e) => {
+    if (!nativeBento) return;
+    const target=e.target.closest('.dashboard-kpis > .metric-card');
+    if (target && target !== nativeBento) e.preventDefault();
+  });
+  document.addEventListener('drop', (e) => {
+    if (!nativeBento) return;
+    const target=e.target.closest('.dashboard-kpis > .metric-card');
+    if (target && target !== nativeBento) {
+      e.preventDefault();
+      const r=target.getBoundingClientRect();
+      if (e.clientX > r.left + r.width/2) target.after(nativeBento);
+      else target.before(nativeBento);
+    }
+    const order=bentoCards().map(bentoKey).filter(Boolean);
+    try { localStorage.setItem(BENTO_KEY, JSON.stringify(order)); } catch (_) {}
+    nativeBento.classList.remove('is-dragging');
+    nativeBento=null;
+  });
+  document.addEventListener('dragend', () => {
+    if (!nativeBento) return;
+    nativeBento.classList.remove('is-dragging');
+    nativeBento=null;
+  });
+  function beginBento(card, pointerId) {
+    if (!bentoDrag) return;
+    bentoDrag.active=true;
+    card.classList.add('is-dragging');
+    document.body.classList.add('bento-sorting');
+    try { card.setPointerCapture(pointerId); } catch (_) {}
+  }
+  document.addEventListener('pointerdown', (e) => {
+    if (!e.isPrimary || e.button !== 0) return;
+    const card=e.target.closest('.dashboard-kpis > .metric-card');
+    if (!card) return;
+    bentoDrag={card, x:e.clientX, y:e.clientY, pointerId:e.pointerId, active:false};
+    bentoHold=setTimeout(()=>beginBento(card,e.pointerId),150);
+  });
+  document.addEventListener('pointermove', (e) => {
+    if (!bentoDrag) return;
+    const dx=Math.abs(e.clientX-bentoDrag.x), dy=Math.abs(e.clientY-bentoDrag.y);
+    if (!bentoDrag.active) {
+      if (e.pointerType==='mouse' && Math.hypot(dx,dy)>7) { clearTimeout(bentoHold); beginBento(bentoDrag.card,e.pointerId); }
+      else if (Math.hypot(dx,dy)>12) { clearTimeout(bentoHold); bentoDrag=null; return; }
+      if (!bentoDrag?.active) return;
+    }
+    e.preventDefault();
+    const host=$('.dashboard-kpis');
+    if (!host) return;
+    const target=[...host.children].find((el) => {
+      const r=el.getBoundingClientRect();
+      return e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+    });
+    if (target && target !== bentoDrag.card) {
+      const r=target.getBoundingClientRect();
+      if (e.clientX > r.left + r.width/2) target.after(bentoDrag.card);
+      else target.before(bentoDrag.card);
+    }
+  }, { passive: false });
+  function endBento() {
+    clearTimeout(bentoHold);
+    if (!bentoDrag) return;
+    const active=bentoDrag.active, card=bentoDrag.card;
+    bentoDrag=null;
+    if (!active) return;
+    card.classList.remove('is-dragging');
+    document.body.classList.remove('bento-sorting');
+    const order=bentoCards().map(bentoKey).filter(Boolean);
+    try { localStorage.setItem(BENTO_KEY, JSON.stringify(order)); } catch (_) {}
+    bentoSuppress=true;
+    setTimeout(()=>{bentoSuppress=false;},350);
+  }
+  document.addEventListener('pointerup', endBento);
+  document.addEventListener('pointercancel', endBento);
+  document.addEventListener('click', (e) => {
+    if (bentoSuppress && e.target.closest('.dashboard-kpis > .metric-card')) { e.preventDefault(); e.stopPropagation(); }
+  }, true);
+
+  /* ---------- long-press lift ---------- */
+  let peekEl=null, peekTimer=null, peekStart=null;
+  function clearPeek() {
+    clearTimeout(peekTimer); peekTimer=null; peekStart=null;
+    if (peekEl) peekEl.classList.remove('is-peek');
+    peekEl=null;
+  }
+  document.addEventListener('pointerdown', (e) => {
+    if (!e.isPrimary || e.pointerType==='mouse' && e.button!==0) return;
+    const el=e.target.closest('.matrix-task, .agent-node-card, .reading-book-card, .health-check');
+    if (!el || e.target.closest('.watch-row')) return;
+    peekEl=el; peekStart={x:e.clientX,y:e.clientY};
+    peekTimer=setTimeout(()=>{ if (peekEl) peekEl.classList.add('is-peek'); }, 340);
+  });
+  document.addEventListener('pointermove', (e) => {
+    if (!peekStart) return;
+    if (Math.hypot(e.clientX-peekStart.x,e.clientY-peekStart.y) > 8) clearPeek();
+  }, { passive: true });
+  document.addEventListener('pointerup', clearPeek);
+  document.addEventListener('pointercancel', clearPeek);
 
   document.body.dataset.taste = 'data-terminal';
 })();
