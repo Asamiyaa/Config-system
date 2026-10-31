@@ -14,17 +14,17 @@
   "determinism": {
     "42": {
       "hashes": [
-        "56da3c4cca29b494d3b33eb1e72ca3658f1754d6ccebd03358cf2b480879a621",
-        "56da3c4cca29b494d3b33eb1e72ca3658f1754d6ccebd03358cf2b480879a621",
-        "56da3c4cca29b494d3b33eb1e72ca3658f1754d6ccebd03358cf2b480879a621"
+        "89bb69d391f99dccd74a3b9866c188ddb3804edd9d8de6a01679d5494ca1e0cf",
+        "89bb69d391f99dccd74a3b9866c188ddb3804edd9d8de6a01679d5494ca1e0cf",
+        "89bb69d391f99dccd74a3b9866c188ddb3804edd9d8de6a01679d5494ca1e0cf"
       ],
       "identical": true
     },
     "120": {
       "hashes": [
-        "e317759a2601eadb1287b8967b28ae4d29ac74911dce248082473656c3077add",
-        "e317759a2601eadb1287b8967b28ae4d29ac74911dce248082473656c3077add",
-        "e317759a2601eadb1287b8967b28ae4d29ac74911dce248082473656c3077add"
+        "5ff3864636ff3caa2e5fb71fd6e0aa4b4445b2b3d14212dffd6eb208c17d0071",
+        "5ff3864636ff3caa2e5fb71fd6e0aa4b4445b2b3d14212dffd6eb208c17d0071",
+        "5ff3864636ff3caa2e5fb71fd6e0aa4b4445b2b3d14212dffd6eb208c17d0071"
       ],
       "identical": true
     },
@@ -58,7 +58,7 @@
     },
     {
       "frame": 120,
-      "min": 5,
+      "min": 13,
       "max": 255
     },
     {

@@ -644,6 +644,10 @@ function renderAttentionCards() {
   const todayRows=focusTaskFilter('home').filter(t=>!t.done);
   const overdue=todayRows.filter(t=>t.dueDate&&t.dueDate<today).length;
   const dueToday=todayRows.filter(t=>t.dueDate===today).length;
+  const allToday=focusTaskFilter('home'), doneToday=allToday.filter(t=>t.done).length;
+  const completion=allToday.length?Math.round(doneToday/allToday.length*100):0;
+  const ringDash=(completion/100*150.8).toFixed(1);
+  const estimated=todayRows.reduce((sum,t)=>sum+n(t.estimate,0),0);
   const priorityRank={高:0,中:1,低:2};
   const lead=[...todayRows].sort((a,b)=>{
     const ao=a.dueDate&&a.dueDate<today?0:1, bo=b.dueDate&&b.dueDate<today?0:1;
@@ -687,7 +691,13 @@ function renderAttentionCards() {
       <div class="feature-status"><span class="attention-status good">执行 · 空清单</span><span class="feature-source">今天</span></div>
       <p class="feature-desc">先添加第一件今天要做的事；也可以从 90 天项目里挑一个最小动作。</p>
       <button class="feature-link" data-action="go-page" data-page="today">打开执行清单 <span>↗</span></button>`;
-  return `<div class="attention-section-head"><div><div class="eyebrow">WEALTH OS · TODAY</div><h2>关注点</h2><p>先做一件今天的事；市场与项目状态放在右侧索引，不再和“今天”混在一起。</p></div>
+  return `<div class="home-stat-row" aria-label="今日执行概览">
+    <div class="home-stat home-stat-progress"><div class="home-ring" aria-hidden="true"><svg viewBox="0 0 56 56"><circle class="home-ring-track" cx="28" cy="28" r="24"/><circle class="home-ring-progress" cx="28" cy="28" r="24" stroke-dasharray="${ringDash} 150.8"/></svg><span>${completion}%</span></div><div><small>今日完成</small><strong>${doneToday} <em>/ ${allToday.length}</em></strong></div></div>
+    <div class="home-stat"><small>待完成</small><strong>${todayRows.length}</strong><span>件任务</span></div>
+    <div class="home-stat"><small>逾期</small><strong class="${overdue?'is-warn':''}">${overdue}</strong><span>件</span></div>
+    <div class="home-stat"><small>预计投入</small><strong>${estimated}</strong><span>分钟</span></div>
+  </div>
+  <div class="attention-section-head"><div><h2>今日关注</h2><p>先做一件今天的事；市场与项目状态放在右侧索引。</p></div>
   <div class="attention-tools"><button class="btn btn-quiet" data-action="go-page" data-page="today">全部任务 →</button><button class="btn btn-quiet" data-action="go-page" data-page="dashboard">资产总览 →</button></div></div>
   <div class="home-editorial">
     <article class="home-feature tone-${leadTone}">
@@ -804,10 +814,16 @@ function renderHomeSheet() {
 }
 function renderHome() {
   const d=new Date(),theme=document.body.dataset.theme==='light'?'light':'dark';
-  return `<div class="page-head home-welcome"><div><h1>工作台</h1><p>${d.getFullYear()} 年 ${d.getMonth()+1} 月 ${d.getDate()} 日 · 今日执行与资产关注</p></div><div class="home-welcome-actions"><div class="theme-switch" role="group" aria-label="界面外观"><button type="button" data-action="theme-dark" class="theme-option ${theme==='dark'?'selected':''}" aria-pressed="${theme==='dark'}">深色</button><button type="button" data-action="theme-light" class="theme-option ${theme==='light'?'selected':''}" aria-pressed="${theme==='light'}">浅色</button></div></div></div>
-    ${renderAttentionCards()}
-    ${renderHomeSheet()}
-`;
+  return `<div class="home-canvas">
+    <div class="home-appbar">
+      <div class="home-appbrand"><span class="home-appmark">W</span><div><h1>工作台</h1><p>${d.getFullYear()} 年 ${d.getMonth()+1} 月 ${d.getDate()} 日 · 今日执行与资产关注</p></div></div>
+      <div class="home-appbar-actions"><span class="home-local"><i></i>本地数据</span><div class="theme-switch" role="group" aria-label="界面外观"><button type="button" data-action="theme-dark" class="theme-option ${theme==='dark'?'selected':''}" aria-pressed="${theme==='dark'}">深色</button><button type="button" data-action="theme-light" class="theme-option ${theme==='light'?'selected':''}" aria-pressed="${theme==='light'}">浅色</button></div></div>
+    </div>
+    <div class="home-canvas-body">
+      ${renderAttentionCards()}
+      ${renderHomeSheet()}
+    </div>
+  </div>`;
 }
 function renderInbox() { return renderTaskWorkspace('inbox'); }
 function renderUpcoming() { return renderTaskWorkspace('upcoming'); }
