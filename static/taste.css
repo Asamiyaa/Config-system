@@ -2172,18 +2172,3 @@ button, a, [role="button"] { -webkit-tap-highlight-color: transparent; touch-act
 @media (max-width: 480px) { .home-head-btn { display: none; } }
 .home-search { display: grid; place-items: center; width: 30px; height: 30px; border: 1px solid var(--border); border-radius: 8px; background: transparent; color: var(--muted); font-size: 16px; cursor: pointer; }
 .home-search:hover { color: var(--text); border-color: var(--control); }
-
-/* Pull-to-refresh indicator; gesture is ignored away from the top. */
-.pull-refresh {
-  position: fixed; z-index: 9999; top: calc(8px + env(safe-area-inset-top));
-  left: 50%; transform: translate(-50%, -44px); opacity: 0;
-  min-width: 94px; padding: 8px 13px; border: 1px solid var(--border);
-  border-radius: 980px; background: var(--surface); color: var(--muted);
-  font: 500 11px/1 var(--sans); text-align: center; pointer-events: none;
-  box-shadow: 0 4px 16px rgba(0,0,0,.12);
-  transition: transform 180ms var(--ease-out), opacity 180ms var(--ease-out);
-}
-.pull-refresh.visible { transform: translate(-50%, 0); opacity: 1; }
-.pull-refresh.ready { color: var(--accent); border-color: var(--accent); }
-.pull-refresh.refreshing { color: var(--accent); border-color: var(--accent); }
-@media (min-width: 861px) { .pull-refresh { display: none; } }
