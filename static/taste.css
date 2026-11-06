@@ -122,6 +122,7 @@ body[data-theme="light"] {
 /* ---------- reset ---------- */
 *, *::before, *::after { box-sizing: border-box; }
 html { background: var(--ground) !important; -webkit-text-size-adjust: 100%; }
+html, body { overscroll-behavior-y: none; }
 body {
   margin: 0;
   background: var(--ground) !important;
