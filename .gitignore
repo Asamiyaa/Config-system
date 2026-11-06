@@ -19,3 +19,6 @@ video/assets/score_mastered.wav
 *.log
 .DS_Store
 Thumbs.db
+
+# generated screenshots, downloads and source archives
+/artifacts/

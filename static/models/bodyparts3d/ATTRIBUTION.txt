@@ -1,0 +1,7 @@
+BodyParts3D, © The Database Center for Life Science licensed under CC Attribution 4.0 International.
+Source: https://dbarchive.biosciencedbc.jp/en/bodyparts3d/download.html
+Original reduced polygon meshes; grouping and browser viewer added by this project. Educational reference, not clinically validated.
+
+Skeleton inventory / Chinese labels reference: https://github.com/jixiangying/skeleton
+That project identifies its BodyParts3D source under CC BY-SA 2.1 Japan; attribution retained for adapted inventory metadata. Meshes used here were extracted directly from the official DBCLS archive linked above.
+Viewer dependencies: Three.js r128, OBJLoader and OrbitControls, MIT License (three.js authors).

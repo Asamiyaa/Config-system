@@ -10,8 +10,11 @@
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 
   const PAGES = [
-    { page: 'home', label: '首页', hint: '今天' },
-    { page: 'schedules', label: '待办', hint: '任务' },
+    { page: 'newconfig', label: '成长总览', hint: '成长' },
+    { page: 'xindeng', label: '新登', hint: '能力金字塔' },
+    { page: 'home', label: '今日与角色', hint: '首页 精力与平衡' },
+    { page: 'today', label: '执行', hint: '今日 待办 任务' },
+    { page: 'schedules', label: '自动化', hint: '定时任务' },
     { page: 'dailyflow', label: '流程', hint: '编排与统计' },
     { page: 'mistakes', label: '切记', hint: '错过与过错' },
     { page: 'dashboard', label: '资产总览', hint: '风控' },
@@ -27,10 +30,8 @@
     { page: 'skin', label: '皮肤护理', hint: '健康' },
     { page: 'sleep', label: '睡眠与恢复', hint: '健康' },
     { page: 'style', label: '发型与穿搭', hint: '健康' },
-    { page: 'agents', label: '角色', hint: '精力与平衡' },
-    { page: 'newconfig', label: '新登', hint: '90 天执行' },
-    { page: 'english', label: '外语', hint: '输入与输出' },
-    { page: 'reading', label: '书单', hint: '阅读与笔记' },
+    { page: 'english', label: '英语', hint: '外语 输入与输出' },
+    { page: 'reading', label: '阅读', hint: '书单 阅读与笔记' },
     { page: 'archive', label: '归档', hint: '聊天与源文件' }
   ];
 
@@ -42,10 +43,9 @@
   let returnFocus = null;
 
   function openPalette() {
-    if (!palette) return;
+    if (!palette || !$('#appShell') || $('#appShell').classList.contains('hidden')) return;
     returnFocus = document.activeElement;
     palette.classList.remove('hidden');
-    document.body.classList.add('ui-scroll-lock');
     input.value = '';
     filtered = PAGES.slice();
     active = 0;
@@ -56,7 +56,6 @@
   function closePalette() {
     if (!palette) return;
     palette.classList.add('hidden');
-    document.body.classList.remove('ui-scroll-lock');
     if (returnFocus && returnFocus.focus) returnFocus.focus();
   }
 
@@ -64,7 +63,7 @@
     if (!results) return;
     results.innerHTML = filtered.length
       ? filtered.map((item, i) => `<button type="button" class="taste-palette-item ${i === active ? 'active' : ''}" data-palette-page="${item.page}"><span>${item.label}</span><kbd>${item.hint}</kbd></button>`).join('')
-      : '<div class="taste-palette-empty">没有匹配的页面</div>';
+      : '<div class="taste-palette-empty">没有找到页面，请尝试“任务”“健康”或“资产”</div>';
     const el = results.querySelector('.taste-palette-item.active');
     if (el) el.scrollIntoView({ block: 'nearest' });
   }
@@ -157,7 +156,7 @@
     calendar:'today', matrix:'today', stats:'today', important:'today', alltasks:'today', flowstats:'today',
     dashboard:'dashboard', allocation:'dashboard', nasdaq:'dashboard', ashare:'dashboard', execution:'dashboard', alpharadar:'dashboard',
     health:'health', checkin:'health', diet:'health', fitness:'health', skin:'health', sleep:'health', style:'health',
-    agents:'agents', newconfig:'newconfig', english:'newconfig', reading:'newconfig', archive:'archive'
+    xindeng:'newconfig', growthplan:'newconfig', review:'newconfig', agents:'home', newconfig:'newconfig', english:'newconfig', reading:'newconfig', archive:'archive'
   };
   function syncActive() {
     const page = (typeof currentPage !== 'undefined' ? currentPage : '') || '';
@@ -424,12 +423,10 @@
     const img=box.querySelector('img');
     img.src=src; img.alt=alt;
     box.classList.add('is-open');
-    document.body.classList.add('ui-scroll-lock');
   }
   function closeLightbox() {
     if (!lightbox) return;
     lightbox.classList.remove('is-open');
-    document.body.classList.remove('ui-scroll-lock');
   }
   document.addEventListener('click', (e) => {
     const img=e.target.closest('.metric-cover img, .agent-node-card img');
@@ -445,7 +442,7 @@
   /* ---------- 3D tilt ---------- */
   let tiltCard=null;
   document.addEventListener('pointermove', (e) => {
-    if (e.pointerType === 'touch' || document.body.classList.contains('watch-sorting') || document.body.classList.contains('bento-sorting')) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || e.pointerType === 'touch' || document.body.classList.contains('watch-sorting') || document.body.classList.contains('bento-sorting')) return;
     const card=e.target.closest('.home-feature, .metric-card.has-cover, .agent-node-card, #viewRoot > .page-head');
     if (!card) {
       if (tiltCard) resetTilt(tiltCard);

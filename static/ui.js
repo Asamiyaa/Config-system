@@ -48,6 +48,7 @@
     { name: 'flow', root: '#flowModalMount', panel: '.flow-modal', close: 'flow-modal-close' },
     { name: 'workbook', root: '#workbookViewer', panel: '.workbook-modal', close: 'close-workbook' },
     { name: 'interaction', root: '#interactionModal', panel: '.interaction-modal-panel', close: 'close-interaction-modal' },
+    { name: 'palette', root: '#tastePalette', panel: '.taste-palette-panel', customClose: 'palette' },
     { name: 'sheet', root: '#uiSheet', panel: '.ui-sheet-panel', customClose: 'sheet' },
   ];
 
@@ -180,6 +181,7 @@
 
   /* ── 5. 关闭 ─────────────────────────────────────────────────────────── */
   function closeLayer(layer) {
+    if (layer.customClose === 'palette') { layer.el.querySelector('[data-palette-close]').click(); return true; }
     if (layer.customClose === 'sheet') { closeSheet(); return true; }
     const btn = layer.el.querySelector('[data-action="' + layer.close + '"]');
     if (btn) {
@@ -203,14 +205,14 @@
       if (!layer) return;
       if (e.key === 'Escape') {
         e.preventDefault();
-        e.stopPropagation();
+        e.stopImmediatePropagation();
         closeTop();
         return;
       }
       if (e.key === 'Tab') {
         const panel = layer.panelEl;
         const items = focusables(panel);
-        if (!items.length) return;
+        if (!items.length) { e.preventDefault(); panel.focus(); return; }
         const first = items[0];
         const last = items[items.length - 1];
         if (!panel.contains(document.activeElement)) {
@@ -262,6 +264,9 @@
       if (table.closest('.table-scroll')) return;
       const box = document.createElement('div');
       box.className = 'table-scroll';
+      box.tabIndex = 0;
+      box.setAttribute('role', 'region');
+      box.setAttribute('aria-label', '数据表格，可左右滚动查看完整内容');
       table.parentNode.insertBefore(box, table);
       box.appendChild(table);
     });
@@ -347,22 +352,25 @@
   }
 
   function activateTab(scope, name, remember) {
-    const panels = scope.querySelectorAll('[data-tab-panel]');
+    // Resolve a valid destination before hiding anything. Ignore nested workspaces.
+    const panels = [...scope.querySelectorAll('[data-tab-panel]')].filter(p => tabScopeOf(p) === scope);
     if (!panels.length) return;
-    let hit = false;
-    panels.forEach((p) => {
-      const on = p.getAttribute('data-tab-panel') === name;
-      p.classList.toggle('active', on);
-      if (on) hit = true;
-    });
-    if (!hit) return;
-    scope.querySelectorAll('[data-tab]').forEach((b) => {
+    const requested = name;
+    if(scope.classList?.contains('fit-shell') && name==='tools')name='library';
+    const exists = value => panels.some(p => p.getAttribute('data-tab-panel') === value);
+    if (!exists(name)) {
+      const fallback = scope.dataset?.defaultTab;
+      name = exists(fallback) ? fallback :
+        (panels.find(p => p.classList.contains('active')) || panels[0]).getAttribute('data-tab-panel');
+    }
+    panels.forEach(p => p.classList.toggle('active', p.getAttribute('data-tab-panel') === name));
+    [...scope.querySelectorAll('[data-tab]')].filter(b => tabScopeOf(b) === scope).forEach(b => {
       const on = b.getAttribute('data-tab') === name;
       b.classList.toggle('active', on);
       if (b.getAttribute('data-tab') === 'plan' && !b.closest('[role="tablist"]')) b.removeAttribute('aria-selected');
       else b.setAttribute('aria-selected', on ? 'true' : 'false');
     });
-    if (remember) {
+    if (remember || requested !== name) {
       try { sessionStorage.setItem(tabStorageKey(scope), name); } catch (_) {}
     }
   }

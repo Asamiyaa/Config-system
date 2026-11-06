@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="/static/theme.css" />
   <link rel="stylesheet" href="/static/taste.css" />
 </head>
-<body data-theme="light">
+<body data-theme="dark">
   <svg class="taste-icon-sprite" aria-hidden="true" focusable="false">
     <symbol id="i-home" viewBox="0 0 16 16"><path d="M2.5 7.2 8 2.5l5.5 4.7v5.8a.5.5 0 0 1-.5.5h-3.2V9.8H6.2v3.7H3a.5.5 0 0 1-.5-.5V7.2Z"/></symbol>
     <symbol id="i-check" viewBox="0 0 16 16"><path d="M3 8.4 6.2 11.6 13 4.8"/><path d="M2.5 2.5h11v11h-11z" opacity=".35"/></symbol>
@@ -39,8 +39,8 @@
       <div class="auth-grid"></div>
       <div class="auth-copy">
         <div class="eyebrow">ONE WORKSPACE · MANY DECISIONS</div>
-        <h2>把资产配置，<br><em>变成可执行系统。</em></h2>
-        <p>监控 · 评分 · 触发条件 · 日志 · 90天落地路线图。策略与数据在一个工作台里持续迭代。</p>
+        <h2>把每天的计划，<br><em>变成看得见的进展。</em></h2>
+        <p>安排今日任务，记录健康与学习，跟踪资产配置。在一个工作台里，把计划落实到每天。</p>
       </div>
     </div>
     <div class="auth-panel">
@@ -49,7 +49,7 @@
       <form id="authForm" class="auth-form">
         <label>用户名<input id="authUsername" autocomplete="username" minlength="3" required placeholder="例如：investor01" value="demo" /></label>
         <label>密码<div class="password-wrap"><input id="authPassword" type="password" autocomplete="current-password" required placeholder="至少 10 位" value="Demo1234!" /><button class="ghost-icon" type="button" data-action="toggle-password" aria-label="显示密码">◉</button></div></label>
-        <div class="auth-message" id="authMessage"></div>
+        <div class="auth-message" id="authMessage" role="status" aria-live="polite"></div>
         <button class="btn btn-primary btn-full" id="authSubmit" type="submit">登录工作台 <span>↗</span></button>
       </form>
       <div class="auth-mode"><span id="authModeText">还没有账户？</span><button type="button" id="authModeToggle">创建本地账户</button></div>
@@ -64,21 +64,20 @@
         <div class="brand-mark small">W<span>·</span></div>
         <div class="sidebar-brand-copy"><strong>WEALTH OS</strong><small>PRIVATE OS</small></div>
         <button class="sidebar-collapse" id="tasteCollapse" type="button" title="收起侧栏" aria-label="收起侧栏">‹</button>
-        <button class="mobile-close" data-action="close-sidebar">×</button>
+        <button class="mobile-close" aria-label="关闭导航菜单" data-action="close-sidebar">×</button>
       </div>
       <button class="sidebar-search" id="tasteSearch" type="button" aria-label="搜索页面">
-        <span class="sidebar-search-icon">⌕</span><span class="sidebar-search-label">搜索页面</span><kbd>⌘K</kbd>
+        <span class="sidebar-search-icon">⌕</span><span class="sidebar-search-label">搜索页面</span><kbd>Ctrl / ⌘ K</kbd>
       </button>
       <div class="sidebar-scroll">
         <nav id="mainNav" class="main-nav" aria-label="主导航">
           <div class="nav-group-label">工作台</div>
+          <button class="nav-item" data-page="newconfig" title="成长"><svg class="nav-icon"><use href="#i-compass"></use></svg><span class="nav-label">成长</span></button>
           <button class="nav-item active" data-page="home" title="今日"><svg class="nav-icon"><use href="#i-home"></use></svg><span class="nav-label">今日</span></button>
           <button class="nav-item" data-page="today" title="执行"><svg class="nav-icon"><use href="#i-check"></use></svg><span class="nav-label">执行</span></button>
           <button class="nav-item" data-page="dashboard" title="资产"><svg class="nav-icon"><use href="#i-shield"></use></svg><span class="nav-label">资产</span></button>
           <button class="nav-item" data-page="health" title="健康"><svg class="nav-icon"><use href="#i-heart"></use></svg><span class="nav-label">健康</span></button>
           <div class="nav-group-label">个人系统</div>
-          <button class="nav-item" data-page="agents" title="角色"><svg class="nav-icon"><use href="#i-users"></use></svg><span class="nav-label">角色</span></button>
-          <button class="nav-item" data-page="newconfig" title="成长"><svg class="nav-icon"><use href="#i-compass"></use></svg><span class="nav-label">成长</span></button>
           <button class="nav-item" data-page="archive" title="归档"><svg class="nav-icon"><use href="#i-archive"></use></svg><span class="nav-label">归档</span></button>
         </nav>
       </div>
@@ -88,10 +87,12 @@
       </div>
     </aside>
 
-    <main class="main-panel">
+    <main class="main-panel" id="mainContent" tabindex="-1">
+      <a class="skip-link" href="#viewRoot">跳到页面内容</a>
       <div id="toast" class="toast hidden"></div>
-      <div id="viewRoot" class="view-root"></div>
-      <footer class="app-footer"><span>WEALTH OS · PRIVATE WORKSPACE</span><span>规则是风险预算器，不是涨跌预测。交易前核验源数据、合规和产品状态。</span><span id="saveStatus">未修改</span></footer>
+      <div id="saveRecovery" class="save-recovery hidden" role="alert"><span>更改尚未保存，请保留此页面并重试。</span><button class="btn btn-small" data-action="retry-save">重试保存</button></div>
+      <div id="viewRoot" class="view-root" tabindex="-1"></div>
+      <footer class="app-footer"><span>WEALTH OS · PRIVATE WORKSPACE</span><span>规则是风险预算器，不是涨跌预测。交易前核验源数据、合规和产品状态。</span><span id="saveStatus" role="status" aria-live="polite">未修改</span></footer>
     </main>
   </div>
 
@@ -103,15 +104,18 @@
     </div>
   </div>
 
-  <script src="/static/health_core.js"></script>
-  <script src="/static/skin_os.js"></script>
-  <script src="/static/diet_os.js"></script>
-  <script src="/static/sleep_os.js"></script>
-  <script src="/static/newconfig_os.js"></script>
-  <script src="/static/english_os.js"></script>
-  <script src="/static/reading_os.js"></script>
-  <script src="/static/app.js"></script>
-  <script src="/static/ui.js" defer></script>
-  <script src="/static/taste.js" defer></script>
+  <script src="/static/health_core.js?v=20261106-anatomy1"></script>
+  <script src="/static/skin_os.js?v=20261106-anatomy1"></script>
+  <script src="/static/diet_os.js?v=20261106-anatomy1"></script>
+  <script src="/static/sleep_os.js?v=20261106-anatomy1"></script>
+  <script src="/static/newconfig_os.js?v=20261106-anatomy1"></script>
+  <script src="/static/english_os.js?v=20261106-anatomy1"></script>
+  <script src="/static/reading_os.js?v=20261106-anatomy1"></script>
+  <script src="/static/app.js?v=20261106-anatomy1"></script>
+  <script src="/static/growth.js?v=20261106-anatomy1"></script>
+  <script src="/static/ui.js?v=20261106-anatomy1" defer></script>
+  <script src="/static/taste.js?v=20261106-anatomy1" defer></script>
+  <script src="/static/spatial.js?v=20261106-anatomy1" defer></script>
+  <script src="/static/workspace.js?v=20261106-anatomy1" defer></script>
 </body>
 </html>

@@ -74,7 +74,7 @@ function readStatusTone(status) {
 
 function renderReadingV2() {
   const s = readStats();
-  return `${sectionHead('READING OS · LIBRARY & NOTES', '书单', '用阅读计划形成持续输入，用打卡记录真实阅读，用感想与 Notebook 沉淀判断。书籍、打卡、笔记分别放在独立页签里，新增和编辑都使用弹层。', `<button class="btn btn-outline" data-action="capability-page" data-page="home">← 返回今日工作台</button><button class="btn btn-outline" data-action="read-add-book">＋ 添加书籍</button><button class="btn btn-primary" data-action="read-add-session">＋ 记录阅读</button>`)}
+  return `${sectionHead('READING OS · LIBRARY & NOTES', '阅读', '用阅读计划形成持续输入，用打卡记录真实阅读，用感想与 Notebook 沉淀判断。书籍、打卡、笔记分别放在独立页签里，新增和编辑都使用弹层。', `<button class="btn btn-outline" data-action="capability-page" data-page="home">← 返回今日工作台</button><button class="btn btn-outline" data-action="read-add-book">＋ 添加书籍</button><button class="btn btn-primary" data-action="read-add-session">＋ 记录阅读</button>`)}
   <div class="hos-shell" data-tab-shell data-tab-key="reading" data-default-tab="books">
     <div class="hos-bar"><div class="fit-tabs" data-tabs role="tablist">
       <button class="fit-tab active" data-tab="books" role="tab">书架</button>
@@ -223,9 +223,7 @@ function readDelete(kind, index) {
   const arr = state[key] || [];
   const i = hosNum(index, -1);
   if (i < 0 || !arr[i]) return;
-  if (!confirm(`确认删除这条${label}？删除后不能恢复。`)) return;
-  arr.splice(i, 1);
-  saveAndRender(`${label}已删除`);
+  deleteWithUndo(arr, i, label);
 }
 
 document.addEventListener('click', (e) => {

@@ -8,9 +8,9 @@ const money = (v, currency='CNY') => new Intl.NumberFormat('zh-CN', {style:'curr
 const fmt = (v, d=2) => v === null || v === undefined || v === '' || !Number.isFinite(Number(v)) ? '—' : Number(v).toFixed(d);
 const stateUrl = '/api/state';
 let state = null;
-const savedTheme = (()=>{try{return localStorage.getItem('wealth-os-theme-v3')==='light'?'light':'dark'}catch(_){return 'light'}})();
+const savedTheme = (()=>{try{return localStorage.getItem('wealth-os-theme-v3')==='dark'?'dark':'light'}catch(_){return 'light'}})();
 document.documentElement.dataset.theme=savedTheme;document.body.dataset.theme=savedTheme;
-const syncThemeColor=()=>{const m=document.querySelector('meta[name="theme-color"]');if(m)m.content=document.body.dataset.theme==='dark'?'#0F0F12':'#f5f5f7';};syncThemeColor();
+const syncThemeColor=()=>{const m=document.querySelector('meta[name="theme-color"]');if(m)m.content=document.body.dataset.theme==='dark'?'#14211f':'#f4f2eb';};syncThemeColor();
 let currentPage = 'home';
 let authMode = 'login';
 let saveTimer = null;
@@ -30,7 +30,7 @@ const WORKBOOKS = [
 ];
 function shiftDateKey(key, days) { if(!key) return ''; const d=new Date(`${key}T12:00:00`); d.setDate(d.getDate()+days); return todayKey(d); }
 function dayDiff(start,end) { if(!start||!end) return 0; return Math.round((new Date(`${end}T12:00:00`)-new Date(`${start}T12:00:00`))/86400000); }
-const PAGE_NAMES = {schedules:'自动化',agents:'角色',mistakes:'避坑',home:'工作台',inbox:'今日任务',upcoming:'未来 7 天',calendar:'周历 / 日程',matrix:'任务四象限',stats:'执行统计',important:'重要事项',alltasks:'全部任务',dashboard:'资产总览',allocation:'全球资产配置',nasdaq:'纳斯达克 AI 策略',ashare:'A股 ETF 轮动',newconfig:'新登',health:'健康',checkin:'打卡与统计',diet:'饮食饮水',fitness:'健身管理',skin:'皮肤护理',sleep:'睡眠与恢复',style:'发型与穿搭',english:'外语',reading:'书单',execution:'每日执行与日志',archive:'归档',dailyflow:'流程',flowstats:'流程统计',alpharadar:'Alpha Radar'};
+const PAGE_NAMES = {schedules:'自动化',agents:'角色',mistakes:'避坑',home:'工作台',inbox:'今日任务',upcoming:'未来 7 天',calendar:'周历 / 日程',matrix:'任务四象限',stats:'执行统计',important:'重要事项',alltasks:'全部任务',dashboard:'资产总览',allocation:'全球资产配置',nasdaq:'纳斯达克 AI 策略',ashare:'A股 ETF 轮动',xindeng:'新登',newconfig:'成长总览',health:'健康',checkin:'打卡与统计',diet:'饮食饮水',fitness:'健身管理',skin:'皮肤护理',sleep:'睡眠与恢复',style:'发型与穿搭',english:'英语',reading:'阅读',execution:'每日执行与日志',archive:'归档',dailyflow:'流程',flowstats:'流程统计',alpharadar:'Alpha Radar'};
 
 async function api(path, options={}) {
   const res = await fetch(path, {credentials:'same-origin', headers:{'Content-Type':'application/json', ...(options.headers||{})}, ...options});
@@ -61,6 +61,7 @@ function setAuthMessage(msg, error=true) {
 }
 
 function showAuth() {
+  undoEntries.length=0;$('#undoNotice')?.remove();
   $('#authScreen').classList.remove('hidden');
   $('#appShell').classList.add('hidden');
 }
@@ -179,21 +180,57 @@ function ensureStateDefaults() {
   if (typeof ensureHealthOSState === 'function') ensureHealthOSState();
 }
 
-async function persist({quiet=false}={}) {
-  if (!state) return;
-  $('#saveStatus').textContent='保存中…';
-  try {
-    await api(stateUrl, {method:'PUT', body:JSON.stringify({state})});
-    $('#saveStatus').textContent='已保存 · '+new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'});
-    state.meta.lastSaved = new Date().toISOString();
-    if (!quiet) toast('更改已保存，并同步到 Windows Excel 个人数据保险库');
-  } catch(err) {
-    $('#saveStatus').textContent='保存失败';
-    toast('保存失败：'+err.message, true);
-  }
+let saveQueue = Promise.resolve();
+let unsavedChanges = false;
+function setSaveState(kind, text) {
+  const status = $('#saveStatus');
+  status.textContent = text;
+  status.dataset.state = kind;
+  const banner = $('#saveRecovery');
+  if (banner) banner.classList.toggle('hidden', kind !== 'error');
 }
-function scheduleSave() { clearTimeout(saveTimer); $('#saveStatus').textContent='待保存…'; saveTimer=setTimeout(()=>persist({quiet:true}),500); }
-function saveAndRender(message) { persist({quiet:true}).then(()=>{ if(message) toast(message); renderPage(currentPage); }); }
+function persist({quiet=false}={}) {
+  unsavedChanges = true;
+  const run = async () => {
+    if (!state) return false;
+    setSaveState('saving', '保存中…');
+    const payload = JSON.stringify({state});
+    const saveStarted=performance.now();
+    try {
+      await api(stateUrl, {method:'PUT', body:payload});
+      window.lastWorkspaceSaveMs=Math.round(performance.now()-saveStarted);
+      unsavedChanges = JSON.stringify({state}) !== payload;
+      setSaveState(unsavedChanges?'pending':'saved', unsavedChanges?'还有更改待保存…':'已保存 · '+new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'}));
+      if (!quiet) toast('更改已保存');
+      return true;
+    } catch(err) {
+      unsavedChanges = true;
+      setSaveState('error', '保存失败 · 更改仍保留在当前页面');
+      toast('保存失败：'+err.message, true);
+      return false;
+    }
+  };
+  saveQueue = saveQueue.then(run, run);
+  return saveQueue;
+}
+function scheduleSave() { clearTimeout(saveTimer); unsavedChanges=true; setSaveState('pending','待保存…'); saveTimer=setTimeout(()=>persist({quiet:true}),500); }
+function saveAndRender(message) { const y=window.scrollY; const active=document.activeElement; const id=active?.id; const selection=active?.selectionStart; renderPage(currentPage,{transition:false,animate:false});window.scrollTo(0,y);if(id){const field=document.getElementById(id);field?.focus({preventScroll:true});try{field?.setSelectionRange(selection,selection)}catch(_){}} return persist({quiet:true}).then(ok=>{if(ok&&message)toast(message);return ok;}); }
+window.addEventListener('beforeunload', e=>{if(unsavedChanges){e.preventDefault();e.returnValue='';}});
+const undoEntries = [];
+function deleteWithUndo(arr, index, label) {
+  if(index<0 || !arr[index]) return;
+  const [item]=arr.splice(index,1);
+  undoEntries.push({arr,index,item,label});
+  renderUndoNotice();
+  saveAndRender();
+}
+function renderUndoNotice() {
+  let el=$('#undoNotice');
+  if(!el){el=document.createElement('div');el.id='undoNotice';el.setAttribute('role','status');$('#appShell').append(el);}
+  const last=undoEntries.at(-1);
+  el.classList.toggle('hidden',!last);
+  if(last) el.innerHTML=`<span>${esc(last.label)}已移除（${undoEntries.length} 项可恢复）</span><button class="btn btn-small" data-action="undo-delete">撤销最近删除</button>`;
+}
 
 function tag(text, type='neutral') { return `<span class="tag ${type}">${esc(text)}</span>`; }
 function sectionHead(kicker, title, desc, actions='', level='h1') { return `<div class="page-head"><div><div class="eyebrow">${esc(kicker)}</div><${level}>${esc(title)}</${level}><p>${esc(desc)}</p></div><div class="page-actions">${actions}</div></div>`; }
@@ -242,7 +279,7 @@ function setHeader(page) {
 }
 
 const HUB_OF={
-  home:'home',
+  home:'home',xindeng:'newconfig',growthplan:'newconfig',review:'newconfig',
   today:'today',inbox:'today',schedules:'today',dailyflow:'today',mistakes:'today',calendar:'today',matrix:'today',stats:'today',important:'today',alltasks:'today',flowstats:'today',
   dashboard:'dashboard',allocation:'dashboard',nasdaq:'dashboard',ashare:'dashboard',execution:'dashboard',alpharadar:'dashboard',
   health:'health',checkin:'health',diet:'health',fitness:'health',skin:'health',sleep:'health',style:'health',
@@ -251,7 +288,7 @@ const HUB_OF={
 const HUB_TABS={
   today:{label:'执行',items:[['today','今日'],['schedules','自动化'],['dailyflow','流程'],['mistakes','避坑'],['calendar','周历'],['stats','统计']]},
   dashboard:{label:'资产',items:[['dashboard','总览'],['allocation','配置'],['nasdaq','纳指'],['ashare','A股'],['execution','执行'],['alpharadar','实验']]},
-  newconfig:{label:'成长',items:[['newconfig','新登'],['english','外语'],['reading','书单']]},
+  newconfig:{label:'成长',items:[['xindeng','新登'],['newconfig','成长总览'],['growthplan','90天计划'],['review','每周复盘'],['english','英语'],['reading','阅读']]},
   health:{label:'健康',items:[['health','总览'],['checkin','打卡'],['diet','饮食'],['fitness','健身'],['skin','皮肤'],['sleep','睡眠'],['style','穿搭']]}
 };
 function renderHubTabs(page){
@@ -259,7 +296,7 @@ function renderHubTabs(page){
   if(!hub) return '';
   const def=HUB_TABS[hub];
   if(!def) return '';
-  if(page==='dashboard'||page==='health') return '';
+
   return `<div class="hub-tabs" role="navigation" aria-label="${esc(def.label)}导航">${def.items.map(([key,label])=>`<button class="hub-tab ${key===page?'active':''}" data-action="go-page" data-page="${key}" aria-current="${key===page?'page':'false'}">${label}</button>`).join('')}</div>`;
 }
 
@@ -333,16 +370,25 @@ function labelControls(root=document){
   });
 }
 function renderPage(page, {autoRefresh=false, transition=true, animate=true}={}) {  if (!state) return;
+  if(page==='agents')page='home';
+  const renderStarted=performance.now();
   currentPage=page;
   setHeader(page);
   const root=$('#viewRoot');
   root.dataset.page=page;
   root.dataset.hub=HUB_OF[page]||page;
-  const map={today:()=>renderTaskWorkspace('home'),schedules:renderSchedules,agents:renderAgents,mistakes:renderMistakes,home:renderHome,inbox:renderInbox,upcoming:renderUpcoming,calendar:renderCalendar,matrix:renderMatrix,stats:renderFocusStats,important:renderImportant,alltasks:renderAllFocusTasks,dashboard:renderDashboard,allocation:renderAllocation,nasdaq:renderNasdaq,ashare:renderAshare,newconfig:()=> (typeof renderNewConfigV2==='function'?renderNewConfigV2():renderNewConfig()),health:renderHealth,checkin:renderHealthCheckin,diet:()=>renderHealthSection('diet'),fitness:()=>renderHealthSection('fitness'),skin:()=>renderHealthSection('skin'),sleep:()=>renderHealthSection('sleep'),style:()=>renderHealthSection('style'),english:()=> (typeof renderEnglishV2==='function'?renderEnglishV2():renderEnglish()),reading:()=> (typeof renderReadingV2==='function'?renderReadingV2():renderReading()),execution:renderExecution,archive:renderArchive,dailyflow:renderDailyFlow,flowstats:renderFlowStats,alpharadar:renderAlphaRadar};
+  const map={xindeng:renderXinDeng,growthplan:renderGrowthPlan,review:renderGrowthReview,today:()=>renderTaskWorkspace('home'),schedules:renderSchedules,agents:renderAgents,mistakes:renderMistakes,home:renderHome,inbox:renderInbox,upcoming:renderUpcoming,calendar:renderCalendar,matrix:renderMatrix,stats:renderFocusStats,important:renderImportant,alltasks:renderAllFocusTasks,dashboard:renderDashboard,allocation:renderAllocation,nasdaq:renderNasdaq,ashare:renderAshare,newconfig:()=> (typeof renderNewConfigV2==='function'?renderNewConfigV2():renderNewConfig()),health:renderHealth,checkin:renderHealthCheckin,diet:()=>renderHealthSection('diet'),fitness:()=>renderHealthSection('fitness'),skin:()=>renderHealthSection('skin'),sleep:()=>renderHealthSection('sleep'),style:()=>renderHealthSection('style'),english:()=> (typeof renderEnglishV2==='function'?renderEnglishV2():renderEnglish()),reading:()=> (typeof renderReadingV2==='function'?renderReadingV2():renderReading()),execution:renderExecution,archive:renderArchive,dailyflow:renderDailyFlow,flowstats:renderFlowStats,alpharadar:renderAlphaRadar};
   const investingPages=['dashboard','allocation','nasdaq','ashare','execution'];
   const body=(map[page]||renderHome)();
   const commit = () => {
     root.innerHTML=body;
+    if (['dashboard','allocation','nasdaq','ashare','alpharadar'].includes(page)) {
+      const refreshed=state.meta?.lastRefresh;
+      const stamp=refreshed?new Date(refreshed):null;
+      const valid=stamp&&!Number.isNaN(stamp.getTime());
+      const stale=!valid||Date.now()-stamp.getTime()>24*60*60*1000;
+      root.insertAdjacentHTML('afterbegin',`<div class="data-provenance ${stale?'is-stale':''}" role="note"><strong>${state.meta?.mode==='demo'?'演示工作区':'当前工作区'}</strong><span>行情刷新：${valid?esc(stamp.toLocaleString('zh-CN')):'尚无有效刷新时间'}</span><span>${stale?'数据待核验，请检查各标的日期与来源':'刷新时间不代表全部标的数据均为最新'}</span></div>`);
+    }
     if (investingPages.includes(page) && page !== 'dashboard') {
       const marketPanel=renderMarketActionPanel(page);
       const head=root.querySelector('.page-head');
@@ -364,7 +410,8 @@ function renderPage(page, {autoRefresh=false, transition=true, animate=true}={})
     updateFocusCounts();
     labelControls(root);
     closeSidebar();
-    cleanPageSections(page, root);
+    window.workspacePerformance=window.workspacePerformance||[];window.workspacePerformance.push({page,renderMs:Math.round(performance.now()-renderStarted),at:Date.now()});if(window.workspacePerformance.length>100)window.workspacePerformance.shift();
+    // Keep module content visible; the shared chapter navigator handles long pages.
   };
   const reduceMotion=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   if (document.startViewTransition && !reduceMotion && transition) {
@@ -548,7 +595,7 @@ function taskDueLabel(t) {
 function renderFocusTaskRows(view) {
   const query=(ui.focusQuery||'').trim().toLowerCase();
   const rows=focusTaskFilter(view).filter(t=>!query||[t.title,t.project,t.note,t.priority].join(' ').toLowerCase().includes(query)).sort((a,b)=>Number(a.done)-Number(b.done)||(a.dueDate||'9999').localeCompare(b.dueDate||'9999')||({'高':0,'中':1,'低':2}[a.priority]??3)-({'高':0,'中':1,'低':2}[b.priority]??3));
-  if(!rows.length) return `<div class="task-empty"><span class="empty-spark">✳</span><strong>${query?'没有匹配的任务':'这一区域暂时没有任务'}</strong><p>${query?'试试任务名称、模块或备注。':'先添加一项任务，把想法变成下一步行动。'}</p></div>`;
+  if(!rows.length) return `<div class="task-empty"><span class="empty-spark">✳</span><strong>${query?'没有匹配的任务':'这一区域暂时没有任务'}</strong><p>${query?'试试任务名称、模块或备注。':'先添加一项任务，把想法变成下一步行动。'}</p><button class="btn btn-outline" data-action="${query?'clear-task-search':'focus-add-focus'}">${query?'清除搜索':'添加任务'}</button></div>`;
   return rows.map((t,i)=>`<article class="focus-task-row ${t.done?'is-done':''}" data-focus-task-row="${esc(t.id)}" style="--task-i:${Math.min(i,12)}">
     <button class="focus-check ${t.done?'checked':''}" data-action="toggle-focus-task" data-id="${esc(t.id)}" aria-label="${t.done?'标记未完成':'完成任务'}">${t.done?'✓':''}</button>
     <div class="focus-task-copy"><div class="focus-task-title">${esc(t.title)}</div><div class="focus-task-meta"><span class="project-chip">${esc(t.project||'收集箱')}</span><span class="task-due ${t.dueDate<todayKey()&&!t.done?'overdue':''}">${esc(taskDueLabel(t))}</span><span>◷ ${Math.max(0,n(t.estimate,0))}m</span><span class="priority-label ${taskPriorityClass(t.priority)}">${esc(t.priority||'低')}优先级</span></div>${t.note?`<p class="focus-task-note">${esc(t.note)}</p>`:''}</div>
@@ -870,16 +917,20 @@ function renderHomeDashboard(){
       <div class="home-dash-title"><span class="home-dash-mark">W</span><div><h1>工作台</h1><p>${d.getFullYear()} 年 ${d.getMonth()+1} 月 ${d.getDate()} 日 · 今日执行与资产关注</p></div></div>
       <div class="home-dash-actions"><button class="home-search" data-action="home-search" aria-label="搜索页面">⌕</button><span class="home-live"><i></i>本地数据</span><button class="home-head-btn" data-action="home-share">分享</button><button class="home-head-btn" data-action="export-json">导出</button><button class="btn btn-primary btn-small" data-action="focus-add-focus">＋ 新任务</button><div class="theme-switch" role="group" aria-label="界面外观"><button type="button" data-action="theme-dark" class="theme-option ${theme==='dark'?'selected':''}" aria-pressed="${theme==='dark'}">深色</button><button type="button" data-action="theme-light" class="theme-option ${theme==='light'?'selected':''}" aria-pressed="${theme==='light'}">浅色</button></div></div>
     </header>
-    <div class="home-kpi-row">
+    <section class="spatial-hero" aria-label="今日行动">
+      <div class="spatial-hero-copy"><span class="spatial-label">你的每日空间</span><h2>${openTasks.length?'让今天，向前一步。':'留一点空间，给新的开始。'}</h2><p>${lead?`从「${esc(lead.title)}」开始，把注意力放在一件事上。`:'记录一个小目标，从今天开始积累。'}</p><div class="spatial-hero-actions">${lead?`<button class="btn btn-primary" data-action="toggle-focus-task" data-id="${esc(lead.id)}">完成这件事</button><button class="btn btn-outline" data-action="edit-focus-task" data-id="${esc(lead.id)}">编辑 / 改期</button><button class="btn btn-outline" data-action="home-start-focus">开始专注</button>`:'<button class="btn btn-primary" data-action="focus-add-focus">添加第一件任务</button>'}</div><div class="spatial-hero-meta"><span>${openTasks.length} 件待办</span><span>${habits} 项习惯已打卡</span></div></div>
+      <div class="spatial-object" aria-label="今日任务完成率 ${completion}%"><div class="spatial-orbit spatial-orbit-one"></div><div class="spatial-orbit spatial-orbit-two"></div><div class="spatial-sphere"><span>今日进度</span><strong>${completion}<small>%</small></strong><span>${doneHome} / ${homeTasks.length} 已完成</span></div><span class="spatial-satellite" aria-hidden="true"></span><span class="spatial-object-caption">每一小步，都算数。</span></div>
+    </section>
+    <details class="home-data-overview"><summary>数据概览 · 精力、资产与任务负载</summary><div class="home-kpi-row">
       <article class="home-kpi"><div class="home-kpi-top"><span>今日待办</span><b>01</b></div><strong>${openTasks.length}</strong><small class="${overdue?'is-down':''}">${overdue?`${overdue} 项逾期`:'没有逾期'}</small></article>
       <article class="home-kpi home-kpi-ring"><div class="home-kpi-top"><span>今日完成</span><b>02</b></div><div class="home-kpi-ring-wrap">${homeRingSvg(completion)}<strong>${doneHome}<em>/${homeTasks.length}</em></strong></div><small>完成率 ${completion}%</small></article>
       <article class="home-kpi"><div class="home-kpi-top"><span>平衡指数</span><b>03</b></div><strong>${balance.score}</strong><small>忙碌 ${balance.busy} · 暂停 ${balance.paused}</small></article>
       <article class="home-kpi"><div class="home-kpi-top"><span>纳指配置分</span><b>04</b></div><strong>${fmt(nd.entry,1)}</strong><small>泡沫 ${fmt(nd.bubble,1)}</small></article>
       <article class="home-kpi"><div class="home-kpi-top"><span>7 日负载</span><b>05</b></div><strong>${due7}</strong><small class="${delta!==null&&delta>0?'is-warn':delta!==null&&delta<0?'is-up':''}">较前 7 日 ${delta===null?'—':`${delta>0?'↑':delta<0?'↓':'·'} ${Math.abs(delta)}%`}</small></article>
     </div>
-    <div class="home-dash-grid">
+    </details><div class="home-dash-grid">
       <section class="home-panel home-trend-panel">
-        <div class="home-panel-head"><div><span class="home-overline">今日主线</span><h2>${lead?esc(lead.title):'今天还没有任务'}</h2><p>${lead?`${overdue} 件逾期 · ${dueToday} 件今天到期`:'先添加一件今天要做的事；不要把项目进度当成今天的任务。'}</p></div><button class="btn btn-small btn-outline" data-action="go-page" data-page="today">执行清单 →</button></div>
+        <div class="home-panel-head"><div><span class="home-overline">执行节奏</span><h2>任务负载与接下来</h2><p>查看到期分布，给今天留出合理余量。</p></div><button class="btn btn-small btn-outline" data-action="go-page" data-page="today">执行清单 →</button></div>
         ${lead?`<div class="home-lead-meta"><span class="project-chip">${esc(lead.project||'收集箱')}</span><span class="${lead.dueDate&&lead.dueDate<today?'is-overdue':''}">${esc(lead.dueDate===today?'今天到期':lead.dueDate||'未排期')}</span><span>${Math.max(0,n(lead.estimate,0))} 分钟</span></div>`:''}
         <div class="home-chart-head"><span>任务负载</span><div class="home-range-tabs" role="group" aria-label="趋势时间范围">${[['7','7D'],['30','30D'],['90','90D']].map(([v,l])=>`<button class="${(ui.homeRange||'7')===v?'active':''}" data-action="home-range" data-range="${v}">${l}</button>`).join('')}</div></div>
         <div class="home-chart">${homeTrendSvg(load)}</div>
@@ -891,11 +942,12 @@ function renderHomeDashboard(){
         <section class="home-panel home-sim-panel"><div class="home-panel-head"><div><span class="home-overline">策略模拟器</span><h2>现金目标预览</h2></div><span class="home-count">仅预览</span></div><div class="home-sim-value"><strong id="homeCashValue">${fmt(cash,1)}%</strong><span>当前目标</span></div><input id="homeCashSlider" data-home-cash type="range" min="5" max="40" step="1" value="${Math.round(cash)}" aria-label="预览现金目标比例" style="--v:${(cash-5)/35*100}%"><div class="home-sim-scale"><span>5%</span><span>40%</span></div><p id="homeCashNote">调整只影响预览，不写入配置。降低现金目标会提高风险预算。</p><button class="btn btn-small btn-outline" data-action="go-page" data-page="allocation">查看配置 →</button></section>
       </div>
     </div>
+    <details class="getting-started"><summary>第一次使用？从这三步开始</summary><div><button class="btn btn-outline" data-action="focus-add-focus">1. 添加一个任务</button><button class="btn btn-outline" data-action="go-page" data-page="checkin">2. 记录健康打卡</button><button class="btn btn-outline" data-action="go-page" data-page="dashboard">3. 核验资产数据</button><p>任务、健康与资产各自记录；先从你今天需要的一个模块开始。</p></div></details>
     <section class="home-reco"><div class="home-reco-head"><div><span class="home-overline">建议</span><h2>接下来可以做什么</h2></div><span class="home-count">基于当前任务与持仓</span></div><div class="home-reco-grid">${recs.slice(0,3).map((r,i)=>`<article class="home-reco-card"><div class="home-reco-top"><span class="tag neutral">${r.tag}</span><b>0${i+1}</b></div><h3>${esc(r.title)}</h3><p>${esc(r.text)}</p><div class="home-reco-foot"><span>影响 · ${esc(r.impact)}</span><button data-action="go-page" data-page="${r.page}">${r.cta} ↗</button></div></article>`).join('')}</div></section>
     ${renderHomeSheet()}
   </div>`;
 }
-function renderHome() { return renderHomeDashboard(); }
+function renderHome() { return (typeof renderGrowthHome==='function'?renderGrowthHome():renderHomeDashboard()) + `<section class="today-roles" aria-label="今日角色与精力"><h2>今日角色与精力</h2>${renderTodayRoles()}</section>`; }
 function renderInbox() { return renderTaskWorkspace('inbox'); }
 function renderUpcoming() { return renderTaskWorkspace('upcoming'); }
 function renderImportant() { return renderTaskWorkspace('important'); }
@@ -1159,7 +1211,7 @@ function renderCapabilityPyramid() {
     {level:'01',width:100,title:'现金流、应急金与执行底盘',subtitle:'任何全球化计划的地基：先保证生存能力，再配置风险资产',items:'税后收入 / 必要支出 / 高息债管理 / 6–12 个月应急金 / 睡眠、训练与固定执行节奏',gate:'资产负债覆盖率先做到 ≥95%；应急金与投资资金分开；高息债未处理前暂停杠杆和大额低流动性投入。'}
   ];
   return `<section class="card capability-pyramid-card" id="capability-pyramid">
-    <div class="card-head"><div><h3>新登配置能力金字塔</h3><p>目标不是“集齐资产标签”，而是按依赖顺序建立可持续的能力。由下往上逐层解锁，每层都必须有可核验的交付或条件。</p></div><span class="tag good">先底盘 · 后选择权</span></div>
+    <div class="card-head"><div><h3>新登</h3><p>目标不是“集齐资产标签”，而是按依赖顺序建立可持续的能力。由下往上逐层解锁，每层都必须有可核验的交付或条件。</p></div><span class="tag good">先底盘 · 后选择权</span></div>
     <div class="capability-pyramid-layout"><div class="capability-pyramid" role="list" aria-label="新登配置六层能力金字塔">
       ${layers.map((x,i)=>`<article class="capability-layer layer-${x.level}" style="--layer-width:${x.width}%;--layer-order:${i}" role="listitem"><div class="capability-level">L${x.level}</div><div class="capability-layer-copy"><h4>${x.title}</h4><p class="capability-subtitle">${x.subtitle}</p><div class="capability-items">${x.items}</div><p class="capability-gate"><b>解锁条件</b> · ${x.gate}</p></div></article>`).join('')}
     </div><aside class="capability-side-note"><div class="eyebrow">BUILD ORDER</div><h4>推荐落地顺序</h4><ol><li><b>稳定</b><span>现金流、负债、应急金、健康和执行节奏。</span></li><li><b>积累</b><span>合规渠道下的低成本核心资产，写好 IPS。</span></li><li><b>增产</b><span>英语、AI/编程、内容与产品，用真实交付验证技能。</span></li><li><b>扩展</b><span>在真实需求出现后，逐项开立账户、保险、签证或居留。</span></li><li><b>复杂化最后</b><span>公司、离岸结构和海外房产只在收益覆盖维护成本后考虑。</span></li></ol><div class="pyramid-principle">原则：先证明它能带来安全、收益、效率或真实选择权，再增加复杂度。</div><button class="btn btn-outline btn-full" data-action="ncfg-goto" data-sheet="roadmap">按 90 天路线执行 ↓</button></aside></div>
@@ -1415,10 +1467,10 @@ function renderFitnessCommandCenter(){
 function renderTrainingStudio(){
  const zone=BODY_ZONES.find(z=>z.id===ui.bodyZone)||null, zoneName=zone?.name||'全身', muscles=zone?.muscles||[], allExercises=EXERCISES[zoneName]||EXERCISES['全身'], query=(ui.bodySearch||'').toLowerCase(), exerciseList=allExercises.filter(x=>x.toLowerCase().includes(query));
  const sessions=(state.trainingSessions||[]).slice(0,5);
- return `<section class="card training-studio"><div class="card-head"><div><h3>3D 交互人体 · 肌肉定位与动作检查器</h3><p>选择六大区域，再细分目标肌群。骨骼模式加载本地 BodyParts3D 网格；肌肉/外皮模式为训练定位示意，不用于医学诊断。</p></div><div class="body-mode-switch"><button data-action="body-mode" data-mode="muscle" class="${ui.bodyMode==='muscle'?'active':''}">肌肉</button><button data-action="body-mode" data-mode="skeleton" class="${ui.bodyMode==='skeleton'?'active':''}">骨骼</button><button data-action="body-mode" data-mode="skin" class="${ui.bodyMode==='skin'?'active':''}">外皮</button><button data-action="body-mode" data-mode="head" class="${ui.bodyMode==='head'?'active':''}">头部</button></div></div>
+ return `<section class="card training-studio"><div class="card-head"><div><h3>3D 交互人体 · 肌肉定位与动作检查器</h3><p>选择六大区域，再细分目标肌群。肌肉、骨骼、外皮和头部使用本地 BodyParts3D 参考网格。可旋转、缩放并点选结构；未经临床验证，不用于诊断。</p></div><div class="body-mode-switch"><button data-action="body-mode" data-mode="muscle" class="${ui.bodyMode==='muscle'?'active':''}">肌肉</button><button data-action="body-mode" data-mode="skeleton" class="${ui.bodyMode==='skeleton'?'active':''}">骨骼</button><button data-action="body-mode" data-mode="skin" class="${ui.bodyMode==='skin'?'active':''}">外皮</button><button data-action="body-mode" data-mode="head" class="${ui.bodyMode==='head'?'active':''}">头部</button></div></div>
  <div class="training-studio-grid"><aside class="body-region-index"><h4>身体区域索引</h4><small>六区 · 悬停预览，点击选择</small>${BODY_ZONES.map(bodyRegionButton).join('')}<button class="btn btn-small btn-outline body-reset" data-action="body-reset">↺ 重置视图 / 取消选择</button></aside>
- <div class="body-model-panel"><div class="body-model-meta"><span class="tag good">${zone?esc(zone.name):'未选择'}</span><span class="model-angle">正面 · 可拖拽查看</span></div><div class="body-model-canvas ${ui.bodyMode==='skeleton'?'medical-model-active':''}" id="bodyModelCanvas" tabindex="0">${ui.bodyMode==='skeleton'?`<iframe class="medical-anatomy-frame" title="BodyParts3D 医学解剖骨骼模型" src="/static/anatomy/index.html" loading="eager" allow="fullscreen"></iframe>`:`<div class="body-model-grid-bg"></div>${anatomySvg()}`}<div class="body-model-caption">${ui.bodyMode==='skeleton'?'真实解剖骨骼网格 · 鼠标拖拽旋转 / 滚轮缩放':'左键拖拽：平移　·　中键拖拽：旋转　·　滚轮：缩放'}</div></div><div class="body-model-controls"><button data-action="body-mode" data-mode="muscle">肌肉模型</button><button data-action="body-mode" data-mode="skeleton">骨骼模型</button><button data-action="body-mode" data-mode="skin">外皮模型</button><button data-action="body-mode" data-mode="head">头部放大</button><button data-action="body-reset">重置</button></div><p class="body-selection-note">${zone?`当前区域：<b>${esc(zone.name)}</b> · ${esc(zone.desc)}`:'未选择任何肌肉。点击左侧区域或人体模型上的部位开始检查。'}</p></div>
- <aside class="action-inspector"><h4>动作检查器</h4><div class="inspector-tabs"><span>目标细分</span><span>动作列表</span></div><label class="body-search"><span>⌕</span><input id="bodyExerciseSearch" value="${esc(ui.bodySearch||'')}" placeholder="搜索动作名称…" aria-label="搜索动作名称"></label><div class="inspector-section-title">${zone?esc(zone.name):'请选择身体区域'} <small>${zone?`${muscles.length} 个目标`:'六区索引'}</small></div><div class="muscle-target-list">${(muscles.length?muscles:BODY_ZONES.map(z=>z.name)).map((m,i)=>{const id=muscles.length?m:BODY_ZONES[i].id;return `<button data-action="body-muscle" data-muscle="${esc(id)}" class="muscle-target ${ui.bodyMuscle===id?'active':''}"><span>◉</span><b>${esc(m)}</b><small>${ui.bodyMuscle===id?'已选择':'单选目标'}</small></button>`}).join('')}</div><div class="inspector-section-title">推荐动作 <small>${exerciseList.length} 项</small></div><div class="exercise-list">${exerciseList.map((ex,i)=>`<article class="exercise-item"><div class="exercise-mini-figure">${exerciseGifUrl(ex)?`<img src="${exerciseGifUrl(ex)}" alt="${esc(ex)} 动作 GIF" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'动作'}))">`:`<span>${['↗','⇧','↔','⌁'][i%4]}</span>`}</div><div class="exercise-copy"><strong>${esc(ex)}</strong><small>${zoneName} · 建议从可控负荷开始</small>${exerciseGifUrl(ex)?'<small class="local-gif-label">本地动作 GIF · 离线可播</small>':'<small>暂无对应本地动画</small>'}</div><button data-action="body-pick-exercise" data-exercise="${esc(ex)}" data-zone="${esc(zoneName)}" title="记录该动作">＋</button></article>`).join('')||'<div class="empty-state">没有匹配动作。尝试更短的关键词。</div>'}</div></aside></div>
+ <div class="body-model-panel"><div class="body-model-meta"><span class="tag good">${zone?esc(zone.name):'未选择'}</span><span class="model-angle">正面 · 可拖拽查看</span></div><div class="body-model-canvas ${ui.bodyMode==='skeleton'?'medical-model-active':''}" id="bodyModelCanvas" tabindex="0"><iframe class="medical-anatomy-frame" title="BodyParts3D 三维解剖参考模型" src="/static/anatomy/index.html?mode=${encodeURIComponent(ui.bodyMode||'muscle')}" loading="eager" allow="fullscreen"></iframe><div class="body-model-caption">BodyParts3D 参考网格 · 拖拽旋转 / 滚轮缩放 / 点选结构</div></div><div class="body-model-controls"><button data-action="body-mode" data-mode="muscle">肌肉模型</button><button data-action="body-mode" data-mode="skeleton">骨骼模型</button><button data-action="body-mode" data-mode="skin">外皮模型</button><button data-action="body-mode" data-mode="head">头部放大</button><button data-action="body-reset">重置</button></div><p class="body-selection-note">${zone?`当前区域：<b>${esc(zone.name)}</b> · ${esc(zone.desc)}`:'未选择任何肌肉。点击左侧区域或人体模型上的部位开始检查。'}</p></div>
+ <aside class="action-inspector"><h4>动作检查器</h4><div class="inspector-tabs"><span>目标细分</span><span>动作列表</span></div><label class="body-search"><span>⌕</span><input id="bodyExerciseSearch" value="${esc(ui.bodySearch||'')}" placeholder="搜索动作名称…" aria-label="搜索动作名称"></label><div class="inspector-section-title">${zone?esc(zone.name):'请选择身体区域'} <small>${zone?`${muscles.length} 个目标`:'六区索引'}</small></div><div class="muscle-target-list">${(muscles.length?muscles:BODY_ZONES.map(z=>z.name)).map((m,i)=>{const id=muscles.length?m:BODY_ZONES[i].id;return `<button data-action="body-muscle" data-muscle="${esc(id)}" class="muscle-target ${ui.bodyMuscle===id?'active':''}"><span>◉</span><b>${esc(m)}</b><small>${ui.bodyMuscle===id?'已选择':'单选目标'}</small></button>`}).join('')}</div><div class="inspector-section-title">推荐动作 <small>${exerciseList.length} 项</small></div><div class="exercise-list">${exerciseList.map((ex,i)=>`<article class="exercise-item"><div class="exercise-mini-figure">${exerciseGifUrl(ex)?`<img src="${exerciseGifUrl(ex)}" alt="${esc(ex)} 动作 GIF" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'动作'}))">`:`<span>${['↗','⇧','↔','⌁'][i%4]}</span>`}</div><div class="exercise-copy"><strong>${esc(ex)}</strong><small>${zoneName} · 建议从可控负荷开始</small>${exerciseGifUrl(ex)?'<small class="local-gif-label">本地动作 GIF · 离线可播</small>':'<small>暂无对应本地动画</small>'}</div><button data-action="body-pick-exercise" data-exercise="${esc(ex)}" data-zone="${esc(zoneName)}" title="在动作库查看并加入计划">查看</button></article>`).join('')||'<div class="empty-state">没有匹配动作。尝试更短的关键词。</div>'}</div></aside></div>
  <div class="fit-cta-row"><div><strong>练完记得记录</strong><small>组数 / 次数 / 重量会进入热力图、PR 与恢复判断。</small></div><button class="btn btn-primary" data-action="open-fitness-log">＋ 记录训练</button></div></section>`;
 }
 function openInlineModal(title, form){ const existing=$('#interactionModal');existing?.remove();const modal=document.createElement('div');modal.id='interactionModal';modal.className='interaction-modal';modal.innerHTML=`<div class="interaction-modal-backdrop" data-action="close-interaction-modal"></div><section class="interaction-modal-panel" role="dialog" aria-modal="true"><header><h3>${esc(title)}</h3><button type="button" data-action="close-interaction-modal" aria-label="关闭">×</button></header><div class="interaction-modal-body"></div></section>`;document.body.appendChild(modal);modal.querySelector('.interaction-modal-body').appendChild(form.cloneNode(true));const clone=modal.querySelector('form');clone.querySelectorAll('[data-action]').forEach(x=>x.removeAttribute('data-action'));const submit=document.createElement('button');submit.className='btn btn-primary';submit.type='button';submit.textContent='保存记录';submit.addEventListener('click',()=>{const orig=form;const fd=new FormData(clone);for(const el of orig.elements){if(el.name&&fd.has(el.name))el.value=fd.get(el.name)}orig.querySelector('[data-action]')?.click();modal.remove()});clone.appendChild(submit); }
@@ -1790,6 +1842,7 @@ function renderGymChrome(){
 function renderGymGrid(){
   const grid=$('#gymGrid'); if(!grid) return;
   const fav=gymFavSet(), u=gymUI();
+  if(GYM.error){grid.innerHTML=`<div class="gym-empty">${esc(GYM.error)}<button class="btn btn-outline" data-action="gym-retry">重新连接</button></div>`;return;}
   if(GYM.status && !GYM.status.available){
     grid.innerHTML=`<div class="gym-empty"><b>动作库目录未连接</b><span>${esc(GYM.status.reason||'未找到 openGym 目录')}</span><span>把 OPEN_GYM_DIR 指向 openGym 根目录后点“重试”。</span><button class="btn btn-small btn-outline" data-action="gym-retry">重试</button></div>`;
     renderGymChrome();
@@ -1829,7 +1882,7 @@ function renderGymLibraryPanel(){
 }
 async function loadGym(reset=true){
   if(GYM.loading){ GYM.pending=true; return; }
-  GYM.pending=false;
+  GYM.pending=false;GYM.error='';
   const u=gymUI();
   if(reset){ u.offset=0; GYM.items=[]; }
   GYM.loading=true;
@@ -1838,15 +1891,16 @@ async function loadGym(reset=true){
   renderGymChrome();
   try{
     if(!GYM.status || GYM.forceRefresh){
-      GYM.status=await api('/api/gym/status'+(GYM.forceRefresh?'?refresh=1':''));
+      GYM.status=await gymRequest('/api/gym/status'+(GYM.forceRefresh?'?refresh=1':''));
       GYM.forceRefresh=false;
       gymSourceLine();
       if(!GYM.status.available){ GYM.items=[]; GYM.total=0; renderGymGrid(); return; }
     }
     if(!GYM.status.available){ GYM.items=[]; GYM.total=0; renderGymGrid(); return; }
-    if(!GYM.facets){ GYM.facets=await api('/api/gym/facets'); renderGymFilters(); }
+    if(!GYM.facets){ GYM.facets=await gymRequest('/api/gym/facets'); renderGymFilters(); }
     const p=new URLSearchParams();
     if(u.q) p.set('q',u.q);
+    if(u.zone) p.set('zone',u.zone);
     if(u.bodyPart) p.set('bodyPart',u.bodyPart);
     if(u.equipment) p.set('equipment',u.equipment);
     if(u.category) p.set('category',u.category);
@@ -1856,17 +1910,18 @@ async function loadGym(reset=true){
       p.set('ids',favorites.join(','));
     }
     p.set('limit',u.limit); p.set('offset',u.offset);
-    const res=await api('/api/gym/exercises?'+p.toString());
+    const res=await gymRequest('/api/gym/exercises?'+p.toString());
     GYM.items = reset ? (res.items||[]) : GYM.items.concat(res.items||[]);
     GYM.total = n(res.total,GYM.items.length);
     u.offset = GYM.items.length;
     renderGymGrid();
   }catch(err){
+    GYM.error=err.message;
     gymSourceLine('动作库读取失败：'+err.message);
-    if(grid) grid.innerHTML=`<div class="gym-empty">动作库读取失败：${esc(err.message)}<button class="btn btn-small btn-outline" data-action="gym-retry">重试</button></div>`;
+    if($('#gymGrid')) $('#gymGrid').innerHTML=`<div class="gym-empty">动作库读取失败：${esc(err.message)}<button class="btn btn-small btn-outline" data-action="gym-retry">重试</button></div>`;
   }finally{
     GYM.loading=false;
-    GYM.loadedOnce=true;
+    GYM.loadedOnce=!GYM.error;
     renderGymChrome();
     if(GYM.pending){ GYM.pending=false; loadGym(true); }
   }
@@ -1882,7 +1937,7 @@ function hydrateGymLibrary(force=false){
 async function openGymDetail(id){
   try{
     let d=GYM.detail.get(String(id));
-    if(!d){ d=await api('/api/gym/exercises/'+encodeURIComponent(id)); GYM.detail.set(String(id),d); }
+    if(!d){ d=await gymRequest('/api/gym/exercises/'+encodeURIComponent(id)); GYM.detail.set(String(id),d); }
     const fav=gymFavSet().has(d.id);
     let wrap=$('#gymModal');
     if(!wrap){ wrap=document.createElement('div'); wrap.id='gymModal'; document.body.appendChild(wrap); }
@@ -1930,7 +1985,7 @@ function addGymExerciseToRoutine(ex, day, opts={}){
 async function openGymAddPlan(id){
   try{
     let d=GYM.detail.get(String(id));
-    if(!d){ d=await api('/api/gym/exercises/'+encodeURIComponent(id)); GYM.detail.set(String(id),d); }
+    if(!d){ d=await gymRequest('/api/gym/exercises/'+encodeURIComponent(id)); GYM.detail.set(String(id),d); }
     closeGymModal();
     if(!window.UISheet){ toast('弹层组件未加载',true); return; }
     const dayNames=['周日','周一','周二','周三','周四','周五','周六'];
@@ -1966,7 +2021,7 @@ function submitGymAddPlan(){
 async function openGymLog(id){
   try{
     let d=GYM.detail.get(String(id));
-    if(!d){ d=await api('/api/gym/exercises/'+encodeURIComponent(id)); GYM.detail.set(String(id),d); }
+    if(!d){ d=await gymRequest('/api/gym/exercises/'+encodeURIComponent(id)); GYM.detail.set(String(id),d); }
     closeGymModal();
     openFitnessSheet('log',{exercise:d.name,zone:d.zone,exerciseId:d.id,sets:3,reps:10});
   }catch(err){ toast('动作读取失败：'+err.message,true); }
@@ -1976,7 +2031,7 @@ async function searchGymPicker(q){
   if(!q){ box.innerHTML='<div class="gym-empty">输入关键词检索动作库，例如：深蹲 / 划船 / 臀</div>'; return; }
   box.innerHTML='<div class="gym-empty">检索中…</div>';
   try{
-    const res=await api('/api/gym/exercises?q='+encodeURIComponent(q)+'&limit=12');
+    const res=await gymRequest('/api/gym/exercises?q='+encodeURIComponent(q)+'&limit=12');
     if(!res.items.length){ box.innerHTML='<div class="gym-empty">没有匹配动作。</div>'; return; }
     box.innerHTML=res.items.map(e=>`<article class="gym-picker-row">
       ${e.hasStill?`<img src="${gymMediaUrl(e.id,'still')}" alt="" loading="lazy">`:'<span class="gym-picker-noimg">◉</span>'}
@@ -2049,7 +2104,7 @@ async function submitGymPlan(){
   const btn=form.querySelector('[data-action="gym-generate-plan-submit"]');
   if(btn){ btn.disabled=true; btn.textContent='正在生成…'; }
   try{
-    const res=await api('/api/gym/plan/generate',{method:'POST',body:JSON.stringify({goal:String(fd.get('goal')||'hypertrophy'),daysPerWeek:n(fd.get('days'),3),equipment,sessionMinutes:n(fd.get('minutes'),60)})});
+    const res=await gymRequest('/api/gym/plan/generate',{method:'POST',body:JSON.stringify({goal:String(fd.get('goal')||'hypertrophy'),daysPerWeek:n(fd.get('days'),3),equipment,sessionMinutes:n(fd.get('minutes'),60)})});
     applyGymPlan(res.plan);
     state.gym.planMeta=res.meta||null;
     const firstDay=[1,2,3,4,5,6,0].find(d=>res.plan&&res.plan[d]);
@@ -2182,9 +2237,9 @@ function renderFitnessV2(){
       <div class="fit-tabs" data-tabs role="tablist">
         <button class="fit-tab active" data-tab="today" role="tab">今日</button>
         <button class="fit-tab" data-tab="plan" role="tab">计划</button>
-        <button class="fit-tab" data-tab="library" role="tab">动作库</button>
+        <button class="fit-tab" data-tab="library" role="tab">动作中心</button>
         <button class="fit-tab" data-tab="review" role="tab">复盘</button>
-        <button class="fit-tab" data-tab="tools" role="tab">工具</button>
+
       </div>
       <div class="fit-bar-actions">
         <button class="btn btn-small btn-outline" data-action="open-fitness-measure">测围度</button>
@@ -2193,9 +2248,9 @@ function renderFitnessV2(){
     </div>
     <div class="fit-panel active" data-tab-panel="today">${todayPanel}</div>
     <div class="fit-panel" data-tab-panel="plan">${planPanel}</div>
-    <div class="fit-panel" data-tab-panel="library">${libraryPanel}</div>
+    <div class="fit-panel" data-tab-panel="library">${toolsPanel}${libraryPanel}</div>
     <div class="fit-panel" data-tab-panel="review">${reviewPanel}</div>
-    <div class="fit-panel" data-tab-panel="tools">${toolsPanel}</div>
+
   </div>`;
 }
 
@@ -2234,7 +2289,7 @@ function bindDelegatedEvents() {
     if(a==='gym-add-plan-submit'){submitGymAddPlan();return;}
     if(a==='gym-generate-plan-submit'){submitGymPlan();return;}
     if(a==='gym-picker-add'){addPickedGymExercise(action);return;}
-    if(a==='flow-kind'){ui.flowKind=action.dataset.kind;renderPage('dailyflow');return;}
+    if(a==='flow-kind'){ui.flowKind=action.dataset.kind;renderPage(currentPage==='xindeng'?'xindeng':'dailyflow');return;}
     if(a==='flow-new'){openFlowEditor(action.dataset.kind||flowDateKind());return;}
     if(a==='flow-edit'){openFlowEditor(action.dataset.kind||'weekday',action.dataset.id);return;}
     if(a==='flow-complete'){const run=(state.dailyFlowRuns||[]).find(x=>String(x.flowId)===String(action.dataset.id)&&x.status==='opened');if(run){run.status='completed';run.note=$('#flowRunNote')?.value||'';run.completedAt=new Date().toISOString();}persist({quiet:true});refreshFlowTabCounts();$('#flowModalMount')?.replaceChildren();toast('流程完成记录已保存');return;}
@@ -2267,7 +2322,11 @@ function bindDelegatedEvents() {
     if(a==='watch-filter') { ui.homeWatchScope=action.dataset.scope||'all'; renderPage('home',{transition:false,animate:false}); return; }
     if(a==='go-page') return renderPage(action.dataset.page||'home',{autoRefresh:true});
     if(a==='newconfig-anchor') { const target=action.dataset.target||'capability-pyramid'; if(currentPage!=='newconfig') renderPage('newconfig'); setTimeout(()=>document.getElementById(target)?.scrollIntoView({behavior:'smooth',block:'start'}),40); return; }
-    if(a==='focus-add-focus') { renderPage(currentPage); setTimeout(()=>$('#focusTaskTitle')?.focus(),0); return; }
+    if(a==='clear-task-search'){ui.focusQuery='';renderPage(currentPage);return;}
+    if(a==='retry-save') { persist(); return; }
+    if(a==='undo-delete') { const entry=undoEntries.pop();if(entry){entry.arr.splice(Math.min(entry.index,entry.arr.length),0,entry.item);renderUndoNotice();saveAndRender('已恢复');}return; }
+    if(a==='home-start-focus') { startFocusClock();renderPage('today');toast('专注已开始');return; }
+    if(a==='focus-add-focus') { renderPage('today'); setTimeout(()=>$('#focusTaskTitle')?.focus(),0); return; }
     if(a==='calendar-prev'){ui.calendarWeekOffset=(ui.calendarWeekOffset||0)-1;renderPage('home');return;}
     if(a==='calendar-next'){ui.calendarWeekOffset=(ui.calendarWeekOffset||0)+1;renderPage('home');return;}
     if(a==='calendar-this'){ui.calendarWeekOffset=0;renderPage('home');return;}
@@ -2277,9 +2336,9 @@ function bindDelegatedEvents() {
     if(a==='open-workbook'){openWorkbookViewer(action.dataset.workbookId);return;}
     if(a==='close-workbook'){ $('#workbookViewer')?.remove();ui.workbookData=null;return;}
     if(a==='workbook-sheet'){ui.workbookSheetIndex=n(action.dataset.index);renderWorkbookSheet();return;}
-    if(a==='toggle-focus-task') { const t=focusTasks().find(x=>String(x.id)===String(action.dataset.id)); if(t){t.done=!t.done;t.completedAt=t.done?new Date().toISOString():null;saveAndRender(t.done?'任务已完成':'任务已恢复');} return; }
+    if(a==='toggle-focus-task') { const t=focusTasks().find(x=>String(x.id)===String(action.dataset.id)); if(t){t.done=!t.done;t.completedAt=t.done?new Date().toISOString():null;if(typeof growthSyncGoals==='function')growthSyncGoals(); if(currentPage==='today'||currentPage==='alltasks'||currentPage==='inbox'){const list=$('#focusTaskList');if(list)list.innerHTML=renderFocusTaskRows(currentPage==='today'?'home':currentPage);updateFocusCounts();persist({quiet:true}).then(ok=>{if(ok)toast(t.done?'任务已完成':'任务已恢复');});}else saveAndRender(t.done?'任务已完成':'任务已恢复');} return; }
     if(a==='toggle-focus-important') { const t=focusTasks().find(x=>String(x.id)===String(action.dataset.id)); if(t){t.important=!t.important;saveAndRender(t.important?'已标记为重要':'已取消重要标记');} return; }
-    if(a==='delete-focus-task') { const i=focusTasks().findIndex(x=>String(x.id)===String(action.dataset.id)); if(i>=0){state.focusTasks.splice(i,1);saveAndRender('任务已删除');} return; }
+    if(a==='delete-focus-task') { const i=focusTasks().findIndex(x=>String(x.id)===String(action.dataset.id)); if(i>=0){deleteWithUndo(state.focusTasks,i,'任务');} return; }
     if(a==='edit-focus-task') { const t=focusTasks().find(x=>String(x.id)===String(action.dataset.id)); if(t)openFocusTaskEditor(t); return; }
     if(a==='close-focus-modal') { $('#focusTaskModal')?.remove(); return; }
     if(a==='toggle-habit') { const key=todayKey();state.habitChecks[key]=state.habitChecks[key]||{};state.habitChecks[key][action.dataset.habit]=!state.habitChecks[key][action.dataset.habit];saveAndRender('今日打卡已保存');return; }
@@ -2293,7 +2352,7 @@ function bindDelegatedEvents() {
     if(a==='open-fitness-measure'){openFitnessSheet('measure');return;}
     if(a==='fitness-focus-today'){startGuidedWorkout();return;} if(a==='guided-complete-set'){completeGuidedSet(false);return;} if(a==='guided-skip-set'){completeGuidedSet(true);return;} if(a==='guided-finish'){finishGuidedWorkout();return;} if(a==='guided-rest-skip'){const g=guidedCurrent();if(g){g.w.restUntil=null;persist({quiet:true});renderPage('fitness');}return;} if(a==='guided-rest-adjust'){const g=guidedCurrent();if(g){const left=guidedRestRemaining(g.w);g.w.restUntil=new Date(Date.now()+Math.max(0,left+n(action.dataset.seconds))*1000).toISOString();persist({quiet:true});renderPage('fitness');startGuidedTimer();}return;} if(a==='guided-close-summary'){ui.guidedSummaryId=null;renderPage('fitness');return;} if(a==='fitness-scroll-muscle'){document.querySelector('.training-studio')?.scrollIntoView({behavior:'smooth',block:'start'});return;} if(a==='fitness-day-focus'){const d=action.dataset.date||todayKey();const f=document.querySelector('#trainingSessionForm');if(f){f.elements.date.value=d;f.scrollIntoView({behavior:'smooth',block:'center'});}return;} if(a==='body-mode') { ui.bodyMode=action.dataset.mode||'muscle';if(ui.bodyMode==='head'){ui.bodyZone='head';ui.bodyMuscle='head';}renderPage(currentPage);return; }
     if(a==='body-reset') {ui.bodyZone='';ui.bodyMuscle='';ui.bodyMode='muscle';ui.bodySearch='';ui.bodyView={x:0,y:0,rx:0,ry:0,scale:1};renderPage(currentPage);return;}
-    if(a==='body-pick-exercise') {ui.bodySearch=action.dataset.exercise||'';const form=$('#trainingSessionForm');if(form){form.elements.exercise.value=ui.bodySearch;form.elements.zone.value=action.dataset.zone||'全身';form.scrollIntoView({behavior:'smooth',block:'center'});form.elements.sets.focus();}return;}
+    if(a==='body-pick-exercise') {openRecommendedGym(action.dataset.exercise||'');return;}
     if(a==='add-training-session') {const form=$('#trainingSessionForm');if(!form?.reportValidity())return;const fd=new FormData(form);state.trainingSessions=state.trainingSessions||[];state.trainingSessions.unshift({id:Date.now(),date:String(fd.get('date')||todayKey()),zone:String(fd.get('zone')||'全身'),exercise:String(fd.get('exercise')||''),exerciseId:String(fd.get('exerciseId')||'')||null,sets:n(fd.get('sets')),reps:n(fd.get('reps')),weight:n(fd.get('weight')),km:n(fd.get('km')),duration:n(fd.get('duration')),note:String(fd.get('note')||''),createdAt:new Date().toISOString()});state.healthChecks[String(fd.get('date')||todayKey())]=state.healthChecks[String(fd.get('date')||todayKey())]||{};state.healthChecks[String(fd.get('date')||todayKey())].workout=true;saveAndRender('训练记录已保存，统计图已更新');return;}
     if(a==='add-body-measurement') {const form=$('#bodyMeasureForm');if(!form)return;const fd=new FormData(form),entry={id:Date.now(),date:String(fd.get('date')||todayKey())};['chest','waist','hip','arm','thigh','weight'].forEach(k=>{const v=String(fd.get(k)||'').trim();if(v)entry[k]=n(v)});if(Object.keys(entry).length<=2){toast('至少填写一项围度或体重',true);return;}state.bodyMeasurements=state.bodyMeasurements||[];state.bodyMeasurements.unshift(entry);saveAndRender('身体测量已保存');return;}
     if(a==='select-checkin-date'){ui.checkinDate=action.dataset.date||todayKey();renderPage('checkin');return;}
@@ -2367,7 +2426,7 @@ function bindDelegatedEvents() {
     if(e.target.id==='screenTestCount'){ui.screenTestCount=Number(e.target.value);const t=$('#screenTestCountText');if(t)t.textContent=e.target.value;const box=e.target.closest('.card-body');if(box){const sel=$('#screenTestGrade');const r=state.screenRule||{};const grade=sel?.value||'黄色B';const accepted=r.includeHigherGrades?['黄色B','B','B+','A','A+','黄色A','黄色B+'].includes(grade):['黄色B','B'].includes(grade);const pass=accepted&&Number(e.target.value)>=n(r.yellowBMin,2);const decision=box.querySelector('.decision-box');if(decision){decision.querySelector('h3').textContent=pass?'满足初筛条件':'不满足初筛条件';decision.querySelector('p').textContent=`评级 ${grade}；窗口内计数 ${e.target.value}，门槛 ${n(r.yellowBMin,2)} 次。${pass?'进入下一步过滤。':'继续观察或检查信号记录。'}`;decision.querySelector('.decision-footer strong').textContent=pass?'PASS':'NOT PASSED';}}}
   });
   document.addEventListener('submit',async e=>{
-    if(e.target.id==='flowEditForm'){e.preventDefault();const f=e.target,fd=new FormData(f),kind=String(fd.get('kind')||f.dataset.kind),oldKind=f.dataset.kind,id=String(f.dataset.id||''),toMin=v=>{const [h,m]=String(v).split(':').map(Number);return h*60+m;};const start=toMin(fd.get('start')),endRaw=toMin(fd.get('end')),end=endRaw<=start?endRaw+1440:endRaw;const obj={id:id||`flow-${Date.now()}-${Math.random().toString(36).slice(2,7)}`,title:String(fd.get('title')||'').trim(),start,end,category:String(fd.get('category')||'日常').trim(),note:String(fd.get('note')||'').trim(),color:String(fd.get('color')||'#6e9c79'),order:Date.now()};if(!obj.title){toast('请填写流程事项',true);return;}if(id&&oldKind!==kind)state.dailyFlows[oldKind]=state.dailyFlows[oldKind].filter(x=>String(x.id)!==id);const list=state.dailyFlows[kind]||(state.dailyFlows[kind]=[]),idx=list.findIndex(x=>String(x.id)===id);if(idx>=0)list[idx]=obj;else list.push(obj);ui.flowKind=kind;await persist({quiet:true});$('#flowModalMount')?.replaceChildren();try{sessionStorage.setItem('wealthos-tab-dailyflow','edit')}catch(_){}renderPage('dailyflow');toast('流程块已保存');return;}
+    if(e.target.id==='flowEditForm'){e.preventDefault();const f=e.target,fd=new FormData(f),kind=String(fd.get('kind')||f.dataset.kind),oldKind=f.dataset.kind,id=String(f.dataset.id||''),toMin=v=>{const [h,m]=String(v).split(':').map(Number);return h*60+m;};const start=toMin(fd.get('start')),endRaw=toMin(fd.get('end')),end=endRaw<=start?endRaw+1440:endRaw;const obj={id:id||`flow-${Date.now()}-${Math.random().toString(36).slice(2,7)}`,title:String(fd.get('title')||'').trim(),start,end,category:String(fd.get('category')||'日常').trim(),note:String(fd.get('note')||'').trim(),color:String(fd.get('color')||'#6e9c79'),order:Date.now()};if(!obj.title){toast('请填写流程事项',true);return;}if(id&&oldKind!==kind)state.dailyFlows[oldKind]=state.dailyFlows[oldKind].filter(x=>String(x.id)!==id);const list=state.dailyFlows[kind]||(state.dailyFlows[kind]=[]),idx=list.findIndex(x=>String(x.id)===id);if(idx>=0)list[idx]=obj;else list.push(obj);ui.flowKind=kind;await persist({quiet:true});$('#flowModalMount')?.replaceChildren();try{sessionStorage.setItem('wealthos-tab-dailyflow','edit')}catch(_){}renderPage(currentPage==='xindeng'?'xindeng':'dailyflow');toast('流程块已保存');return;}
     if(e.target.id==='scheduleJobForm'){
       e.preventDefault();const fd=new FormData(e.target);const job={id:String(fd.get('id')||`job-${Date.now()}`),name:String(fd.get('name')||'').trim(),taskType:String(fd.get('taskType')||'refresh_archive'),frequency:String(fd.get('frequency')||'daily'),time:String(fd.get('time')||'07:30'),description:String(fd.get('description')||''),enabled:fd.has('enabled')};if(!job.name){toast('请输入任务名称',true);return;}const jobs=scheduleJobsCache.filter(x=>x.id!==job.id);jobs.push(job);try{await api('/api/scheduler/jobs',{method:'PUT',body:JSON.stringify({jobs})});await loadSchedules();renderPage('schedules');toast('定时任务已保存')}catch(err){toast(err.message,true)}return;
     }
@@ -2376,14 +2435,15 @@ function bindDelegatedEvents() {
     }
     if(e.target.id==='focusTaskEditForm'){
       e.preventDefault();const task=focusTasks().find(x=>String(x.id)===String(e.target.dataset.id));if(!task)return;
+      const title=$('#focusEditName').value.trim(),start=$('#focusEditStart')?.value||'',due=$('#focusEditDue').value||'';if(!title){toast('请输入任务内容',true);return;}if(start&&due&&due<start){toast('截止日期不能早于起始日期',true);return;}
       const priorStartDate=task.startDate||task.dueDate||'';task.title=$('#focusEditName').value.trim();task.project=$('#focusEditProject').value;task.startDate=$('#focusEditStart')?.value||'';task.dueDate=$('#focusEditDue').value||'';if(task.startDate&&task.dueDate&&task.dueDate<task.startDate){toast('截止日期不能早于起始日期',true);return;}if(task.startDate&&!task.dueDate)task.dueDate=task.startDate;if(task.dueDate&&!task.startDate)task.startDate=task.dueDate;if(task.startDate&&task.startDate!==priorStartDate)task.sortOrder=dayDiff('2000-01-01',task.startDate)*1000+(((n(task.sortOrder,0)%1000)+1000)%1000);task.priority=$('#focusEditPriority').value;task.estimate=Math.max(0,n($('#focusEditEstimate').value,25));task.important=$('#focusEditImportant').checked;task.note=$('#focusEditNote').value.trim();
-      $('#focusTaskModal')?.remove();await persist({quiet:true});renderPage(currentPage);toast('任务详情已保存');return;
+      if(await persist({quiet:true})){$('#focusTaskModal')?.remove();renderPage(currentPage);toast('任务详情已保存');}return;
     }
     if(e.target.id==='focusTaskForm'){
       e.preventDefault();const title=$('#focusTaskTitle')?.value.trim();if(!title){toast('先写下任务内容',true);return;}
       const startDate=$('#focusTaskStart')?.value||'',dueDate=$('#focusTaskDue')?.value||'';if(startDate&&dueDate&&dueDate<startDate){toast('截止日期不能早于起始日期',true);return;}
       const list=focusTasks();list.unshift({id:(window.crypto?.randomUUID?.()||`task-${Date.now()}-${Math.random().toString(36).slice(2,8)}`),title,project:$('#focusTaskProject').value,priority:$('#focusTaskPriority').value,startDate:startDate||dueDate,dueDate:dueDate||startDate,sortOrder:dayDiff('2000-01-01',startDate||dueDate||'2099-12-31')*1000+list.filter(t=>(t.startDate||t.dueDate)===(startDate||dueDate)).length,estimate:Math.max(0,n($('#focusTaskEstimate').value,25)),note:$('#focusTaskNote').value.trim(),done:false,important:$('#focusTaskImportant').checked,createdAt:new Date().toISOString()});
-      await persist({quiet:true});ui.focusQuery='';renderPage(currentPage);toast('任务已添加并保存');return;
+      const ok=await persist({quiet:true});ui.focusQuery='';renderPage(currentPage);if(ok)toast('任务已添加并保存');return;
     }
     if(e.target.id==='calendarTaskForm'){
       e.preventDefault();const title=$('#calendarTaskTitle')?.value.trim(),startDate=$('#calendarTaskStart')?.value||'',dueDate=$('#calendarTaskEnd')?.value||'';if(!title){toast('请先填写任务内容',true);return;}if(!startDate||!dueDate){toast('请填写起始和截止日期',true);return;}if(dueDate<startDate){toast('截止日期不能早于起始日期',true);return;}
@@ -2401,7 +2461,7 @@ function bindDelegatedEvents() {
 let flowPointer=null;
 document.addEventListener('pointerdown',e=>{const block=e.target.closest('.flow-block');if(!block||e.target.closest('button'))return;const timeline=$('#flowTimeline');if(!timeline)return;flowPointer={id:block.dataset.flowId,kind:ui.flowKind||flowDateKind(),start:n(block.dataset.flowStart),end:n(block.dataset.flowEnd),y:e.clientY,resize:!!e.target.closest('[data-flow-resize]'),last:null};block.setPointerCapture?.(e.pointerId);e.preventDefault();});
 document.addEventListener('pointermove',e=>{if(!flowPointer)return;const timeline=$('#flowTimeline');if(!timeline)return;const delta=Math.round((e.clientY-flowPointer.y)/(timeline.clientHeight||800)*1440/5)*5;flowPointer.last=delta;const block=$(`.flow-block[data-flow-id="${CSS.escape(flowPointer.id)}"]`);if(block){const st=flowPointer.resize?flowPointer.start:Math.max(0,Math.min(1435,flowPointer.start+delta));const en=flowPointer.resize?Math.max(st+5,Math.min(1440,flowPointer.end+delta)):Math.max(st+5,Math.min(1440,flowPointer.end+delta));block.style.top=`${st}px`;block.style.height=`${en-st}px`;const time=block.querySelector('.flow-time');if(time)time.textContent=`${flowClock(st)}–${flowClock(en)}`;}});
-document.addEventListener('pointerup',async()=>{if(!flowPointer)return;const drag=flowPointer;flowPointer=null;if(drag.last===null||Math.abs(drag.last)<3)return;const item=(state.dailyFlows[drag.kind]||[]).find(x=>String(x.id)===String(drag.id));if(!item)return;if(drag.resize)item.end=Math.max(item.start+5,Math.min(2880,item.end+drag.last));else{const delta=drag.last;item.start=Math.max(0,Math.min(1435,item.start+delta));item.end=Math.max(item.start+5,item.end+delta);}await persist({quiet:true});renderPage('dailyflow');toast('流程时间已调整');});
+document.addEventListener('pointerup',async()=>{if(!flowPointer)return;const drag=flowPointer;flowPointer=null;if(drag.last===null||Math.abs(drag.last)<3)return;const item=(state.dailyFlows[drag.kind]||[]).find(x=>String(x.id)===String(drag.id));if(!item)return;if(drag.resize)item.end=Math.max(item.start+5,Math.min(2880,item.end+drag.last));else{const delta=drag.last;item.start=Math.max(0,Math.min(1435,item.start+delta));item.end=Math.max(item.start+5,item.end+delta);}await persist({quiet:true});renderPage(currentPage==='xindeng'?'xindeng':'dailyflow');toast('流程时间已调整');});
 // Calendar drag/drop: move date ranges, reorder overlapping work, and resize by dragging the right edge.
 let calendarDragState=null;
 function persistTaskOrder(){focusTasks().sort((a,b)=>n(a.sortOrder)-n(b.sortOrder)).forEach((t,i)=>t.sortOrder=(i+1)*10);}
@@ -2471,3 +2531,35 @@ document.addEventListener('click',e=>{const tab=e.target.closest?.('[data-tab-ke
 updateAuthMode();
 bindDelegatedEvents();
 boot();
+
+async function gymRequest(path, options={}) {
+  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),15000);
+  try{return await api(path,{...options,signal:controller.signal});}
+  catch(err){
+    if(err.name==='AbortError')throw new Error('动作库响应超时，请稍后重试。');
+    if(err instanceof TypeError)throw new Error('无法连接本地服务。请确认服务正在运行，并从 http://127.0.0.1:8765 打开工作台后重试。');
+    throw err;
+  }finally{clearTimeout(timer);}
+}
+function openRecommendedGym(name){
+  const u=gymUI();Object.assign(u,{q:name,zone:'',bodyPart:'',equipment:'',category:'',favorites:false,offset:0});
+  try{sessionStorage.setItem('wealthos-fit-tab','library');}catch(_){}
+  if(currentPage!=='fitness')renderPage('fitness',{transition:false});
+  else{const search=$('#gymSearch');if(search)search.value=name;document.querySelector('.fit-tabs [data-tab="library"]')?.click();loadGym(true);}
+  requestAnimationFrame(()=>$('#gymSearch')?.scrollIntoView({behavior:'smooth',block:'center'}));
+}
+
+function renderTodayRoles(){const template=document.createElement('template');template.innerHTML=renderAgents();template.content.querySelector('.page-head')?.remove();return template.innerHTML;}
+
+window.addEventListener('message',event=>{
+ const frame=document.querySelector('.medical-anatomy-frame');
+ if(event.origin!==location.origin||event.source!==frame?.contentWindow)return;
+ if(event.data?.type==='anatomy-mode'&&['muscle','skeleton','skin','head'].includes(event.data.mode)){ui.bodyMode=event.data.mode;document.querySelectorAll('.body-mode-switch [data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode===ui.bodyMode));return;}
+ if(event.data?.type!=='anatomy-select')return;
+ const zones={head:'head',upper:'upper',chest:'chest',core:'core',lower:'lower',full:'full'};
+ const zone=zones[event.data.zone];if(!zone)return;
+ ui.bodyZone=zone;ui.bodyMuscle='';ui.bodySearch='';
+ const template=document.createElement('template');template.innerHTML=renderTrainingStudio();
+ const inspector=document.querySelector('.training-studio .action-inspector');if(inspector)inspector.replaceWith(template.content.querySelector('.action-inspector'));
+ const note=document.querySelector('.body-selection-note');if(note)note.textContent='已选结构：'+String(event.data.name||'')+'；右侧提供区域训练参考，点击动作可进入动作库。';
+});
