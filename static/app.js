@@ -11,7 +11,7 @@ let state = null;
 const savedTheme = (()=>{try{return localStorage.getItem('wealth-os-theme-v3')==='dark'?'dark':'light'}catch(_){return 'light'}})();
 document.documentElement.dataset.theme=savedTheme;document.body.dataset.theme=savedTheme;
 const syncThemeColor=()=>{const m=document.querySelector('meta[name="theme-color"]');if(m)m.content=document.body.dataset.theme==='dark'?'#14211f':'#f4f2eb';};syncThemeColor();
-let currentPage = 'home';
+let currentPage = 'xindeng';
 let authMode = 'login';
 let saveTimer = null;
 let marketBusy = false;
