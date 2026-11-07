@@ -1203,3 +1203,13 @@ if not SCHEDULER_SETTINGS_PATH.exists():
 threading.Thread(target=_scheduler_loop, name="wealth-os-scheduler", daemon=True).start()
 # 预热 openGym 动作库索引（首次约 2-3 秒），避免用户第一次打开“动作库”等待。
 threading.Thread(target=gymlib.get_catalogue, name="wealth-os-opengym-warmup", daemon=True).start()
+
+@app.get("/api/app-version")
+def app_version():
+    files = ["index.html", "app.js", "flow_upgrade.js", "xindeng.css", "ui.js"]
+    digest = hashlib.sha256()
+    for name in files:
+        path = STATIC / name
+        if path.is_file():
+            digest.update(path.read_bytes())
+    return JSONResponse({"version": digest.hexdigest()[:20]}, headers={"Cache-Control": "no-store"})

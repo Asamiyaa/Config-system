@@ -280,7 +280,7 @@ function setHeader(page) {
 }
 
 const HUB_OF={
-  home:'newconfig',today:'newconfig',xindeng:'newconfig',growthplan:'newconfig',review:'newconfig',
+  whiteboard:'newconfig',home:'newconfig',today:'newconfig',xindeng:'newconfig',growthplan:'newconfig',review:'newconfig',
   inbox:'newconfig',schedules:'settings',settings:'settings',dailyflow:'newconfig',mistakes:'newconfig',calendar:'newconfig',matrix:'newconfig',stats:'newconfig',important:'newconfig',alltasks:'newconfig',flowstats:'newconfig',
   dashboard:'dashboard',allocation:'dashboard',nasdaq:'dashboard',ashare:'dashboard',execution:'dashboard',alpharadar:'dashboard',
   health:'health',checkin:'health',diet:'health',fitness:'health',skin:'health',sleep:'health',style:'health',
@@ -289,7 +289,7 @@ const HUB_OF={
 const HUB_TABS={
   settings:{label:'设置',items:[['schedules','自动化']]},
   dashboard:{label:'资产',items:[['http://39.106.118.186/','市场引擎 ↗'],['dashboard','总览'],['allocation','配置'],['nasdaq','纳指'],['ashare','A股'],['execution','执行'],['alpharadar','实验']]},
-  newconfig:{label:'成长',items:[['dailyflow','流程'],['xindeng','新登'],['agents','平衡'],['calendar','周历'],['newconfig','成长总览'],['growthplan','90天计划'],['mistakes','避坑'],['review','每周复盘']]},
+  newconfig:{label:'成长',items:[['dailyflow','流程'],['calendar','周历'],['growthplan','90天计划'],['xindeng','新登'],['agents','平衡'],['newconfig','成长总览'],['mistakes','避坑'],['review','每周复盘'],['whiteboard','白布画板']]},
   health:{label:'健康',items:[['health','总览'],['checkin','打卡'],['diet','饮食'],['fitness','健身'],['skin','皮肤'],['sleep','睡眠'],['style','穿搭']]}
 };
 function renderHubTabs(page){
@@ -379,7 +379,7 @@ function renderPage(page, {autoRefresh=false, transition=true, animate=true}={})
   const root=$('#viewRoot');
   root.dataset.page=page;
   root.dataset.hub=HUB_OF[page]||page;
-  const map={xindeng:renderXinDeng,growthplan:renderGrowthPlan,review:renderGrowthReview,today:()=>renderTaskWorkspace('home'),schedules:renderSchedules,agents:renderAgents,mistakes:renderMistakes,home:renderHome,inbox:renderInbox,upcoming:renderUpcoming,calendar:renderCalendar,matrix:renderMatrix,stats:renderFocusStats,important:renderImportant,alltasks:renderAllFocusTasks,dashboard:renderDashboard,allocation:renderAllocation,nasdaq:renderNasdaq,ashare:renderAshare,newconfig:()=> (typeof renderNewConfigV2==='function'?renderNewConfigV2():renderNewConfig()),health:renderHealth,checkin:renderHealthCheckin,diet:()=>renderHealthSection('diet'),fitness:()=>renderHealthSection('fitness'),skin:()=>renderHealthSection('skin'),sleep:()=>renderHealthSection('sleep'),style:()=>renderHealthSection('style'),english:()=> (typeof renderEnglishV2==='function'?renderEnglishV2():renderEnglish()),reading:()=> (typeof renderReadingV2==='function'?renderReadingV2():renderReading()),execution:renderExecution,archive:renderArchive,dailyflow:renderDailyFlow,flowstats:renderFlowStats,alpharadar:renderAlphaRadar};
+  const map={whiteboard:renderWhiteboard,xindeng:renderXinDeng,growthplan:renderGrowthPlan,review:renderGrowthReview,today:()=>renderTaskWorkspace('home'),schedules:renderSchedules,agents:renderAgents,mistakes:renderMistakes,home:renderHome,inbox:renderInbox,upcoming:renderUpcoming,calendar:renderCalendar,matrix:renderMatrix,stats:renderFocusStats,important:renderImportant,alltasks:renderAllFocusTasks,dashboard:renderDashboard,allocation:renderAllocation,nasdaq:renderNasdaq,ashare:renderAshare,newconfig:()=> (typeof renderNewConfigV2==='function'?renderNewConfigV2():renderNewConfig()),health:renderHealth,checkin:renderHealthCheckin,diet:()=>renderHealthSection('diet'),fitness:()=>renderHealthSection('fitness'),skin:()=>renderHealthSection('skin'),sleep:()=>renderHealthSection('sleep'),style:()=>renderHealthSection('style'),english:()=> (typeof renderEnglishV2==='function'?renderEnglishV2():renderEnglish()),reading:()=> (typeof renderReadingV2==='function'?renderReadingV2():renderReading()),execution:renderExecution,archive:renderArchive,dailyflow:renderDailyFlow,flowstats:renderFlowStats,alpharadar:renderAlphaRadar};
   const investingPages=['dashboard','allocation','nasdaq','ashare','execution'];
   const body=(map[page]||renderHome)();
   const commit = () => {
@@ -973,9 +973,9 @@ function flowClock(min){return `${String(Math.floor(min/60)).padStart(2,'0')}:${
 function flowEditorPanel(kind){
  const items=state.dailyFlows[kind]||[];const sorted=[...items].sort((a,b)=>n(a.start)-n(b.start)||n(a.order)-n(b.order));
  // Interval coloring: simultaneous tasks use separate horizontal lanes.
- const laneMeta=new Map(),laneEnds=[];sorted.forEach(x=>{let lane=laneEnds.findIndex(end=>end<=n(x.start));if(lane<0)lane=laneEnds.length;laneEnds[lane]=n(x.end);laneMeta.set(x.id,lane);});
+ const laneMeta=new Map(),laneEnds=[];sorted.forEach(x=>{let lane=laneEnds.findIndex(end=>end<=n(x.start));if(lane<0)lane=laneEnds.length;laneEnds[lane]=Math.max(n(x.end),n(x.start)+112);laneMeta.set(x.id,lane);});
  const laneCount=Math.max(1,laneEnds.length);
- const blocks=sorted.map(x=>{const lane=laneMeta.get(x.id)||0,st=Math.max(0,Math.min(1439,n(x.start))),en=Math.max(st+5,Math.min(1440,n(x.end)));return `<article class="flow-block" draggable="true" data-flow-id="${esc(x.id)}" data-flow-start="${st}" data-flow-end="${en}" data-flow-lane="${lane}" data-flow-lanes="${laneCount}" style="top:${st}px;height:${en-st}px;left:calc(66px + ${lane/laneCount*100}% - ${lane/laneCount*82}px);width:calc(${100/laneCount}% - ${82/laneCount+6}px);--flow-color:${esc(x.color||'#6e9c79')}" title="拖动块可调整时间；重叠任务并排显示"><span class="flow-time">${flowClock(st)}–${flowClock(en)}</span><strong>${esc(x.title)}</strong><small>${esc(x.category||'日常')} · ${esc(x.note||'')}</small><div class="flow-block-actions"><button data-action="flow-run" data-kind="${kind}" data-id="${esc(x.id)}">开始 / 记录</button><button data-action="flow-edit" data-kind="${kind}" data-id="${esc(x.id)}">编辑</button></div><span class="flow-resize" data-flow-resize="${esc(x.id)}" title="拖动调整结束时间"></span></article>`}).join('');
+ const blocks=sorted.map(x=>{const lane=laneMeta.get(x.id)||0,st=Math.max(0,Math.min(1439,n(x.start))),en=Math.max(st+5,Math.min(1440,n(x.end)));return `<article class="flow-block" draggable="true" data-flow-id="${esc(x.id)}" data-flow-start="${st}" data-flow-end="${en}" data-flow-lane="${lane}" data-flow-lanes="${laneCount}" style="top:${st}px;height:${en-st}px;left:calc(66px + ${lane/laneCount*100}% - ${lane/laneCount*82}px);width:calc(${100/laneCount}% - ${82/laneCount+6}px);--flow-color:${esc(x.color||'#6e9c79')}" title="双击编辑；短任务扩大显示，实际时长以时间标签为准" tabindex="0"><span class="flow-time">${flowClock(st)}–${flowClock(en)}</span><strong>${esc(x.title)}</strong><small>${esc(x.category||'日常')} · ${esc(x.note||'')}</small><div class="flow-block-actions"><button data-action="flow-run" data-kind="${kind}" data-id="${esc(x.id)}">开始 / 记录</button><button data-action="flow-edit" data-kind="${kind}" data-id="${esc(x.id)}">编辑</button></div><span class="flow-resize" data-flow-resize="${esc(x.id)}" title="拖动调整结束时间"></span></article>`}).join('');
  const rows=Array.from({length:24},(_,h)=>`<div class="flow-hour" style="top:${h/24*100}%"><span>${String(h).padStart(2,'0')}:00</span><i></i></div>`).join('');
  return `<div class="flow-mode-tabs"><button class="filter-pill ${kind==='weekday'?'selected':''}" data-action="flow-kind" data-kind="weekday">工作日 <span>${state.dailyFlows.weekday.length}</span></button><button class="filter-pill ${kind==='restday'?'selected':''}" data-action="flow-kind" data-kind="restday">休息日 <span>${state.dailyFlows.restday.length}</span></button><span class="micro-copy">${kind==='weekday'?'周一至周五':'周六、周日'} · 自定义任务与时间</span></div>
  <div class="flow-editor-layout"><section class="card flow-timeline-card">${cardHead(kind==='weekday'?'工作日时间轴':'休息日时间轴','左侧为时间；并行任务以并排时间块显示。')}<div class="flow-timeline-scroll"><div class="flow-timeline" id="flowTimeline">${rows}${blocks||'<div class="flow-empty">当前没有流程块。点击右上角“新增流程块”开始编排。</div>'}</div></div></section></div>`;
@@ -985,9 +985,9 @@ function renderDailyFlow(){
  const runs=state.dailyFlowRuns||[],items=[...(state.dailyFlows.weekday||[]),...(state.dailyFlows.restday||[])];
  return `${sectionHead('LIFE OS · DAILY RHYTHM','流程','流程编排与流程统计收进同一个工作台，用左右两个页签切换：编排看工作日/休息日时间轴，统计看记录、完成率、分类与趋势。电脑可拖动任务块调整时间；手机滑动浏览，点“编辑”修改时间。任务允许重叠。',`<button class="btn btn-primary" data-action="flow-new" data-kind="${kind}">＋ 新增流程块</button>`)}
  <div class="flow-page-shell" data-tab-shell data-tab-key="dailyflow" data-default-tab="edit">
-  <div class="flow-page-bar"><div class="flow-page-tabs" data-tabs role="tablist"><button class="flow-page-tab active" data-tab="edit" role="tab"><span>流程编排</span><small>${items.length} 个流程块</small></button><button class="flow-page-tab" data-tab="stats" role="tab"><span>流程统计</span><small>${runs.length} 次记录</small></button></div><div class="flow-page-meta"><span class="live-dot"></span>${kind==='weekday'?'当前：工作日':'当前：休息日'} · 本地保存</div></div>
+  <div class="flow-page-bar"><div class="flow-page-tabs" data-tabs role="tablist"><button class="flow-page-tab active" data-tab="edit" role="tab"><span>流程编排</span><small>${items.length} 个流程块</small></button><button class="flow-page-tab" data-tab="checklist" role="tab"><span>每日清单</span></button><button class="flow-page-tab" data-tab="stats" role="tab"><span>流程统计</span><small>${runs.length} 次记录</small></button></div><div class="flow-page-meta"><span class="live-dot"></span>${kind==='weekday'?'当前：工作日':'当前：休息日'} · 本地保存</div></div>
   <div class="flow-page-panel active" data-tab-panel="edit">${flowEditorPanel(kind)}</div>
-  <div class="flow-page-panel" data-tab-panel="stats" id="flowStatsPanel">${flowStatsBody()}</div>
+  <div class="flow-page-panel" data-tab-panel="checklist">${renderFlowChecklist()}</div><div class="flow-page-panel" data-tab-panel="stats" id="flowStatsPanel">${flowStatsBody()}</div>
   <div id="flowModalMount"></div>
  </div>`;
 }
@@ -1003,7 +1003,7 @@ function flowStatsBody(){ const runs=state.dailyFlowRuns||[],items=[...(state.da
  const byCat={};runs.forEach(r=>{const c=r.category||'未分类';byCat[c]=(byCat[c]||0)+1});const cats=Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
  const byDay={};runs.forEach(r=>{const d=(r.timestamp||'').slice(0,10);if(d)byDay[d]=(byDay[d]||0)+1});const days=Object.entries(byDay).sort((a,b)=>a[0].localeCompare(b[0])).slice(-14);
  const flowCounts=items.map(f=>({...f,count:runs.filter(r=>r.flowId===f.id).length,done:runs.filter(r=>r.flowId===f.id&&r.status==='completed').length})).sort((a,b)=>b.count-a.count);
- return `<div class="home-kpi-grid stats-kpis"><div class="home-kpi"><span>流程块总数</span><strong>${items.length}</strong><p>工作日与休息日全部编排</p></div><div class="home-kpi"><span>打开 / 记录次数</span><strong>${opened}</strong><p>每次点击开始/记录计一次</p></div><div class="home-kpi"><span>完成次数</span><strong>${completed}</strong><p>从记录弹窗标记完成</p></div><div class="home-kpi"><span>使用过的流程</span><strong>${unique}</strong><p>至少记录过一次的独立流程</p></div></div>
+ return `${renderChecklistStats()}<div class="home-kpi-grid stats-kpis"><div class="home-kpi"><span>流程块总数</span><strong>${items.length}</strong><p>工作日与休息日全部编排</p></div><div class="home-kpi"><span>打开 / 记录次数</span><strong>${opened}</strong><p>每次点击开始/记录计一次</p></div><div class="home-kpi"><span>完成次数</span><strong>${completed}</strong><p>从记录弹窗标记完成</p></div><div class="home-kpi"><span>使用过的流程</span><strong>${unique}</strong><p>至少记录过一次的独立流程</p></div></div>
  <div class="grid grid-2" style="margin-top:14px"><section class="card">${cardHead('近14天流程记录趋势','按发生日期统计打开 / 记录次数')}<div class="card-body"><div class="flow-bars">${days.map(([d,v])=>`<div class="flow-bar-row"><span>${d.slice(5)}</span><div><i style="width:${Math.max(2,v/Math.max(1,...days.map(x=>x[1]))*100)}%"></i></div><b>${v}</b></div>`).join('')||'<p class="micro-copy">暂无记录；进入流程编排点击「开始 / 记录」后会生成统计数据。</p>'}</div></div></section><section class="card">${cardHead('分类维度','按流程记录时的分类统计')}<div class="card-body">${cats.map(([c,v])=>`<div class="flow-stat-chip"><span>${esc(c)}</span><strong>${v} 次</strong><small>${opened?Math.round(v/opened*100):0}%</small></div>`).join('')||'<p class="micro-copy">尚无分类统计。</p>'}</div></section></div>
  <section class="card" style="margin-top:14px">${cardHead('单项流程使用明细','可按工作日/休息日、打开次数、完成次数观察使用情况')}<div class="table-wrap"><table class="data-table"><thead><tr><th>流程</th><th>类型</th><th>时间</th><th>分类</th><th>打开次数</th><th>完成次数</th><th>操作</th></tr></thead><tbody>${flowCounts.map(f=>`<tr><td><strong>${esc(f.title)}</strong></td><td>${f.kind==='weekday'?'工作日':'休息日'}</td><td>${flowClock(f.start)}–${flowClock(f.end)}</td><td>${esc(f.category||'日常')}</td><td>${f.count}</td><td>${f.done}</td><td><button class="btn btn-small btn-outline" data-action="flow-edit" data-kind="${f.kind}" data-id="${esc(f.id)}">编辑</button></td></tr>`).join('')||'<tr><td colspan="7">暂无流程，请先到「流程编排」添加。</td></tr>'}</tbody></table></div></section>`;
 }
@@ -2334,12 +2334,12 @@ function bindDelegatedEvents() {
     if(a==='undo-delete') { const entry=undoEntries.pop();if(entry){entry.arr.splice(Math.min(entry.index,entry.arr.length),0,entry.item);renderUndoNotice();saveAndRender('已恢复');}return; }
     if(a==='home-start-focus') { startFocusClock();renderPage('today');toast('专注已开始');return; }
     if(a==='focus-add-focus') { renderPage('today'); setTimeout(()=>$('#focusTaskTitle')?.focus(),0); return; }
-    if(a==='calendar-prev'){ui.calendarWeekOffset=(ui.calendarWeekOffset||0)-1;renderPage('home');return;}
-    if(a==='calendar-next'){ui.calendarWeekOffset=(ui.calendarWeekOffset||0)+1;renderPage('home');return;}
-    if(a==='calendar-this'){ui.calendarWeekOffset=0;renderPage('home');return;}
-    if(a==='calendar-toggle-create'){ui.showCalendarComposer=!ui.showCalendarComposer;renderPage('home');return;}
-    if(a==='calendar-pick-date'){ui.calendarSelectedDate=action.dataset.date||todayKey();ui.showCalendarComposer=true;renderPage('home');setTimeout(()=>$('#calendarTaskTitle')?.focus(),0);return;}
-    if(a==='calendar-add-day'){ui.calendarSelectedDate=action.dataset.date||todayKey();ui.showCalendarComposer=true;renderPage('home');setTimeout(()=>$('#calendarTaskTitle')?.focus(),0);return;}
+    if(a==='calendar-prev'){ui.calendarWeekOffset=(ui.calendarWeekOffset||0)-1;renderPage('calendar');return;}
+    if(a==='calendar-next'){ui.calendarWeekOffset=(ui.calendarWeekOffset||0)+1;renderPage('calendar');return;}
+    if(a==='calendar-this'){ui.calendarWeekOffset=0;renderPage('calendar');return;}
+    if(a==='calendar-toggle-create'){ui.showCalendarComposer=!ui.showCalendarComposer;renderPage('calendar');return;}
+    if(a==='calendar-pick-date'){ui.calendarSelectedDate=action.dataset.date||todayKey();ui.showCalendarComposer=true;renderPage('calendar');setTimeout(()=>$('#calendarTaskTitle')?.focus(),0);return;}
+    if(a==='calendar-add-day'){ui.calendarSelectedDate=action.dataset.date||todayKey();ui.showCalendarComposer=true;renderPage('calendar');setTimeout(()=>$('#calendarTaskTitle')?.focus(),0);return;}
     if(a==='open-workbook'){openWorkbookViewer(action.dataset.workbookId);return;}
     if(a==='close-workbook'){ $('#workbookViewer')?.remove();ui.workbookData=null;return;}
     if(a==='workbook-sheet'){ui.workbookSheetIndex=n(action.dataset.index);renderWorkbookSheet();return;}
@@ -2455,7 +2455,7 @@ function bindDelegatedEvents() {
     if(e.target.id==='calendarTaskForm'){
       e.preventDefault();const title=$('#calendarTaskTitle')?.value.trim(),startDate=$('#calendarTaskStart')?.value||'',dueDate=$('#calendarTaskEnd')?.value||'';if(!title){toast('请先填写任务内容',true);return;}if(!startDate||!dueDate){toast('请填写起始和截止日期',true);return;}if(dueDate<startDate){toast('截止日期不能早于起始日期',true);return;}
       const list=focusTasks();list.push({id:(window.crypto?.randomUUID?.()||`task-${Date.now()}-${Math.random().toString(36).slice(2,8)}`),title,project:$('#calendarTaskProject').value,quadrant:$('#calendarTaskQuadrant')?.value||'later',priority:$('#calendarTaskPriority').value,startDate,dueDate,sortOrder:dayDiff('2000-01-01',startDate)*1000+list.filter(t=>(t.startDate||t.dueDate)===startDate).length,estimate:Math.max(0,n($('#calendarTaskEstimate').value,25)),note:$('#calendarTaskNote').value.trim(),done:false,important:$('#calendarTaskImportant').checked,createdAt:new Date().toISOString()});
-      await persist({quiet:true});ui.showCalendarComposer=false;ui.calendarSelectedDate=startDate;renderPage('home');toast('任务已添加到周历');return;
+      await persist({quiet:true});ui.showCalendarComposer=false;ui.calendarSelectedDate=startDate;renderPage('calendar');toast('任务已添加到周历');return;
     }
     if(e.target.id==='alphaSignalForm'){e.preventDefault();const fd=new FormData(e.target);const v=k=>String(fd.get(k)||'').trim();state.alphaRadarSignals.push({id:`alpha-${Date.now()}`,title:v('title'),radar:v('radar'),stage:n(fd.get('stage'),2),fundamental:clamp(fd.get('fundamental')),catalyst:clamp(fd.get('catalyst')),capital:clamp(fd.get('capital')),attention:clamp(fd.get('attention')),crowding:clamp(fd.get('crowding')),priced:clamp(fd.get('priced')),thesis:v('thesis'),anchor:v('anchor'),mapping:v('mapping'),evidence:v('evidence'),updatedAt:new Date().toLocaleString('zh-CN')});await persist({quiet:true});renderPage('alpharadar');toast('Alpha Radar 信号已保存，并同步到个人数据保险库');return;}
     if(e.target.id==='dailyLogForm'){e.preventDefault();state.dailyLog=state.dailyLog||[];state.dailyLog.push({date:$('#logDate').value,kind:$('#logKind').value,action:$('#logAction').value.trim(),reason:$('#logReason').value.trim(),status:$('#logStatus').value});await persist({quiet:true});renderPage('execution');toast('每日记录已保存');}
@@ -2538,7 +2538,7 @@ document.addEventListener('wheel',e=>{const canvas=e.target.closest?.('#bodyMode
 document.addEventListener('click',e=>{const tab=e.target.closest?.('[data-tab-key="dailyflow"] [data-tab="stats"]');if(!tab)return;const panel=$('#flowStatsPanel');if(panel)panel.innerHTML=flowStatsBody();refreshFlowTabCounts();});
 updateAuthMode();
 bindDelegatedEvents();
-boot();
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 
 async function gymRequest(path, options={}) {
   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),15000);

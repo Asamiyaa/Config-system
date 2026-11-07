@@ -23,8 +23,8 @@ with sync_playwright() as pw:
  page.wait_for_timeout(500)
  assert page.locator('#mainNav .nav-label').all_text_contents()==['成长','资产','健康','设置','归档']
  tabs=page.locator('.hub-tabs .hub-tab')
- assert tabs.all_text_contents()==['流程','新登','平衡','周历','成长总览','90天计划','避坑','每周复盘']
- for key in ['xindeng','agents','calendar','newconfig','growthplan','mistakes','review','dailyflow']:
+ assert tabs.all_text_contents()==['流程','周历','90天计划','新登','平衡','成长总览','避坑','每周复盘','白布画板']
+ for key in ['whiteboard','xindeng','agents','calendar','newconfig','growthplan','mistakes','review','dailyflow']:
   page.locator(f'.hub-tab[data-page="{key}"]').click()
   page.wait_for_function('(k)=>document.querySelector("#viewRoot").dataset.page===k',arg=key)
   page.wait_for_timeout(200)
@@ -44,6 +44,32 @@ with sync_playwright() as pw:
  assert page.locator('.hub-tab').first.get_attribute('href')=='http://39.106.118.186/'
  page.locator('#mainNav [data-page="newconfig"]').click();page.wait_for_timeout(300)
  assert page.locator('#viewRoot').get_attribute('data-page')=='dailyflow'
+ page.evaluate("state.dailyFlows.weekday=[{id:'short',title:'五分钟任务',start:600,end:605}];ui.flowKind='weekday';renderPage('dailyflow',{transition:false})")
+ page.locator('.flow-block').dblclick();page.wait_for_timeout(200)
+ assert page.locator('.flow-modal').is_visible()
+ page.evaluate("document.querySelector('.flow-modal')?.remove();document.querySelector('.flow-modal-backdrop')?.remove()")
+ page.locator('[data-tab="checklist"]').click();page.wait_for_timeout(200)
+ page.evaluate("ui.checklistDate='2026-11-06';renderPage('dailyflow',{transition:false})")
+ page.locator('[data-checklist-index]').first.check();page.wait_for_timeout(300)
+ assert page.evaluate("state.flowChecklist['2026-11-06'][0].done")
+ page.locator('.hub-tab[data-page="calendar"]').click();page.wait_for_timeout(250)
+ page.locator('[data-action="calendar-toggle-create"]').click();page.wait_for_timeout(250)
+ assert page.locator('#calendarTaskTitle').is_visible()
+ assert page.locator('#viewRoot').get_attribute('data-page')=='calendar'
+ page.locator('#calendarTaskTitle').fill('周历新增测试')
+ page.locator('#calendarTaskForm button[type="submit"]').click();page.wait_for_timeout(250)
+ assert page.locator('#viewRoot').get_attribute('data-page')=='calendar'
+ page.locator('[data-calendar-date]').first.dblclick();page.wait_for_timeout(250)
+ assert page.locator('#calendarTaskTitle').is_visible()
+ page.locator('.hub-tab[data-page="whiteboard"]').click();page.wait_for_timeout(200)
+ page.locator('[data-board="new"]').click();page.wait_for_timeout(250)
+ assert page.locator('#whiteCanvas').is_visible()
+ canvas=page.locator('#whiteCanvas').bounding_box();page.mouse.move(canvas['x']+30,canvas['y']+30);page.mouse.down();page.mouse.move(canvas['x']+100,canvas['y']+100,steps=5);page.mouse.up();page.wait_for_timeout(200)
+ assert page.evaluate('state.whiteboards[0].strokes.length')==1
+ page.locator('[data-board="save"]').click();page.wait_for_timeout(200)
+ assert seed['whiteboards']
+ page.locator('.hub-tab[data-page="dailyflow"]').click();page.wait_for_timeout(200)
+ page.locator('[data-tab="edit"]').click()
  page.screenshot(path='artifacts/xindeng-flow-desktop.png',full_page=False)
  mobile=browser.new_context(viewport={'width':390,'height':844},is_mobile=True,has_touch=True,device_scale_factor=1)
  m=mobile.new_page();m.on('pageerror',lambda e:errors.append(str(e)));m.route('**/api/**',route);m.goto(BASE);m.wait_for_timeout(800)
