@@ -22,7 +22,7 @@ with sync_playwright() as pw:
  page.goto(BASE)
  page.wait_for_function("document.querySelector('#viewRoot').dataset.page==='dailyflow'")
  page.wait_for_timeout(500)
- assert page.locator('#mainNav .nav-label').all_text_contents()==['成长','资产','健康','设置','归档']
+ assert page.locator('#mainNav .nav-label').all_text_contents()==['成长','健康','资产','设置']
  tabs=page.locator('.hub-tabs .hub-tab')
  assert tabs.all_text_contents()==['流程','周历','90天计划','新登','平衡','成长总览','避坑','每周复盘','白布画板','思维导图']
  for key in ['mindmap','whiteboard','xindeng','agents','calendar','newconfig','growthplan','mistakes','review','dailyflow']:
@@ -40,13 +40,18 @@ with sync_playwright() as pw:
  page.locator('.hub-tab[data-page="agents"]').click();page.wait_for_timeout(300)
  assert page.evaluate('JSON.stringify(state.agentStatuses)')==json.dumps(seed['agentStatuses'],separators=(',',':'))
  page.locator('#mainNav [data-page="settings"]').click();page.wait_for_timeout(500)
- assert page.locator('.hub-tabs').inner_text()=='自动化'
+ assert page.locator('.hub-tabs .hub-tab').all_text_contents()==['自动化','归档']
  page.locator('#mainNav [data-page="dashboard"]').click();page.wait_for_timeout(500)
  assert page.locator('.hub-tab').first.get_attribute('href')=='http://39.106.118.186/'
  page.locator('#mainNav [data-page="newconfig"]').click();page.wait_for_timeout(300)
  assert page.locator('#viewRoot').get_attribute('data-page')=='dailyflow'
  page.evaluate("ui.flowViewMode='timeline';state.dailyFlows.weekday=[{id:'short',title:'五分钟任务',start:600,end:605}];ui.flowKind='weekday';renderPage('dailyflow',{transition:false})")
  assert page.locator('[data-tab="checklist"]').count()==0
+ assert page.locator('.flow-overview-item').all_text_contents()==['五分钟任务']
+ assert not page.locator('.flow-detail-timeline').get_attribute('open')
+ assert page.locator('[data-action="flow-new"]').count()==0
+ assert page.locator('.workspace-jump').count()==0
+ page.locator('.flow-detail-timeline summary').click()
  assert page.locator('.flow-block').inner_text()=='五分钟任务'
  assert page.locator('.flow-block').evaluate('e=>e.getBoundingClientRect().height')==20
  assert page.locator('.flow-block button').count()==0
@@ -64,6 +69,7 @@ with sync_playwright() as pw:
  page.evaluate("state.dailyFlows.weekday[0].title='已修改任务';renderPage('dailyflow',{transition:false})")
  page.locator('#flowViewToggle').click();page.wait_for_timeout(200)
  assert page.locator('.flow-check-row strong').all_text_contents()==['已修改任务']
+ assert page.locator('.checklist-time').inner_text()=='10:00–10:05'
  assert page.locator('[data-checklist-id]').first.is_checked()
  page.locator('.hub-tab[data-page="calendar"]').click();page.wait_for_timeout(250)
  page.locator('[data-action="calendar-toggle-create"]').click();page.wait_for_timeout(250)

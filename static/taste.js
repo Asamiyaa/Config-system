@@ -187,12 +187,7 @@
   setTimeout(syncActive, 300);
 
   /* ---------- app shell: bottom tab bar + hamburger morph ---------- */
-  const MOBILE_TABS = [
-    { page: 'newconfig', label: '成长', icon: 'i-compass' },
-    { page: 'settings', label: '设置', icon: 'i-sun' },
-    { page: 'dashboard', label: '资产', icon: 'i-shield' },
-    { page: 'health', label: '健康', icon: 'i-heart' }
-  ];
+  const MOBILE_TABS = [{page:'newconfig',label:'成长',icon:'i-compass'},{page:'health',label:'健康',icon:'i-heart'},{page:'dashboard',label:'资产',icon:'i-shield'},{page:'settings',label:'设置',icon:'i-sun'}];
   function icon(id) {
     return `<svg viewBox="0 0 16 16" aria-hidden="true"><use href="#${id}"></use></svg>`;
   }
