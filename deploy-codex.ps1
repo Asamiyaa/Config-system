@@ -144,7 +144,7 @@ curl -fsS "__HEALTH_LOCAL__" && echo
     Replace('__SERVICE__', $ServiceName).
     Replace('__HEALTH_LOCAL__', $HealthLocalUrl)
 
-  $remoteScript | & ssh -i $SshKey -o BatchMode=yes -o StrictHostKeyChecking=accept-new -o ConnectTimeout=30 "${ServerUser}@${ServerHost}" 'bash -s'
+  $remoteScript | & ssh -i $SshKey -o BatchMode=yes -o StrictHostKeyChecking=accept-new -o ConnectTimeout=30 "${ServerUser}@${ServerHost}" 'tr -d ''\r'' | bash -s'
   if ($LASTEXITCODE -ne 0) { Fail 'Remote install/restart failed.' }
 
   Step 'Public health check'
