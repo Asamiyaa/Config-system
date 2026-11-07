@@ -33,8 +33,25 @@ with sync_playwright() as pw:
  assert f.evaluate('window.cacheIdentity')=='same-instance'
  assert len(models)==before,(before,len(models))
  p.locator('[data-action="body-zone"][data-zone="chest"]').click();p.wait_for_timeout(200)
- p.locator('[data-action="body-open-library"]').click();p.wait_for_timeout(300)
+ p.wait_for_timeout(300)
+ assert p.locator('[data-action="body-open-library"]').count()==0
+ assert '当前区域' not in p.locator('.training-studio').inner_text()
+ assert '在动作库查看该区域' not in p.locator('.training-studio').inner_text()
+ assert p.locator('.action-inspector').get_by_text('胸大肌上部',exact=True).is_visible()
  assert p.evaluate('gymUI().bodyPart')=='chest'
+ p.locator('[data-action="body-muscle"][data-muscle="胸大肌上部"]').click();p.wait_for_timeout(400)
+ assert p.evaluate('gymUI().q')=='胸大肌'
+ assert p.locator('#gymSearch').input_value()=='胸大肌'
+ assert p.locator('[data-muscle="胸大肌上部"] .active').count()==0
+ assert p.locator('[data-muscle="胸大肌上部"]').get_attribute('class').endswith('active')
+ p.locator('[data-action="body-zone"][data-zone="lower"]').click();p.wait_for_timeout(300)
+ assert p.evaluate('gymUI().q')==''
+ assert p.evaluate('gymUI().bodyPart')=='upper legs,lower legs'
+ assert p.locator('.action-inspector').get_by_text('股四头肌',exact=True).is_visible()
+ p.locator('.body-region-index [data-action="body-reset"]').click();p.wait_for_timeout(300)
+ assert p.evaluate('gymUI().bodyPart')==''
+ assert p.evaluate('gymUI().q')==''
+ assert f.evaluate('window.cacheIdentity')=='same-instance'
  assert not errors,errors
  b.close()
 print('PASS: background worker parsing, all four layers, persistent iframe and parsed cache reuse, inspector-to-library filter; no JS errors')
