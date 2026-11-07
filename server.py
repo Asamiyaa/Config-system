@@ -16,6 +16,8 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
+from data_store import prepare_data_dir, backup_database
+
 from astock_data_backup import fetch_etf_daily as _astock_backup_etf_daily
 import gym_catalogue as gymlib
 
@@ -29,9 +31,9 @@ from dotenv import load_dotenv
 BASE = Path(__file__).resolve().parent
 load_dotenv(BASE / ".env")
 STATIC = BASE / "static"
-DATA = BASE / "data"
+DATA = prepare_data_dir(BASE)
 DB_PATH = DATA / "wealth_os.sqlite3"
-SEED_PATH = DATA / "seed_state.json"
+SEED_PATH = BASE / "data" / "seed_state.json"
 MARKET_LOG_PATH = DATA / "market_refresh_logs.jsonl"
 MARKET_PROGRESS_LOCK = __import__("threading").Lock()
 MARKET_PROGRESS: dict[str, dict[str, Any]] = {}
@@ -81,6 +83,8 @@ def default_state() -> dict[str, Any]:
 
 
 def init_db() -> None:
+    if DB_PATH.is_file():
+        backup_database(DB_PATH)
     with db() as con:
         con.execute("""CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -166,6 +170,8 @@ def _archive_pointer_path() -> Path:
 
 def _external_archive_root() -> Path:
     env = os.getenv("WEALTH_OS_ARCHIVE_DIR", "").strip()
+    if env:
+        return Path(env).expanduser()
     pointer = _archive_pointer_path()
     if pointer.is_file():
         try:
@@ -174,7 +180,8 @@ def _external_archive_root() -> Path:
                 return Path(saved).expanduser()
         except Exception:
             pass
-    return Path(env or r"D:\WEALTH_OS_DAILY_ARCHIVE").expanduser()
+    default = r"D:\WEALTH_OS_DAILY_ARCHIVE" if os.name == "nt" else str(Path.home() / ".local/share/xindeng/archive")
+    return Path(env or default).expanduser()
 
 
 def _remember_archive_root(raw: str) -> None:
@@ -194,7 +201,13 @@ def _personal_vault_path(username: str) -> Path:
     return _external_archive_root() / "PERSONAL_DATA" / f"WEALTH_OS_PERSONAL_DATA_{_safe_user_filename(username)}.xlsx"
 
 
+VAULT_LOCK = __import__("threading").RLock()
+
 def _write_personal_vault(username: str, state: dict[str, Any], scheduler_jobs: list[dict[str, Any]] | None = None) -> Path:
+    with VAULT_LOCK:
+        return _write_personal_vault_locked(username, state, scheduler_jobs)
+
+def _write_personal_vault_locked(username: str, state: dict[str, Any], scheduler_jobs: list[dict[str, Any]] | None = None) -> Path:
     """Mirror all user-owned state to an external Excel vault.
 
     The workbook lives outside the application folder, so replacing/upgrading the
@@ -285,6 +298,8 @@ def _restore_personal_vault(username: str) -> dict[str, Any] | None:
     except Exception:
         return None
 
+STORAGE_WARNINGS: dict[int, str] = {}
+
 def save_user_state(user_id: int, state: dict[str, Any]) -> None:
     # Avoid storing unexpectedly huge or executable payloads in the single JSON state document.
     serialized = json.dumps(state, ensure_ascii=False, allow_nan=False)
@@ -295,6 +310,11 @@ def save_user_state(user_id: int, state: dict[str, Any]) -> None:
             "INSERT OR REPLACE INTO user_state(user_id,state_json,updated_at) VALUES(?,?,?)",
             (user_id, serialized, datetime.now(timezone.utc).isoformat()),
         )
+    STORAGE_WARNINGS.pop(user_id, None)
+    try:
+        backup_database(DB_PATH)
+    except Exception:
+        STORAGE_WARNINGS[user_id] = "数据库已保存，但数据库备份失败，请检查数据目录权限和空间。"
     with db() as con:
         u = con.execute("SELECT username FROM users WHERE id=?", (user_id,)).fetchone()
     if u:
@@ -302,6 +322,7 @@ def save_user_state(user_id: int, state: dict[str, Any]) -> None:
             _write_personal_vault(str(u["username"]), state)
         except Exception as exc:
             # SQLite save remains authoritative for the current run; surface archive health via API later.
+            STORAGE_WARNINGS[user_id] = "数据库已保存，但外部归档失败，请在设置中检查归档目录。"
             print(f"[personal-vault] mirror failed: {type(exc).__name__}: {exc}")
 
 
@@ -393,7 +414,7 @@ def get_state(request: Request) -> dict[str, Any]:
 def put_state(payload: StatePayload, request: Request) -> dict[str, Any]:
     user = current_user(request)
     save_user_state(int(user["id"]), payload.state)
-    return {"ok": True, "saved_at": datetime.now(timezone.utc).isoformat()}
+    return {"ok": True, "saved_at": datetime.now(timezone.utc).isoformat(), "storageWarning": STORAGE_WARNINGS.get(int(user["id"]))}
 
 
 # ---- openGym 动作库原生接入 -------------------------------------------------
@@ -1141,7 +1162,7 @@ def scheduler_run(payload: SchedulerRunPayload, request: Request) -> dict[str, A
 def personal_vault_status(request: Request) -> dict[str, Any]:
     user=current_user(request)
     path=_personal_vault_path(str(user["username"]))
-    return {"ok": path.is_file(), "path": str(path), "archiveRoot": str(_external_archive_root()),
+    return {"ok": path.is_file(), "databasePath": str(DB_PATH), "backupPath": str(DATA / "backups"), "warning": STORAGE_WARNINGS.get(int(user["id"])), "path": str(path), "archiveRoot": str(_external_archive_root()),
             "updatedAt": datetime.fromtimestamp(path.stat().st_mtime).astimezone().isoformat(timespec="seconds") if path.is_file() else None}
 
 

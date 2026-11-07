@@ -437,5 +437,5 @@ document.addEventListener('change', (e) => {
 });
 
 function renderXinDeng() {
-  return `${sectionHead('GROWTH FOUNDATION', '新登', '先建立底盘，再逐层积累能力与选择权。')}<div class="growth-foundations" aria-label="成长核心能力">${renderCapabilityPyramid()}<aside class="xindeng-flow"><div class="card-head"><h3>流程编排</h3><button class="btn btn-primary" data-action="flow-new" data-kind="${ui.flowKind||flowDateKind()}">＋ 新增流程块</button></div>${flowEditorPanel(ui.flowKind||flowDateKind())}<div id="flowModalMount"></div></aside></div>`;
+  return `${sectionHead('GROWTH FOUNDATION', '新登', '先建立底盘，再逐层积累能力与选择权。')}<div class="xindeng-foundation" aria-label="成长核心能力">${renderCapabilityPyramid()}</div>`;
 }

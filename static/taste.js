@@ -12,11 +12,13 @@
   const PAGES = [
     { page: 'newconfig', label: '成长总览', hint: '成长' },
     { page: 'xindeng', label: '新登', hint: '能力金字塔' },
-    { page: 'home', label: '今日与角色', hint: '首页 精力与平衡' },
-    { page: 'today', label: '执行', hint: '今日 待办 任务' },
+    { page: 'agents', label: '平衡', hint: '成长 角色与精力' },
+    { page: 'calendar', label: '周历', hint: '成长 日程' },
+    { page: 'growthplan', label: '90天计划', hint: '成长' },
+    { page: 'review', label: '每周复盘', hint: '成长' },
     { page: 'schedules', label: '自动化', hint: '定时任务' },
     { page: 'dailyflow', label: '流程', hint: '编排与统计' },
-    { page: 'mistakes', label: '切记', hint: '错过与过错' },
+    { page: 'mistakes', label: '避坑', hint: '错过与过错' },
     { page: 'dashboard', label: '资产总览', hint: '风控' },
     { page: 'allocation', label: '全球资产配置', hint: '风控' },
     { page: 'nasdaq', label: '纳斯达克 AI 策略', hint: '风控' },
@@ -151,13 +153,7 @@
     }
     nodes.forEach((n) => { n.nodeValue = n.nodeValue.replace(n.nodeValue.trim(), LABEL_MAP[n.nodeValue.trim()]); });
   }
-  const HUB_OF = {
-    home:'home', today:'today', inbox:'today', schedules:'today', dailyflow:'today', mistakes:'today',
-    calendar:'today', matrix:'today', stats:'today', important:'today', alltasks:'today', flowstats:'today',
-    dashboard:'dashboard', allocation:'dashboard', nasdaq:'dashboard', ashare:'dashboard', execution:'dashboard', alpharadar:'dashboard',
-    health:'health', checkin:'health', diet:'health', fitness:'health', skin:'health', sleep:'health', style:'health',
-    xindeng:'newconfig', growthplan:'newconfig', review:'newconfig', agents:'home', newconfig:'newconfig', english:'newconfig', reading:'newconfig', archive:'archive'
-  };
+
   function syncActive() {
     const page = (typeof currentPage !== 'undefined' ? currentPage : '') || '';
     const hub = HUB_OF[page] || page;
@@ -190,8 +186,8 @@
 
   /* ---------- app shell: bottom tab bar + hamburger morph ---------- */
   const MOBILE_TABS = [
-    { page: 'home', label: '今日', icon: 'i-home' },
-    { page: 'today', label: '执行', icon: 'i-check' },
+    { page: 'newconfig', label: '成长', icon: 'i-compass' },
+    { page: 'settings', label: '设置', icon: 'i-sun' },
     { page: 'dashboard', label: '资产', icon: 'i-shield' },
     { page: 'health', label: '健康', icon: 'i-heart' }
   ];

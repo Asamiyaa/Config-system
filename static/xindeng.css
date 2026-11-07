@@ -1,0 +1,56 @@
+/* New era identity and document-owned mobile scrolling. */
+html,body { overscroll-behavior-y:auto; }
+body.spatial-ui { overflow-x:clip; }
+body.spatial-ui .brand-mark { padding:0!important; background:transparent!important; border:0!important; }
+body.spatial-ui .brand-mark img { display:block; width:100%; height:100%; }
+body.spatial-ui #viewRoot .xindeng-foundation { max-width:1100px; margin:auto; }
+body.spatial-ui #viewRoot .hub-tab { flex-shrink:0; }
+body.spatial-ui #authScreen { display:grid!important; grid-template-columns:minmax(0,1.2fr) minmax(320px,.8fr); gap:clamp(40px,7vw,120px); padding:110px max(32px,7vw) 60px!important; background:radial-gradient(ellipse at 28% 15%,#254c49 0,transparent 52%),#091c20!important; color:#e9eee6; overflow:hidden; position:relative; min-height:100svh!important; }
+body.spatial-ui #authScreen.hidden { display:none!important; }
+#authScreen .auth-brand { position:absolute; top:32px; left:7vw; z-index:2; }
+#authScreen .auth-brand strong { font-size:22px; letter-spacing:.16em; color:#e9eee6; }
+#authScreen .auth-brand small { color:#a5bdb3; letter-spacing:.18em; margin-top:5px; }
+#authScreen .auth-art { display:flex!important; position:relative!important; inset:auto!important; flex-direction:column; justify-content:center; width:auto; min-width:0; padding:0; background:none!important; }
+#authScreen .auth-grid { display:none; }
+#authScreen .auth-copy { position:relative!important; inset:auto!important; max-width:640px; padding:0; z-index:1; }
+#authScreen .auth-copy .eyebrow { display:block!important; color:#c6ad76!important; font-size:11px; letter-spacing:.22em; margin-bottom:22px; }
+#authScreen .auth-copy h2 { font-size:clamp(28px,3.5vw,52px)!important; line-height:1.38!important; letter-spacing:-.04em; color:#f0f3e9; }
+#authScreen .auth-copy em { color:#d8be87; font-style:normal; }
+#authScreen .auth-copy p { color:#a8beb7; max-width:480px; line-height:1.9; margin-top:22px; font-size:14px; }
+#authScreen .auth-panel { position:relative; width:100%!important; max-width:440px; justify-self:end; background:#f5f3eb!important; border:1px solid #f5f3eb!important; border-radius:24px!important; padding:36px!important; color:#203b36; box-shadow:0 28px 80px #0004!important; }
+#authScreen .auth-panel h2 { color:#173b33!important; }
+#authScreen .auth-panel p,#authScreen .auth-form label,#authScreen .auth-mode { color:#52645c!important; }
+#authScreen .auth-form input { background:#fff!important; color:#193b32!important; border:1px solid #c4cfc7!important; border-radius:10px; height:48px; }
+#authScreen .auth-form .btn { height:48px!important; background:#214d40!important; color:#fff!important; border-radius:10px; }
+#authScreen .auth-mode button { color:#214d40; }
+#authScreen .auth-message { color:#a42929; }
+#authScreen .era-orbit { position:relative; width:min(360px,80%); height:250px; margin:0 auto 38px; perspective:650px; }
+.era-ring { position:absolute; inset:12%; border:1px solid #90c7b780; border-radius:50%; transform:rotateX(60deg) rotateZ(-24deg); }
+.era-ring.ring-two { inset:4%; border-color:#d5b87988; transform:rotateX(52deg) rotateY(42deg); animation:era-breathe 12s ease-in-out infinite alternate; }
+.era-ring.ring-three { inset:20%; transform:rotateY(60deg) rotateZ(25deg); border-style:dashed; }
+.era-core { position:absolute; inset:calc(50% - 42px) auto auto calc(50% - 42px); width:84px; height:84px; display:grid; place-items:center; font-size:38px; color:#f2dfb4; border:1px solid #bba57688; border-radius:25px; background:linear-gradient(140deg,#41655b,#122d2b); box-shadow:0 0 90px #a8c69f22; }
+.era-point { position:absolute; font:10px monospace; letter-spacing:.1em; color:#c2d6ca; padding:7px 10px; border:1px solid #6f958455; background:#102b29; border-radius:20px; }
+.era-ai { top:12%; left:8%; }.era-market { right:-2%; top:50%; }.era-self { bottom:3%; left:15%; color:#ddc28c; }
+@keyframes era-breathe { to {transform:rotateX(64deg) rotateY(25deg);opacity:.6;} }
+@media(max-width:760px){
+ body.spatial-ui #authScreen { grid-template-columns:1fr; gap:28px; padding:100px 24px 36px!important; }
+ #authScreen .auth-brand { left:24px; top:24px; }
+ #authScreen .era-orbit { height:140px; width:240px; margin:0 auto 16px; }
+ #authScreen .auth-copy h2 { font-size:28px!important; }
+ #authScreen .auth-copy p { font-size:12px; margin-top:12px; }
+ #authScreen .auth-copy .eyebrow { margin-bottom:12px; }
+ #authScreen .auth-panel { justify-self:center; padding:26px!important; max-width:520px; }
+ body.spatial-ui .app-shell,body.spatial-ui .main-panel,body.spatial-ui #viewRoot { overflow:visible!important; height:auto!important; }
+ body.spatial-ui .flow-block { touch-action:pan-y!important; }
+ body.spatial-ui :is(.flow-timeline-scroll,.sidebar-scroll,.flow-modal,.ui-sheet-panel) { overscroll-behavior-y:contain; }
+}
+@media(prefers-reduced-motion:reduce){.era-ring{animation:none!important;}}
+body.spatial-ui .agent-balance-stage:is(:hover,:focus-within) * { animation-play-state:paused!important; }
+@media(pointer:coarse){body.spatial-ui .flow-block{touch-action:pan-y!important;}body.spatial-ui .agent-node{animation-play-state:paused!important;}}
+body.spatial-ui #authScreen .auth-art { border:0!important; padding:0!important; }
+body.spatial-ui #authScreen .auth-copy { padding:0!important; }
+body.spatial-ui #authScreen .auth-copy h2 { color:#f0f3e9!important; }
+body.spatial-ui #authScreen .auth-copy em { color:#d8be87!important; }
+body.spatial-ui #authScreen .auth-copy p { color:#a8beb7!important; }
+body.spatial-ui #authScreen .auth-panel { display:block!important; min-height:0!important; height:auto!important; align-self:center!important; }
+body.spatial-ui #authScreen .auth-form .btn { width:100%!important; }

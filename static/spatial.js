@@ -8,7 +8,7 @@
   const dock = document.createElement('nav');
   dock.className = 'spatial-dock';
   dock.setAttribute('aria-label', '底部主导航');
-  const destinations = [['newconfig','成长','compass'],['home','今日','home'],['today','执行','check'],['dashboard','资产','shield'],['health','健康','heart']];
+  const destinations = [['newconfig','成长','compass'],['dashboard','资产','shield'],['health','健康','heart'],['settings','设置','sun'],['archive','归档','archive']];
   dock.innerHTML = destinations.map(([page,label,icon]) => `<button type="button" data-spatial-page="${page}" aria-label="${label}"><svg aria-hidden="true"><use href="#i-${icon}"></use></svg><span>${label}</span></button>`).join('');
   shell.append(dock);
   dock.addEventListener('click', e => {

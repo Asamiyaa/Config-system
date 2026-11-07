@@ -11,7 +11,7 @@ let state = null;
 const savedTheme = (()=>{try{return localStorage.getItem('wealth-os-theme-v3')==='dark'?'dark':'light'}catch(_){return 'light'}})();
 document.documentElement.dataset.theme=savedTheme;document.body.dataset.theme=savedTheme;
 const syncThemeColor=()=>{const m=document.querySelector('meta[name="theme-color"]');if(m)m.content=document.body.dataset.theme==='dark'?'#14211f':'#f4f2eb';};syncThemeColor();
-let currentPage = 'xindeng';
+let currentPage = 'dailyflow';
 let authMode = 'login';
 let saveTimer = null;
 let marketBusy = false;
@@ -30,7 +30,7 @@ const WORKBOOKS = [
 ];
 function shiftDateKey(key, days) { if(!key) return ''; const d=new Date(`${key}T12:00:00`); d.setDate(d.getDate()+days); return todayKey(d); }
 function dayDiff(start,end) { if(!start||!end) return 0; return Math.round((new Date(`${end}T12:00:00`)-new Date(`${start}T12:00:00`))/86400000); }
-const PAGE_NAMES = {schedules:'自动化',agents:'角色',mistakes:'避坑',home:'工作台',inbox:'今日任务',upcoming:'未来 7 天',calendar:'周历 / 日程',matrix:'任务四象限',stats:'执行统计',important:'重要事项',alltasks:'全部任务',dashboard:'资产总览',allocation:'全球资产配置',nasdaq:'纳斯达克 AI 策略',ashare:'A股 ETF 轮动',xindeng:'新登',newconfig:'成长总览',health:'健康',checkin:'打卡与统计',diet:'饮食饮水',fitness:'健身管理',skin:'皮肤护理',sleep:'睡眠与恢复',style:'发型与穿搭',english:'英语',reading:'阅读',execution:'每日执行与日志',archive:'归档',dailyflow:'流程',flowstats:'流程统计',alpharadar:'Alpha Radar'};
+const PAGE_NAMES = {schedules:'自动化',agents:'平衡',settings:'设置',mistakes:'避坑',home:'工作台',inbox:'今日任务',upcoming:'未来 7 天',calendar:'周历 / 日程',matrix:'任务四象限',stats:'执行统计',important:'重要事项',alltasks:'全部任务',dashboard:'资产总览',allocation:'全球资产配置',nasdaq:'纳斯达克 AI 策略',ashare:'A股 ETF 轮动',xindeng:'新登',newconfig:'成长总览',health:'健康',checkin:'打卡与统计',diet:'饮食饮水',fitness:'健身管理',skin:'皮肤护理',sleep:'睡眠与恢复',style:'发型与穿搭',english:'英语',reading:'阅读',execution:'每日执行与日志',archive:'归档',dailyflow:'流程',flowstats:'流程统计',alpharadar:'Alpha Radar'};
 
 async function api(path, options={}) {
   const res = await fetch(path, {credentials:'same-origin', headers:{'Content-Type':'application/json', ...(options.headers||{})}, ...options});
@@ -80,8 +80,8 @@ function showApp(username) {
 function updateAuthMode() {
   const register = authMode === 'register';
   $('#authEyebrow').textContent = register ? 'CREATE YOUR WORKSPACE' : 'WELCOME BACK';
-  $('#authTitle').textContent = register ? '创建本地账户' : '登录你的工作台';
-  $('#authSubtitle').textContent = register ? '账户和配置保存在本地SQLite数据库中。' : '数据保存在本地数据库中，每个账户独立。';
+  $('#authTitle').textContent = register ? '创建新登账户' : '登录新登';
+  $('#authSubtitle').textContent = register ? '建立属于你的成长、健康与资产工作区。' : '成长、记录与订阅，随账户持续保存。';
   $('#authSubmit').innerHTML = register ? '创建账户并进入 <span>↗</span>' : '登录工作台 <span>↗</span>';
   $('#authModeText').textContent = register ? '已经有账户？' : '还没有账户？';
   $('#authModeToggle').textContent = register ? '返回登录' : '创建本地账户';
@@ -129,6 +129,7 @@ async function loadState() {
   const result = await api(stateUrl);
   state = result.state;
   ensureStateDefaults();
+  if (!state.agentStatuses) state.agentStatuses={};
 }
 
 function ensureStateDefaults() {
@@ -197,11 +198,11 @@ function persist({quiet=false}={}) {
     const payload = JSON.stringify({state});
     const saveStarted=performance.now();
     try {
-      await api(stateUrl, {method:'PUT', body:payload});
+      const saved=await api(stateUrl, {method:'PUT', body:payload});
       window.lastWorkspaceSaveMs=Math.round(performance.now()-saveStarted);
       unsavedChanges = JSON.stringify({state}) !== payload;
       setSaveState(unsavedChanges?'pending':'saved', unsavedChanges?'还有更改待保存…':'已保存 · '+new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'}));
-      if (!quiet) toast('更改已保存');
+      if(saved.storageWarning){setSaveState('warning','已保存 · 备份待检查');toast(saved.storageWarning,true);}else if (!quiet) toast('更改已保存');
       return true;
     } catch(err) {
       unsavedChanges = true;
@@ -279,16 +280,16 @@ function setHeader(page) {
 }
 
 const HUB_OF={
-  home:'home',xindeng:'newconfig',growthplan:'newconfig',review:'newconfig',
-  today:'today',inbox:'today',schedules:'today',dailyflow:'today',mistakes:'today',calendar:'today',matrix:'today',stats:'today',important:'today',alltasks:'today',flowstats:'today',
+  home:'newconfig',today:'newconfig',xindeng:'newconfig',growthplan:'newconfig',review:'newconfig',
+  inbox:'newconfig',schedules:'settings',settings:'settings',dailyflow:'newconfig',mistakes:'newconfig',calendar:'newconfig',matrix:'newconfig',stats:'newconfig',important:'newconfig',alltasks:'newconfig',flowstats:'newconfig',
   dashboard:'dashboard',allocation:'dashboard',nasdaq:'dashboard',ashare:'dashboard',execution:'dashboard',alpharadar:'dashboard',
   health:'health',checkin:'health',diet:'health',fitness:'health',skin:'health',sleep:'health',style:'health',
-  agents:'agents',newconfig:'newconfig',english:'newconfig',reading:'newconfig',archive:'archive'
+  agents:'newconfig',newconfig:'newconfig',english:'newconfig',reading:'newconfig',archive:'archive'
 };
 const HUB_TABS={
-  today:{label:'执行',items:[['today','今日'],['schedules','自动化'],['dailyflow','流程'],['mistakes','避坑'],['calendar','周历'],['stats','统计']]},
-  dashboard:{label:'资产',items:[['dashboard','总览'],['allocation','配置'],['nasdaq','纳指'],['ashare','A股'],['execution','执行'],['alpharadar','实验']]},
-  newconfig:{label:'成长',items:[['xindeng','新登'],['newconfig','成长总览'],['growthplan','90天计划'],['review','每周复盘'],['english','英语'],['reading','阅读']]},
+  settings:{label:'设置',items:[['schedules','自动化']]},
+  dashboard:{label:'资产',items:[['http://39.106.118.186/','市场引擎 ↗'],['dashboard','总览'],['allocation','配置'],['nasdaq','纳指'],['ashare','A股'],['execution','执行'],['alpharadar','实验']]},
+  newconfig:{label:'成长',items:[['dailyflow','流程'],['xindeng','新登'],['agents','平衡'],['calendar','周历'],['newconfig','成长总览'],['growthplan','90天计划'],['mistakes','避坑'],['review','每周复盘']]},
   health:{label:'健康',items:[['health','总览'],['checkin','打卡'],['diet','饮食'],['fitness','健身'],['skin','皮肤'],['sleep','睡眠'],['style','穿搭']]}
 };
 function renderHubTabs(page){
@@ -297,7 +298,7 @@ function renderHubTabs(page){
   const def=HUB_TABS[hub];
   if(!def) return '';
 
-  return `<div class="hub-tabs" role="navigation" aria-label="${esc(def.label)}导航">${def.items.map(([key,label])=>`<button class="hub-tab ${key===page?'active':''}" data-action="go-page" data-page="${key}" aria-current="${key===page?'page':'false'}">${label}</button>`).join('')}</div>`;
+  return `<div class="hub-tabs" role="navigation" aria-label="${esc(def.label)}导航">${def.items.map(([key,label])=>key.startsWith('http')?`<a class="hub-tab" href="${esc(key)}" target="_blank" rel="noopener noreferrer">${label}</a>`:`<button class="hub-tab ${key===page?'active':''}" data-action="go-page" data-page="${key}" aria-current="${key===page?'page':'false'}">${label}</button>`).join('')}</div>`;
 }
 
 const PAGE_COVER_MEDIA={
@@ -370,7 +371,8 @@ function labelControls(root=document){
   });
 }
 function renderPage(page, {autoRefresh=false, transition=true, animate=true}={}) {  if (!state) return;
-  if(page==='agents')page='home';
+  if(page==='settings')page='schedules';
+  if(page==='home'||page==='today')page='dailyflow';
   const renderStarted=performance.now();
   currentPage=page;
   setHeader(page);
@@ -419,6 +421,8 @@ function renderPage(page, {autoRefresh=false, transition=true, animate=true}={})
     try {
       const vt=document.startViewTransition(commit);
       vt.finished?.catch(()=>{});
+      vt.ready?.catch(()=>{});
+      vt.updateCallbackDone?.catch(()=>{});
     } catch (_) {
       commit();
       root.classList.add('page-enter');
@@ -431,8 +435,8 @@ function renderPage(page, {autoRefresh=false, transition=true, animate=true}={})
       root.classList.add('page-enter');
     }
   }
-  if(page==='schedules') loadSchedules().then(()=>{if(currentPage==='schedules'){const r=$('#viewRoot');if(r)r.innerHTML=renderSchedules();}});
-  if(page==='archive') loadMarketRefreshLogs();
+  if(page==='schedules') loadSchedules().then(()=>{if(currentPage==='schedules'){const r=$('#viewRoot');if(r){r.innerHTML=renderSchedules();r.insertAdjacentHTML('afterbegin',renderHubTabs('schedules'));labelControls(r);}}});
+  if(page==='archive') {loadMarketRefreshLogs();api('/api/personal-vault/status').then(d=>{vaultStatus=d;}).catch(()=>{});}
   if(page==='fitness') hydrateGymLibrary();
   if(autoRefresh && investingPages.includes(page) && !marketBusy) refreshMarket();
 }
@@ -764,7 +768,8 @@ const AGENT_DEFS = [
  {id:'reading',name:'阅读角色',role:'书籍计划 · 知识沉淀',page:'reading',energy:13,accent:'#c9a7ff',meaning:'判断力',balance:'把信息变成判断；慢下来，避免被噪音牵着走。',risk:'失衡信号：只收藏不阅读，只输入不输出。'},
  {id:'english',name:'英语角色',role:'输入训练 · 可复用输出',page:'english',energy:15,accent:'#7fe3c8',meaning:'表达',balance:'把能力变成可复用的输出，让世界听见你。',risk:'失衡信号：连续学习但没有一次真实表达。'}
 ];
-function agentStatuses(){try{return JSON.parse(localStorage.getItem('wealth-os-agent-statuses')||'{}')}catch(_){return {}}}
+function hasLegacyRoles(){try{return !!localStorage.getItem('wealth-os-agent-statuses')&&!state.legacyRolesImported;}catch(_){return false;}}
+function agentStatuses(){return state.agentStatuses ||= {};}
 function agentBalance(){
  const avg=100/AGENT_DEFS.length, dev=AGENT_DEFS.reduce((s,a)=>s+Math.abs(a.energy-avg),0)/AGENT_DEFS.length;
  const distribution=clamp(100-dev*5,0,100);
@@ -807,11 +812,11 @@ function agentConsoleBlock(){
 function renderAgents(){
  const statuses=agentStatuses(), labels={idle:'空闲',busy:'忙碌',paused:'暂停'}, cls={idle:'idle',busy:'busy',paused:'paused'}, balance=agentBalance();
  const cards=AGENT_DEFS.map((a,i)=>{const st=statuses[a.id]||'idle';return `<button class="agent-node agent-node-${cls[st]}" style="--i:${i};--start:${((i*100)/AGENT_DEFS.length).toFixed(2)}%;--delay:-${((i*46)/AGENT_DEFS.length).toFixed(2)}s;--accent:${a.accent}" data-action="agent-cycle" data-agent="${a.id}" title="点击切换 空闲 / 忙碌 / 暂停" aria-label="${esc(a.name)}，${labels[st]}，精力 ${a.energy}%"><span class="agent-node-card">${agentAvatar(a)}<span class="agent-node-copy"><strong>${esc(a.name)}</strong><small>${esc(a.meaning)}</small><em><i></i>${labels[st]} · ${a.energy}%</em></span></span></button>`}).join('');
- return `${sectionHead('PERSONAL MULTI-AGENT OS · BALANCE','角色','不是六个独立的人，而是同一个人的六类精力预算。六个角色绕中心转动，中心 OS 负责调度与平衡；点击任一角色切换 空闲 / 忙碌 / 暂停。',`<button class="btn btn-outline" data-action="agents-reset">重置状态</button><button class="btn btn-primary" data-action="go-page" data-page="home">进入今日工作台 →</button>`)}
- <section class="agent-balance-hero">
+ return `${sectionHead('PERSONAL MULTI-AGENT OS · BALANCE','平衡','不是六个独立的人，而是同一个人的六类精力预算。六个角色绕中心转动，中心 OS 负责调度与平衡；点击任一角色切换 空闲 / 忙碌 / 暂停。',`<button class="btn btn-outline" data-action="agents-reset">重置状态</button><button class="btn btn-primary" data-action="go-page" data-page="home">进入流程 →</button>`)}
+ ${hasLegacyRoles()?'<div class="notice-panel">发现此浏览器的旧角色状态。<button class="btn" data-action="agents-import-legacy">导入到当前账户</button></div>':''}<section class="agent-balance-hero">
   <div class="agent-balance-copy"><span class="eyebrow">BALANCE · NOT EQUALITY</span><h2>一个中心，<em>六个角色</em></h2><p>平衡不是平均分配，而是动态调度：底盘（健康与睡眠）先稳住，再让工作、投资、表达和选择权轮流占用注意力。六个角色围绕中心转动，中心 OS 负责让它们不互相挤压。</p>
    <div class="agent-summary"><div><strong>${balance.score}</strong><span>平衡指数</span></div><div><strong>${AGENT_DEFS.length}</strong><span>角色总数</span></div><div><strong>${balance.busy}</strong><span>忙碌中</span></div><div><strong>${balance.unallocated}%</strong><span>未分配缓冲</span></div></div>
-   <div class="agent-balance-actions"><button class="btn btn-primary" data-action="go-page" data-page="home">回到今日主线</button><button class="btn btn-outline" data-action="agents-spin">${ui.agentSpinPaused?'继续旋转':'暂停旋转'}</button><button class="btn btn-outline" data-action="agents-reset">重置角色状态</button></div>
+   <div class="agent-balance-actions"><button class="btn btn-primary" data-action="go-page" data-page="home">回到流程</button><button class="btn btn-outline" data-action="agents-spin">${ui.agentSpinPaused?'继续旋转':'暂停旋转'}</button><button class="btn btn-outline" data-action="agents-reset">重置角色状态</button></div>
   </div>
   <div class="agent-balance-stage ${ui.agentSpinPaused?'agent-stage-paused':''}">
    <div class="agent-orbit-ring ring-a"></div><div class="agent-orbit-ring ring-b"></div><div class="agent-orbit-glow"></div>
@@ -835,8 +840,9 @@ function renderMistakes(){
 
 
 let scheduleJobsCache = [];
+let vaultStatus = null;
 function personalVaultCard(){
-  return `<section class="card" style="margin-top:14px"><div class="card-head"><div><h3>Windows Excel 历史归档 · 个人数据保险库</h3><p>所有个人配置统一镜像到程序目录之外：任务、健身/健康、每日任务、打卡、日志、投资仓位、错过和过错、新登配置等。更新程序不会依赖项目目录内的数据库才能保留这些数据。</p></div></div><div class="card-body"><form id="archiveSettingsForm" class="schedule-form"><label class="field-label">归档目录（运行服务器的 Windows 本机路径）<input name="archiveDir" value="${esc((state.schedulerSettings||{}).archiveDir||'D:\\WEALTH_OS_DAILY_ARCHIVE')}" placeholder="D:\\WEALTH_OS_DAILY_ARCHIVE" required></label><button class="btn btn-primary" type="submit">保存归档目录</button><button class="btn btn-outline" type="button" data-action="personal-vault-sync">立即同步个人数据 Excel</button><button class="btn btn-outline" type="button" data-action="schedule-run-all">立即抓取并归档所有工作簿</button></form><div class="notice-panel" style="margin-top:12px"><strong>升级保护已开启</strong><p>主文件：PERSONAL_DATA/WEALTH_OS_PERSONAL_DATA_用户名.xlsx；Full_State_JSON 用于无损恢复，Personal_Data_Index 和 Scheduled_Tasks 便于人工查看。密码不会写入 Excel。归档路径同时记录到 Windows 用户配置目录，覆盖程序文件后仍可找到。</p></div><p class="table-note">仅当网站服务运行在你的 Windows 电脑时，才能写入 D: 等本机目录。若部署在其他机器，路径会指向服务器而非浏览器所在电脑。</p></div></section>`;
+  return `<section class="card" style="margin-top:14px"><div class="card-head"><div><h3>Windows Excel 历史归档 · 个人数据保险库</h3><p>所有个人配置统一镜像到程序目录之外：任务、健身/健康、每日任务、打卡、日志、投资仓位、错过和过错、新登配置等。更新程序不会依赖项目目录内的数据库才能保留这些数据。</p></div></div><div class="card-body"><form id="archiveSettingsForm" class="schedule-form"><label class="field-label">归档目录（运行服务器的 Windows 本机路径）<input name="archiveDir" value="${esc((state.schedulerSettings||{}).archiveDir||'D:\\WEALTH_OS_DAILY_ARCHIVE')}" placeholder="D:\\WEALTH_OS_DAILY_ARCHIVE" required></label><button class="btn btn-primary" type="submit">保存归档目录</button><button class="btn btn-outline" type="button" data-action="personal-vault-sync">立即同步个人数据 Excel</button><button class="btn btn-outline" type="button" data-action="schedule-run-all">立即抓取并归档所有工作簿</button></form><div class="notice-panel" style="margin-top:12px"><strong>${vaultStatus?.ok?'外部归档已建立':'请同步并核验外部归档'}</strong><p>数据库：${esc(vaultStatus?.databasePath||'正在读取')}<br>数据库快照：${esc(vaultStatus?.backupPath||'正在读取')}<br>归档状态：${esc(vaultStatus?.warning||(vaultStatus?.updatedAt?'最近同步 '+vaultStatus.updatedAt:'尚未确认成功归档'))}</p><p>主文件：PERSONAL_DATA/WEALTH_OS_PERSONAL_DATA_用户名.xlsx；Full_State_JSON 用于无损恢复，Personal_Data_Index 和 Scheduled_Tasks 便于人工查看。密码不会写入 Excel。归档路径同时记录到 Windows 用户配置目录，覆盖程序文件后仍可找到。</p></div><p class="table-note">仅当网站服务运行在你的 Windows 电脑时，才能写入 D: 等本机目录。若部署在其他机器，路径会指向服务器而非浏览器所在电脑。</p></div></section>`;
 }
 function renderSchedules(){
  const jobs=scheduleJobsCache;
@@ -844,10 +850,10 @@ function renderSchedules(){
  <section class="card schedule-intro"><div class="card-head"><div><h3>第一条任务：全球配置 + 纳斯达克 + A股数据预热</h3><p>在你进入投资页面前，先尽可能准备好公开行情、计算字段和 Excel 历史文件。</p></div><span class="tag good">已预置</span></div><div class="schedule-kpis"><div><small>执行频率</small><strong>每日</strong></div><div><small>默认时间</small><strong>07:30</strong></div><div><small>数据原则</small><strong>不造数</strong></div><div><small>历史归档</small><strong>按日保存</strong></div></div><p class="schedule-note">注意：日线行情以数据源最近可得交易日为准，不保证盘中实时；宏观、估值、财报和人工评分若无可靠来源则保持空白。Excel 原始模板不会被覆盖，归档写入副本。</p></section>
  <section class="card" style="margin-top:14px"><div class="card-head"><div><h3>任务列表</h3><p>可以新增、编辑、启用/暂停或立即执行。</p></div><button class="btn btn-primary" data-action="schedule-new">＋ 新建定时任务</button></div><div class="table-wrap"><table class="data-table"><thead><tr><th>任务</th><th>频率</th><th>时间</th><th>状态</th><th>上次执行</th><th>操作</th></tr></thead><tbody>${jobs.map(j=>`<tr><td><strong>${esc(j.name)}</strong><div class="table-sub">${esc(j.description||'')}</div></td><td>${esc(j.frequency||'daily')}</td><td>${esc(j.time||'07:30')}</td><td><span class="tag ${j.enabled?'good':'neutral'}">${j.enabled?'启用':'暂停'}</span></td><td>${esc(j.lastRun||'尚未执行')}</td><td><div class="button-row"><button class="btn btn-small btn-outline" data-action="schedule-edit" data-id="${esc(j.id)}">编辑</button><button class="btn btn-small btn-outline" data-action="schedule-run" data-id="${esc(j.id)}">立即运行</button><button class="btn btn-small btn-quiet" data-action="schedule-toggle" data-id="${esc(j.id)}">${j.enabled?'暂停':'启用'}</button></div></td></tr>`).join('')||'<tr><td colspan="6">暂无定时任务</td></tr>'}</tbody></table></div></section>
  
- <div id="scheduleEditMount"></div>`;
+ ${personalVaultCard()}<div id="scheduleEditMount"></div>`;
 }
 function scheduleEditor(job={}){const editing=!!job.id;return `<section class="card" style="margin-top:14px"><div class="card-head"><div><h3>${editing?'编辑定时任务':'新建定时任务'}</h3><p>时间使用服务器本地时区；默认 Windows 本地部署以系统时区为准。</p></div><button class="btn btn-quiet" data-action="schedule-editor-close">关闭</button></div><div class="card-body"><form id="scheduleJobForm" class="schedule-form"><input type="hidden" name="id" value="${esc(job.id||'')}"><label class="field-label">任务名称<input name="name" required value="${esc(job.name||'')}"></label><label class="field-label">任务类型<select name="taskType"><option value="refresh_archive" ${(job.taskType||'refresh_archive')==='refresh_archive'?'selected':''}>拉取行情 + 计算基础指标 + Excel 日归档</option><option value="archive_only" ${job.taskType==='archive_only'?'selected':''}>仅归档现有工作簿</option></select></label><div class="composer-two"><label class="field-label">频率<select name="frequency"><option value="daily" ${(job.frequency||'daily')==='daily'?'selected':''}>每天</option><option value="weekdays" ${job.frequency==='weekdays'?'selected':''}>工作日</option></select></label><label class="field-label">执行时间<input name="time" type="time" required value="${esc(job.time||'07:30')}"></label></div><label class="field-label">说明<input name="description" value="${esc(job.description||'全球配置、纳斯达克、A股ETF公开行情预热与历史归档')}"></label><label class="field-label check-inline"><input type="checkbox" name="enabled" ${job.enabled!==false?'checked':''}> 启用任务</label><div class="button-row"><button class="btn btn-primary" type="submit">保存任务</button><button class="btn btn-quiet" type="button" data-action="schedule-editor-close">取消</button></div></form></div></section>`}
-async function loadSchedules(){try{const d=await api('/api/scheduler/jobs');scheduleJobsCache=d.jobs||[];if(d.settings){state.schedulerSettings=state.schedulerSettings||{};if(!state.schedulerSettings.archiveDir)state.schedulerSettings.archiveDir=d.settings.archiveDir;}}catch(e){toast('读取定时任务失败：'+e.message,true)}}
+async function loadSchedules(){try{vaultStatus=await api('/api/personal-vault/status');}catch(_){vaultStatus=null;}try{const d=await api('/api/scheduler/jobs');scheduleJobsCache=d.jobs||[];if(d.settings){state.schedulerSettings=state.schedulerSettings||{};if(!state.schedulerSettings.archiveDir)state.schedulerSettings.archiveDir=d.settings.archiveDir;}}catch(e){toast('读取定时任务失败：'+e.message,true)}}
 
 function renderHomeSheet() {
   return `<div class="home-sheet" data-tab-shell data-tab-key="home-sheet" data-default-tab="matrix">
@@ -977,7 +983,7 @@ function flowEditorPanel(kind){
 function renderDailyFlow(){
  const kind=ui.flowKind||flowDateKind();
  const runs=state.dailyFlowRuns||[],items=[...(state.dailyFlows.weekday||[]),...(state.dailyFlows.restday||[])];
- return `${sectionHead('LIFE OS · DAILY RHYTHM','流程','流程编排与流程统计收进同一个工作台，用左右两个页签切换：编排看工作日/休息日时间轴，统计看记录、完成率、分类与趋势。拖动任务块可移动时间，拖动底部把手可修改时长；任务允许重叠。',`<button class="btn btn-primary" data-action="flow-new" data-kind="${kind}">＋ 新增流程块</button>`)}
+ return `${sectionHead('LIFE OS · DAILY RHYTHM','流程','流程编排与流程统计收进同一个工作台，用左右两个页签切换：编排看工作日/休息日时间轴，统计看记录、完成率、分类与趋势。电脑可拖动任务块调整时间；手机滑动浏览，点“编辑”修改时间。任务允许重叠。',`<button class="btn btn-primary" data-action="flow-new" data-kind="${kind}">＋ 新增流程块</button>`)}
  <div class="flow-page-shell" data-tab-shell data-tab-key="dailyflow" data-default-tab="edit">
   <div class="flow-page-bar"><div class="flow-page-tabs" data-tabs role="tablist"><button class="flow-page-tab active" data-tab="edit" role="tab"><span>流程编排</span><small>${items.length} 个流程块</small></button><button class="flow-page-tab" data-tab="stats" role="tab"><span>流程统计</span><small>${runs.length} 次记录</small></button></div><div class="flow-page-meta"><span class="live-dot"></span>${kind==='weekday'?'当前：工作日':'当前：休息日'} · 本地保存</div></div>
   <div class="flow-page-panel active" data-tab-panel="edit">${flowEditorPanel(kind)}</div>
@@ -2256,7 +2262,7 @@ function renderFitnessV2(){
 
 
 function bindDelegatedEvents() {
-  $('#mainNav')?.addEventListener('click',e=>{const b=e.target.closest('.nav-item[data-page]');if(b)renderPage(b.dataset.page,{autoRefresh:true});});
+  $('#mainNav')?.addEventListener('click',e=>{const b=e.target.closest('.nav-item[data-page]');if(b)renderPage(b.dataset.page==='newconfig'?'dailyflow':b.dataset.page,{autoRefresh:true});});
   const flowBox=$('#flowSubnav'),flowToggle=$('[data-action="toggle-flow-nav"]');try{const open=localStorage.getItem('wealth-os-flow-open')==='1';flowBox?.classList.toggle('hidden',!open);if(flowToggle){flowToggle.setAttribute('aria-expanded',String(open));const k=flowToggle.querySelector('kbd');if(k)k.textContent=open?'−':'＋';}}catch(_){}
   const investingBox=$('#investingSubnav'), investingToggle=$('[data-action="toggle-investing"]'); try{const open=localStorage.getItem('wealth-os-investing-open')==='1';investingBox?.classList.toggle('hidden',!open);if(investingToggle){investingToggle.setAttribute('aria-expanded',String(open));const k=investingToggle.querySelector('kbd');if(k)k.textContent=open?'−':'＋';}}catch(_){}
   document.addEventListener('change',e=>{const el=e.target;if(!el?.dataset?.routineField)return;const d=ui.routineDay==null?new Date(todayKey()+'T12:00:00').getDay():n(ui.routineDay),r=ensureFitnessRoutines()[d],ex=r.exercises[n(el.dataset.index)];if(!ex)return;ex[el.dataset.routineField]=Math.max(el.dataset.routineField==='loadStep'?.5:1,n(el.value));persist({quiet:true}).then(()=>renderPage('fitness'));});
@@ -2303,12 +2309,13 @@ function bindDelegatedEvents() {
     if(a==='personal-vault-sync'){try{const res=await api('/api/personal-vault/sync',{method:'POST'});toast(res.message||'个人数据已同步')}catch(e){toast('同步失败：'+e.message,true)}return;}
     if(a==='schedule-toggle'){const j=scheduleJobsCache.find(x=>String(x.id)===String(action.dataset.id));if(!j)return;j.enabled=!j.enabled;try{await api('/api/scheduler/jobs',{method:'PUT',body:JSON.stringify({jobs:scheduleJobsCache})});await loadSchedules();renderPage('schedules');toast('定时任务状态已更新')}catch(e){toast(e.message,true)}return;}
     if(a==='schedule-run'||a==='schedule-run-all'){try{const res=await api('/api/scheduler/run',{method:'POST',body:JSON.stringify({id:a==='schedule-run'?action.dataset.id:null})});toast(res.message||'任务已执行');await loadSchedules();renderPage('schedules')}catch(e){toast('执行失败：'+e.message,true)}return;}
-    if(a==='agent-cycle') { const id=action.dataset.agent, all=agentStatuses(), seq=['idle','busy','paused'];all[id]=seq[(seq.indexOf(all[id]||'idle')+1)%seq.length];try{localStorage.setItem('wealth-os-agent-statuses',JSON.stringify(all))}catch(_){}renderPage('agents');return; }
+    if(a==='agents-import-legacy'){try{const old=JSON.parse(localStorage.getItem('wealth-os-agent-statuses')||'{}');for(const agent of AGENT_DEFS){if(['idle','busy','paused'].includes(old[agent.id]))agentStatuses()[agent.id]=old[agent.id];}state.legacyRolesImported=true;await saveAndRender('旧角色状态已保存到当前账户');}catch(err){toast('旧状态导入失败',true);}return;}
+    if(a==='agent-cycle') { const id=action.dataset.agent, all=agentStatuses(), seq=['idle','busy','paused'];all[id]=seq[(seq.indexOf(all[id]||'idle')+1)%seq.length];persist({quiet:true});renderPage('agents');return; }
     if(a==='home-search') { document.querySelector('#tasteSearch')?.click(); return; }
     if(a==='home-share') { const done=()=>toast('当前页面链接已复制'); if(navigator.clipboard?.writeText){navigator.clipboard.writeText(location.href).then(done).catch(()=>toast('复制失败，请手动复制地址栏',true));}else{toast('请手动复制地址栏链接');} return; }
     if(a==='home-range') { ui.homeRange=action.dataset.range||'7'; renderPage('home',{transition:false,animate:false}); return; }
-    if(a==='agents-stop-busy') { const all=agentStatuses(), busy=AGENT_DEFS.filter(x=>(all[x.id]||'idle')==='busy'); if(!busy.length){toast('当前没有忙碌的角色');return;} busy.forEach(x=>{all[x.id]='paused'}); try{localStorage.setItem('wealth-os-agent-statuses',JSON.stringify(all))}catch(_){} renderPage('agents'); toast(`已暂停 ${busy.length} 个忙碌角色`); return; }
-    if(a==='agents-reset') { try{localStorage.removeItem('wealth-os-agent-statuses')}catch(_){}renderPage('agents');toast('角色状态已重置');return; }
+    if(a==='agents-stop-busy') { const all=agentStatuses(), busy=AGENT_DEFS.filter(x=>(all[x.id]||'idle')==='busy'); if(!busy.length){toast('当前没有忙碌的角色');return;} busy.forEach(x=>{all[x.id]='paused'}); persist({quiet:true}); renderPage('agents'); toast(`已暂停 ${busy.length} 个忙碌角色`); return; }
+    if(a==='agents-reset') { state.agentStatuses={};persist({quiet:true});renderPage('agents');toast('角色状态已重置');return; }
     if(a==='agents-spin'){ui.agentSpinPaused=!ui.agentSpinPaused;const stage=document.querySelector('.agent-balance-stage');stage?.classList.toggle('agent-stage-paused',!!ui.agentSpinPaused);action.textContent=ui.agentSpinPaused?'继续旋转':'暂停旋转';toast(ui.agentSpinPaused?'已暂停旋转，方便查看单个角色':'已继续旋转');return;}
     if(a==='close-interaction-modal'){ $('#interactionModal')?.remove(); return; }
     if(a==='toggle-flow-nav'){const box=$('#flowSubnav'),open=box?.classList.contains('hidden');if(box)box.classList.toggle('hidden',!open);action.setAttribute('aria-expanded',String(!!open));const k=action.querySelector('kbd');if(k)k.textContent=open?'−':'＋';try{localStorage.setItem('wealth-os-flow-open',open?'1':'0')}catch(_){}return;}
@@ -2459,7 +2466,8 @@ function bindDelegatedEvents() {
 
 // Daily flow timeline pointer editing: drag body to move, bottom handle to resize end; overlaps are allowed.
 let flowPointer=null;
-document.addEventListener('pointerdown',e=>{const block=e.target.closest('.flow-block');if(!block||e.target.closest('button'))return;const timeline=$('#flowTimeline');if(!timeline)return;flowPointer={id:block.dataset.flowId,kind:ui.flowKind||flowDateKind(),start:n(block.dataset.flowStart),end:n(block.dataset.flowEnd),y:e.clientY,resize:!!e.target.closest('[data-flow-resize]'),last:null};block.setPointerCapture?.(e.pointerId);e.preventDefault();});
+document.addEventListener('pointercancel',()=>{if(flowPointer){flowPointer=null;renderPage(currentPage,{transition:false});}});
+document.addEventListener('pointerdown',e=>{const block=e.target.closest('.flow-block');if(e.pointerType==='touch')return;if(!block||e.target.closest('button'))return;const timeline=$('#flowTimeline');if(!timeline)return;flowPointer={id:block.dataset.flowId,kind:ui.flowKind||flowDateKind(),start:n(block.dataset.flowStart),end:n(block.dataset.flowEnd),y:e.clientY,resize:!!e.target.closest('[data-flow-resize]'),last:null};block.setPointerCapture?.(e.pointerId);e.preventDefault();});
 document.addEventListener('pointermove',e=>{if(!flowPointer)return;const timeline=$('#flowTimeline');if(!timeline)return;const delta=Math.round((e.clientY-flowPointer.y)/(timeline.clientHeight||800)*1440/5)*5;flowPointer.last=delta;const block=$(`.flow-block[data-flow-id="${CSS.escape(flowPointer.id)}"]`);if(block){const st=flowPointer.resize?flowPointer.start:Math.max(0,Math.min(1435,flowPointer.start+delta));const en=flowPointer.resize?Math.max(st+5,Math.min(1440,flowPointer.end+delta)):Math.max(st+5,Math.min(1440,flowPointer.end+delta));block.style.top=`${st}px`;block.style.height=`${en-st}px`;const time=block.querySelector('.flow-time');if(time)time.textContent=`${flowClock(st)}–${flowClock(en)}`;}});
 document.addEventListener('pointerup',async()=>{if(!flowPointer)return;const drag=flowPointer;flowPointer=null;if(drag.last===null||Math.abs(drag.last)<3)return;const item=(state.dailyFlows[drag.kind]||[]).find(x=>String(x.id)===String(drag.id));if(!item)return;if(drag.resize)item.end=Math.max(item.start+5,Math.min(2880,item.end+drag.last));else{const delta=drag.last;item.start=Math.max(0,Math.min(1435,item.start+delta));item.end=Math.max(item.start+5,item.end+delta);}await persist({quiet:true});renderPage(currentPage==='xindeng'?'xindeng':'dailyflow');toast('流程时间已调整');});
 // Calendar drag/drop: move date ranges, reorder overlapping work, and resize by dragging the right edge.

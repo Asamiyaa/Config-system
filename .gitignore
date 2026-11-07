@@ -22,3 +22,6 @@ Thumbs.db
 
 # generated screenshots, downloads and source archives
 /artifacts/
+
+# Private database snapshots must never be deployed or committed
+data/backups/

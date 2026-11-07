@@ -4,11 +4,12 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0F0F12" />
-  <title>Wealth OS · 私人操作系统</title>
+  <title>新登 · AI 时代的个人操作系统</title>
   <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="/static/styles.css" />
-  <link rel="stylesheet" href="/static/theme.css?v=20261106-nopull1" />
-  <link rel="stylesheet" href="/static/taste.css?v=20261106-nopull1" />
+  <link rel="stylesheet" href="/static/theme.css?v=20261107-xindeng" />
+  <link rel="stylesheet" href="/static/taste.css?v=20261107-xindeng" />
+  <link rel="stylesheet" href="/static/xindeng.css?v=20261107" />
 </head>
 <body data-theme="dark">
   <svg class="taste-icon-sprite" aria-hidden="true" focusable="false">
@@ -32,25 +33,25 @@
 
   <div id="authScreen" class="auth-screen">
     <div class="auth-brand">
-      <div class="brand-mark">W<span>·</span></div>
-      <div><strong>WEALTH OS</strong><small>PRIVATE OS</small></div>
+      <div class="brand-mark"><img src="/static/favicon.svg" alt="新登" /></div>
+      <div><strong>新登</strong><small>INDIVIDUAL × ERA</small></div>
     </div>
     <div class="auth-art">
-      <div class="auth-grid"></div>
+      <div class="auth-grid"></div><div class="era-orbit" aria-hidden="true"><div class="era-ring ring-one"></div><div class="era-ring ring-two"></div><div class="era-ring ring-three"></div><span class="era-core">登</span><span class="era-point era-ai">AI · 智能</span><span class="era-point era-market">MARKET · 市场</span><span class="era-point era-self">YOU · 个体</span></div>
       <div class="auth-copy">
-        <div class="eyebrow">ONE WORKSPACE · MANY DECISIONS</div>
-        <h2>把每天的计划，<br><em>变成看得见的进展。</em></h2>
-        <p>安排今日任务，记录健康与学习，跟踪资产配置。在一个工作台里，把计划落实到每天。</p>
+        <div class="eyebrow">NEW ERA · YOUR NEXT CHAPTER</div>
+        <h2>时代正在换挡。<br><em>让选择，成为你的命运。</em></h2>
+        <p>在 AI 的浪潮中建立能力，在市场的起伏中保持判断。连接成长、健康与资产，从今天的一段流程，走向自己的下一程。</p>
       </div>
     </div>
     <div class="auth-panel">
       <div class="auth-panel-top"><span class="live-dot"></span><span>PRIVATE WORKSPACE</span><span class="auth-divider"></span><span>本地账户</span></div>
-      <div class="auth-heading"><div class="eyebrow" id="authEyebrow">WELCOME BACK</div><h2 id="authTitle">登录你的工作台</h2><p id="authSubtitle">数据保存在本地数据库中，每个账户独立。</p></div>
+      <div class="auth-heading"><div class="eyebrow" id="authEyebrow">WELCOME BACK</div><h2 id="authTitle">登录新登</h2><p id="authSubtitle">成长、记录与订阅，随账户持续保存。</p></div>
       <form id="authForm" class="auth-form">
         <label>用户名<input id="authUsername" autocomplete="username" minlength="3" required placeholder="例如：investor01" value="demo" /></label>
         <label>密码<div class="password-wrap"><input id="authPassword" type="password" autocomplete="current-password" required placeholder="至少 10 位" value="Demo1234!" /><button class="ghost-icon" type="button" data-action="toggle-password" aria-label="显示密码">◉</button></div></label>
         <div class="auth-message" id="authMessage" role="status" aria-live="polite"></div>
-        <button class="btn btn-primary btn-full" id="authSubmit" type="submit">登录工作台 <span>↗</span></button>
+        <button class="btn btn-primary btn-full" id="authSubmit" type="submit">开启我的下一程 <span>↗</span></button>
       </form>
       <div class="auth-mode"><span id="authModeText">还没有账户？</span><button type="button" id="authModeToggle">创建本地账户</button></div>
       <div class="demo-login" id="demoLogin"><div><small>DEMO ACCESS</small><strong>用户名 demo / 密码 Demo1234!</strong></div><button type="button" id="fillDemo">填入 <span>→</span></button></div>
@@ -61,8 +62,8 @@
   <div id="appShell" class="app-shell hidden">
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-brand">
-        <div class="brand-mark small">W<span>·</span></div>
-        <div class="sidebar-brand-copy"><strong>WEALTH OS</strong><small>PRIVATE OS</small></div>
+        <div class="brand-mark small"><img src="/static/favicon.svg" alt="新登" /></div>
+        <div class="sidebar-brand-copy"><strong>新登</strong><small>INDIVIDUAL × ERA</small></div>
         <button class="sidebar-collapse" id="tasteCollapse" type="button" title="收起侧栏" aria-label="收起侧栏">‹</button>
         <button class="mobile-close" aria-label="关闭导航菜单" data-action="close-sidebar">×</button>
       </div>
@@ -73,11 +74,10 @@
         <nav id="mainNav" class="main-nav" aria-label="主导航">
           <div class="nav-group-label">工作台</div>
           <button class="nav-item active" data-page="newconfig" title="成长"><svg class="nav-icon"><use href="#i-compass"></use></svg><span class="nav-label">成长</span></button>
-          <button class="nav-item" data-page="home" title="今日"><svg class="nav-icon"><use href="#i-home"></use></svg><span class="nav-label">今日</span></button>
-          <button class="nav-item" data-page="today" title="执行"><svg class="nav-icon"><use href="#i-check"></use></svg><span class="nav-label">执行</span></button>
           <button class="nav-item" data-page="dashboard" title="资产"><svg class="nav-icon"><use href="#i-shield"></use></svg><span class="nav-label">资产</span></button>
           <button class="nav-item" data-page="health" title="健康"><svg class="nav-icon"><use href="#i-heart"></use></svg><span class="nav-label">健康</span></button>
           <div class="nav-group-label">个人系统</div>
+          <button class="nav-item" data-page="settings" title="设置"><svg class="nav-icon"><use href="#i-sun"></use></svg><span class="nav-label">设置</span></button>
           <button class="nav-item" data-page="archive" title="归档"><svg class="nav-icon"><use href="#i-archive"></use></svg><span class="nav-label">归档</span></button>
         </nav>
       </div>
@@ -104,19 +104,19 @@
     </div>
   </div>
 
-  <script src="/static/health_core.js?v=20261106-pull1"></script>
-  <script src="/static/skin_os.js?v=20261106-pull1"></script>
-  <script src="/static/diet_os.js?v=20261106-pull1"></script>
-  <script src="/static/sleep_os.js?v=20261106-pull1"></script>
-  <script src="/static/newconfig_os.js?v=20261106-pull1"></script>
-  <script src="/static/english_os.js?v=20261106-pull1"></script>
-  <script src="/static/reading_os.js?v=20261106-pull1"></script>
-  <script src="/static/app.js?v=20261106-pull1"></script>
-  <script src="/static/growth.js?v=20261106-pull1"></script>
-  <script src="/static/ui.js?v=20261106-pull1" defer></script>
-  <script src="/static/taste.js?v=20261106-pull1" defer></script>
-  <script src="/static/spatial.js?v=20261106-pull1" defer></script>
-  <script src="/static/workspace.js?v=20261106-pull1" defer></script>
-<script src="/static/overscroll-guard.js?v=20261106-nopull1" defer></script>
+  <script src="/static/health_core.js?v=20261107-xindeng"></script>
+  <script src="/static/skin_os.js?v=20261107-xindeng"></script>
+  <script src="/static/diet_os.js?v=20261107-xindeng"></script>
+  <script src="/static/sleep_os.js?v=20261107-xindeng"></script>
+  <script src="/static/newconfig_os.js?v=20261107-xindeng"></script>
+  <script src="/static/english_os.js?v=20261107-xindeng"></script>
+  <script src="/static/reading_os.js?v=20261107-xindeng"></script>
+  <script src="/static/app.js?v=20261107-xindeng"></script>
+  <script src="/static/growth.js?v=20261107-xindeng"></script>
+  <script src="/static/ui.js?v=20261107-xindeng" defer></script>
+  <script src="/static/taste.js?v=20261107-xindeng" defer></script>
+  <script src="/static/spatial.js?v=20261107-xindeng" defer></script>
+  <script src="/static/workspace.js?v=20261107-xindeng" defer></script>
+<script src="/static/overscroll-guard.js?v=20261107-xindeng" defer></script>
 </body>
 </html>
