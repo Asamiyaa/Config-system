@@ -11,6 +11,13 @@ with tempfile.TemporaryDirectory() as tmp:
   with patch('threading.Thread.start'):
    import server
   with TestClient(server.app) as client:
+   version=client.get('/api/app-version')
+   assert version.headers['cache-control']=='no-store'
+   html=client.get('/')
+   assert html.headers['cache-control']=='no-store'
+   assert f'content="{version.json()["version"]}"' in html.text
+   assert '/static/app-update.js?v='+version.json()['version'] in html.text
+   assert 'must-revalidate' in client.get('/static/app-update.js').headers['cache-control']
    assert client.post('/api/login',json={'username':'demo','password':'Demo1234!'}).status_code==200
    board=client.post('/api/boards').json()['id']
    payload={'title':'历史保存测试','version':0,'scene':{'elements':[{'id':'test'}],'files':{}}}

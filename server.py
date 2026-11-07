@@ -22,7 +22,7 @@ from astock_data_backup import fetch_etf_daily as _astock_backup_etf_daily
 import gym_catalogue as gymlib
 
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from starlette.middleware.sessions import SessionMiddleware
@@ -329,8 +329,12 @@ def save_user_state(user_id: int, state: dict[str, Any]) -> None:
 
 
 @app.get("/")
-def index() -> FileResponse:
-    return FileResponse(STATIC / "index.html")
+def index() -> HTMLResponse:
+    html = (STATIC / "index.html").read_text(encoding="utf-8")
+    # Bind the checker to this document, never to a later API response.
+    html = html.replace("<head>", '<head><meta name="app-version" content="' + APP_VERSION + '">', 1)
+    html = re.sub(r'(/static/[^"\s?]+\.(?:js|css))(?:\?[^"\s]*)?', lambda m: m[1] + '?v=' + APP_VERSION, html)
+    return HTMLResponse(html, headers={"Cache-Control": "no-store"})
 
 
 @app.get("/api/health")
@@ -1206,15 +1210,31 @@ threading.Thread(target=_scheduler_loop, name="wealth-os-scheduler", daemon=True
 # 预热 openGym 动作库索引（首次约 2-3 秒），避免用户第一次打开“动作库”等待。
 threading.Thread(target=gymlib.get_catalogue, name="wealth-os-opengym-warmup", daemon=True).start()
 
+def _frontend_version() -> str:
+    digest = hashlib.sha256()
+    for path in sorted(STATIC.rglob("*")):
+        if path.is_file() and path.suffix in {".html", ".js", ".css"} and "models" not in path.parts and "vendor" not in path.parts:
+            digest.update(path.relative_to(STATIC).as_posix().encode())
+            digest.update(path.read_bytes())
+    return digest.hexdigest()[:20]
+
+
+# A deployment restarts this process; calculate once rather than reading all bundles per poll.
+APP_VERSION = _frontend_version()
+
+
+@app.middleware("http")
+async def frontend_cache_policy(request: Request, call_next):
+    response = await call_next(request)
+    path = request.url.path
+    if path.startswith("/static/") and Path(path).suffix in {".html", ".js", ".css"}:
+        response.headers["Cache-Control"] = "no-cache, must-revalidate"
+    return response
+
+
 @app.get("/api/app-version")
 def app_version():
-    files = sorted(p.relative_to(STATIC).as_posix() for p in STATIC.rglob("*") if p.is_file() and p.suffix in {".html", ".js", ".css"} and "models" not in p.parts and "vendor" not in p.parts)
-    digest = hashlib.sha256()
-    for name in files:
-        path = STATIC / name
-        if path.is_file():
-            digest.update(path.read_bytes())
-    return JSONResponse({"version": digest.hexdigest()[:20]}, headers={"Cache-Control": "no-store"})
+    return JSONResponse({"version": APP_VERSION}, headers={"Cache-Control": "no-store"})
 
 class BoardPayload(BaseModel):
     title: str = Field(default="未命名画板", max_length=100)

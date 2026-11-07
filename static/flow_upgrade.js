@@ -42,8 +42,6 @@ function addBoardPoint(e){const c=document.querySelector('#whiteCanvas');if(!boa
 document.addEventListener('pointermove',e=>{if(boardStroke)addBoardPoint(e);});
 for(const name of ['pointerup','pointercancel'])document.addEventListener(name,()=>{if(boardStroke){boardStroke=null;persist({quiet:true});}});
 new MutationObserver(()=>{paintBoard();}).observe(document.querySelector('#viewRoot'),{childList:true});
-// Compare version only with the version of the page actually loaded.
-(async()=>{let version;try{version=(await api('/api/app-version')).version;}catch(_){return;}let checking=false;async function check(){if(checking||document.hidden||window.boardEditorDirty||unsavedChanges||document.querySelector('input:focus,textarea:focus,[role="dialog"],.flow-modal')||boardStroke)return;checking=true;try{const next=await api('/api/app-version');if(next.version!==version)location.reload();}catch(_){}finally{checking=false;}}setInterval(check,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)check();});})();
 
 function renderWhiteboard(){
 
