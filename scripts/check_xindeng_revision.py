@@ -47,18 +47,17 @@ with sync_playwright() as pw:
  assert page.locator('#viewRoot').get_attribute('data-page')=='dailyflow'
  page.evaluate("ui.flowViewMode='timeline';state.dailyFlows.weekday=[{id:'short',title:'五分钟任务',start:600,end:605}];ui.flowKind='weekday';renderPage('dailyflow',{transition:false})")
  assert page.locator('[data-tab="checklist"]').count()==0
- assert page.locator('.flow-overview-item').all_text_contents()==['五分钟任务']
- assert not page.locator('.flow-detail-timeline').get_attribute('open')
+ assert page.locator('.flow-overview-item').count()==0
+ assert page.locator('.flow-detail-timeline').count()==0
  assert page.locator('[data-action="flow-new"]').count()==0
  assert page.locator('.workspace-jump').count()==0
- page.locator('.flow-detail-timeline summary').click()
  assert page.locator('.flow-block').inner_text()=='五分钟任务'
- assert page.locator('.flow-block').evaluate('e=>e.getBoundingClientRect().height')==20
+ assert abs(page.locator('.flow-block').evaluate('e=>e.getBoundingClientRect().height') / page.locator('#flowTimeline').evaluate('e=>e.getBoundingClientRect().height') - 5/1440) < 0.001
  assert page.locator('.flow-block button').count()==0
  page.locator('#flowTimeline').dblclick(position={'x':20,'y':100});page.wait_for_timeout(200)
  assert page.locator('#flowEditForm [name=start]').input_value()!='08:00'
  page.locator('[data-action="flow-modal-close"]').last.click();page.wait_for_timeout(100)
- page.locator('.flow-block').dblclick();page.wait_for_timeout(200)
+ page.locator('.flow-block strong').dblclick();page.wait_for_timeout(200)
  assert page.locator('.flow-modal').is_visible()
  page.evaluate("document.querySelector('.flow-modal')?.remove();document.querySelector('.flow-modal-backdrop')?.remove()")
  page.locator('#flowViewToggle').click();page.wait_for_timeout(200)

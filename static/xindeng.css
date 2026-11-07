@@ -59,6 +59,36 @@ body.spatial-ui #authScreen .auth-form .btn { width:100%!important; }
 .flow-check-row{display:flex;gap:14px;align-items:center;padding:16px;border-bottom:1px solid var(--border);}.flow-check-row span{flex:1}.flow-check-row small{display:block;color:var(--muted)}.flow-check-row input{width:24px;height:24px}.flow-check-row.done strong{text-decoration:line-through;opacity:.6}.flow-check-toolbar,.board-tools{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin:16px 0}.white-canvas{display:block;background:white;border:1px solid var(--border);border-radius:12px;width:100%;height:60vh;touch-action:none}.board-list{display:flex;gap:10px;flex-wrap:wrap}
 .excal-frame{width:100%;height:78dvh;border:1px solid var(--border);border-radius:12px;background:white;margin-top:18px}#xBoardList{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
 
-body.spatial-ui #flowTimeline{height:5760px!important;min-height:5760px!important;}body.spatial-ui .flow-block{min-height:0!important;padding:0 6px!important;justify-content:center;gap:0!important;border-radius:3px;box-sizing:border-box;}body.spatial-ui .flow-block strong{font-size:12px;line-height:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0;}body.spatial-ui .flow-resize{height:3px;}
+body.spatial-ui #flowTimeline{height:var(--flow-height,480px)!important;min-height:0!important;}body.spatial-ui .flow-block{min-height:0!important;padding:0 6px!important;justify-content:center;gap:0!important;border-radius:3px;box-sizing:border-box;}body.spatial-ui .flow-block strong{font-size:12px;line-height:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0;}body.spatial-ui .flow-resize{height:3px;}
 .mindmap-scroll{overflow:auto;border:1px solid var(--border);border-radius:16px;background:var(--surface);max-height:72dvh}.mindmap-canvas{max-width:none!important;display:block}.mindmap-canvas g{cursor:pointer}.mindmap-canvas text{font:14px system-ui}.mindmap-canvas g:focus-visible rect{stroke:#ce9d43;stroke-width:4}
 #mainNav{display:flex;flex-direction:column;min-height:100%;}#mainNav [data-page="settings"]{margin-top:auto!important}.sidebar-scroll{display:flex;flex-direction:column}.sidebar-scroll #mainNav{flex:1}.flow-day-overview{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}.flow-overview-item{padding:16px;border:1px solid var(--border);border-left:4px solid var(--accent);border-radius:12px;background:var(--surface);color:var(--text);text-align:left;overflow-wrap:anywhere}.flow-detail-timeline{margin-top:16px}.flow-detail-timeline>summary{cursor:pointer;padding:14px;border:1px solid var(--border);border-radius:12px}.checklist-time{display:inline-block!important;min-width:106px;margin-right:12px;font-variant-numeric:tabular-nums}.medical-anatomy-slot{height:100%;width:100%}.persistent-anatomy-frame{position:fixed!important;z-index:5;border:0;visibility:hidden;pointer-events:none}.inspector-library-link{margin-top:16px;display:grid;gap:12px}
+
+/* A single, fitted day axis. Geometry keeps exact time; short labels remain readable. */
+body.spatial-ui #viewRoot[data-page="dailyflow"] .page-head p{display:none}
+body.spatial-ui .flow-editor-layout{display:block!important}
+body.spatial-ui .flow-timeline-scroll{overflow:visible!important;max-height:none!important;min-height:0!important;padding:12px 8px 12px!important}
+body.spatial-ui .flow-timeline-card{margin-bottom:0!important;padding:0!important}
+body.spatial-ui #flowTimeline{margin-left:44px!important}
+body.spatial-ui .flow-hour{left:-44px!important}
+body.spatial-ui .flow-hour span{width:36px;font-size:10px;line-height:12px;top:-6px}
+body.spatial-ui .flow-hour i{left:44px!important}
+body.spatial-ui .flow-block{overflow:visible!important;border-top:0;border-bottom:0;padding:0 4px!important}
+body.spatial-ui .flow-block strong{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);min-height:18px;line-height:18px;padding:0 4px;background:color-mix(in srgb,var(--flow-color),var(--panel) 80%);border-radius:3px;cursor:pointer;font-size:11px!important}
+body.spatial-ui .flow-block:focus-visible{outline:2px solid var(--accent);z-index:4}
+body.spatial-ui .flow-resize{z-index:3;height:3px}
+
+body.spatial-ui .flow-short .flow-resize{display:none}
+/* Keep navigation and editing controls compact enough to leave room for the day. */
+body.spatial-ui .main-panel:has(#viewRoot[data-page="dailyflow"]){padding-top:12px!important}
+body.spatial-ui #viewRoot[data-page="dailyflow"]>.page-head{min-height:0!important;padding:6px 0!important;margin:0 0 8px!important}
+body.spatial-ui #viewRoot[data-page="dailyflow"]>.page-head h1{font-size:24px!important;margin:0!important;line-height:32px!important}
+body.spatial-ui #viewRoot[data-page="dailyflow"] .hub-tabs{margin:0 0 8px!important;padding:6px 0!important;min-height:0!important}
+body.spatial-ui #viewRoot[data-page="dailyflow"] .flow-page-bar{margin:0!important;padding:0!important;min-height:0!important}
+body.spatial-ui #viewRoot[data-page="dailyflow"] .flow-page-panel{padding:6px 0!important}
+body.spatial-ui #viewRoot[data-page="dailyflow"] .flow-check-toolbar{margin:6px 0!important}
+body.spatial-ui #viewRoot[data-page="dailyflow"] .flow-mode-tabs{margin:6px 0!important}
+@media(max-width:760px){
+ body.spatial-ui .main-panel:has(#viewRoot[data-page="dailyflow"]) .workspace-bar{padding:4px 0!important;margin:0 0 8px!important;min-height:0!important;gap:4px!important}
+ body.spatial-ui #viewRoot[data-page="dailyflow"] .flow-page-meta{display:none!important}
+ body.spatial-ui #viewRoot[data-page="dailyflow"] .flow-mode-tabs .micro-copy{display:none!important}
+}

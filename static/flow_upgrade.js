@@ -18,7 +18,7 @@ function renderChecklistStats(){
 }
 function renderLegacyWhiteboard(){state.whiteboards ||= [];const board=state.whiteboards.find(x=>x.id===ui.whiteboardId);return `${sectionHead('WHITE CANVAS','白布画板','用画笔记录思路；画板随账户保存，可再次打开。')}<div class="board-tools"><button class="btn btn-primary" data-board="new">新建画板</button>${board?'<button class="btn" data-board="undo">撤销一笔</button><button class="btn" data-board="save">保存画板</button><input id="boardColor" type="color" value="#214d40" aria-label="画笔颜色">':''}</div><div class="board-list">${state.whiteboards.map(b=>`<button class="btn" data-board="open" data-id="${esc(b.id)}">打开 · ${esc(b.title)}</button>`).join('')}</div>${board?`<label>画板名称 <input id="boardTitle" value="${esc(board.title)}" maxlength="80"></label><canvas class="white-canvas" id="whiteCanvas" width="1200" height="800" aria-label="可绘制画板"></canvas>`:'<p>新建画板或打开已有画板开始绘制。</p>'}`;}
 function paintBoard(){const c=document.querySelector('#whiteCanvas'),b=state?.whiteboards?.find(x=>x.id===ui.whiteboardId);if(!c||!b)return;const ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);for(const stroke of b.strokes){ctx.strokeStyle=stroke.color;ctx.lineWidth=3;ctx.lineCap='round';ctx.beginPath();stroke.points.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.stroke();}}
-document.addEventListener('dblclick',e=>{const overview=e.target.closest('[data-flow-overview]');if(overview){openFlowEditor(ui.flowKind||flowDateKind(),overview.dataset.flowOverview);return;}const block=e.target.closest('.flow-block');if(block&&!e.target.closest('button')){openFlowEditor(ui.flowKind||flowDateKind(),block.dataset.flowId);return;}const timeline=e.target.closest('#flowTimeline');if(timeline&&!block){const rect=timeline.getBoundingClientRect(),start=Math.max(0,Math.min(1435,Math.floor((e.clientY-rect.top)/rect.height*1440/5)*5));openFlowEditor(ui.flowKind||flowDateKind());document.querySelector('#flowEditForm [name=start]').value=flowClock(start);document.querySelector('#flowEditForm [name=end]').value=flowClock(Math.min(1440,start+30));return;}const cell=e.target.closest('[data-calendar-date]');if(currentPage==='calendar'&&cell&&!e.target.closest('button,[data-calendar-event]')){ui.calendarSelectedDate=cell.dataset.calendarDate;ui.showCalendarComposer=true;renderPage('calendar');setTimeout(()=>document.querySelector('#calendarTaskTitle')?.focus(),0);}});
+document.addEventListener('dblclick',e=>{const block=e.target.closest('.flow-block');if(block&&!e.target.closest('button')){openFlowEditor(ui.flowKind||flowDateKind(),block.dataset.flowId);return;}const timeline=e.target.closest('#flowTimeline');if(timeline&&!block){const rect=timeline.getBoundingClientRect(),start=Math.max(0,Math.min(1435,Math.floor((e.clientY-rect.top)/rect.height*1440/5)*5));openFlowEditor(ui.flowKind||flowDateKind());document.querySelector('#flowEditForm [name=start]').value=flowClock(start);document.querySelector('#flowEditForm [name=end]').value=flowClock(Math.min(1440,start+30));return;}const cell=e.target.closest('[data-calendar-date]');if(currentPage==='calendar'&&cell&&!e.target.closest('button,[data-calendar-event]')){ui.calendarSelectedDate=cell.dataset.calendarDate;ui.showCalendarComposer=true;renderPage('calendar');setTimeout(()=>document.querySelector('#calendarTaskTitle')?.focus(),0);}});
 document.addEventListener('keydown',e=>{const b=e.target.closest('.flow-block');if(b&&e.key==='Enter')openFlowEditor(ui.flowKind||flowDateKind(),b.dataset.flowId);});
 document.addEventListener('change',e=>{
  if(e.target.id==='flowViewMode'){ui.flowViewMode=e.target.value;renderPage('dailyflow');if(ui.flowViewMode==='checklist')persist({quiet:true});}
@@ -51,3 +51,30 @@ async function loadBoardList(){const el=document.querySelector('#xBoardList');if
 new MutationObserver(loadBoardList).observe(document.querySelector('#viewRoot'),{childList:true});
 document.addEventListener('click',async e=>{const b=e.target.closest('[data-xboard]');if(!b)return;try{if(b.dataset.xboard==='new'){const r=await api('/api/boards',{method:'POST'});ui.xBoardId=r.id;}if(b.dataset.xboard==='open')ui.xBoardId=b.dataset.id;if(b.dataset.xboard==='legacy-close')ui.whiteboardId=null;renderPage('whiteboard');}catch(e){toast(e.message,true);}});
 window.addEventListener('message',e=>{if(e.origin!==location.origin||e.source!==document.querySelector('.excal-frame')?.contentWindow)return;if(e.data?.type==='board-save-state')window.boardEditorDirty=e.data.dirty;});
+
+// Fit the entire day into the available viewport; allocate lanes for both bars and labels.
+function fitFlowTimeline(){
+ const timeline=document.querySelector('#flowTimeline');if(!timeline||!timeline.getClientRects().length)return;
+ const viewport=window.visualViewport?.height||innerHeight;
+ const top=timeline.getBoundingClientRect().top+scrollY;
+ const bottom=innerWidth<=760?88:28;
+ const height=Math.max(240,viewport-top-bottom);
+ timeline.style.setProperty('--flow-height',height+'px');
+ const ends=[],blocks=[...timeline.querySelectorAll('.flow-block')];
+ blocks.forEach(block=>{
+  const start=Number(block.dataset.flowStart)/1440*height,end=Number(block.dataset.flowEnd)/1440*height;
+  block.classList.toggle('flow-short',end-start<24);
+  const center=(start+end)/2,visibleStart=Math.min(start,center-11),visibleEnd=Math.max(end,center+11);
+  let lane=ends.findIndex(x=>x<=visibleStart);if(lane<0)lane=ends.length;
+  ends[lane]=visibleEnd;block.dataset.flowLane=lane;
+ });
+ const count=Math.max(1,ends.length);
+ blocks.forEach(block=>{const lane=Number(block.dataset.flowLane);block.dataset.flowLanes=count;block.style.left=`calc(${lane/count*100}% + 6px)`;block.style.width=`calc(${100/count}% - 12px)`;});
+}
+let flowFitFrame;
+function queueFlowFit(){cancelAnimationFrame(flowFitFrame);flowFitFrame=requestAnimationFrame(fitFlowTimeline);}
+new MutationObserver(queueFlowFit).observe(document.querySelector('#viewRoot'),{childList:true,subtree:true});
+window.addEventListener('resize',queueFlowFit);
+window.visualViewport?.addEventListener('resize',queueFlowFit);
+document.addEventListener('click',queueFlowFit);
+queueFlowFit();
