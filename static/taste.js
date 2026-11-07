@@ -16,6 +16,7 @@
     { page: 'calendar', label: '周历', hint: '成长 日程' },
     { page: 'growthplan', label: '90天计划', hint: '成长' },
     { page: 'review', label: '每周复盘', hint: '成长' },
+    { page: 'mindmap', label: '思维导图', hint: '成长 绘制 分支' },
     { page: 'whiteboard', label: '白布画板', hint: '成长 绘制 打开画板' },
     { page: 'schedules', label: '自动化', hint: '定时任务' },
     { page: 'dailyflow', label: '流程', hint: '编排与统计' },

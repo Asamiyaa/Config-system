@@ -24,8 +24,8 @@ with sync_playwright() as pw:
  page.wait_for_timeout(500)
  assert page.locator('#mainNav .nav-label').all_text_contents()==['成长','资产','健康','设置','归档']
  tabs=page.locator('.hub-tabs .hub-tab')
- assert tabs.all_text_contents()==['流程','周历','90天计划','新登','平衡','成长总览','避坑','每周复盘','白布画板']
- for key in ['whiteboard','xindeng','agents','calendar','newconfig','growthplan','mistakes','review','dailyflow']:
+ assert tabs.all_text_contents()==['流程','周历','90天计划','新登','平衡','成长总览','避坑','每周复盘','白布画板','思维导图']
+ for key in ['mindmap','whiteboard','xindeng','agents','calendar','newconfig','growthplan','mistakes','review','dailyflow']:
   page.locator(f'.hub-tab[data-page="{key}"]').click()
   page.wait_for_function('(k)=>document.querySelector("#viewRoot").dataset.page===k',arg=key)
   page.wait_for_timeout(200)
@@ -47,16 +47,24 @@ with sync_playwright() as pw:
  assert page.locator('#viewRoot').get_attribute('data-page')=='dailyflow'
  page.evaluate("ui.flowViewMode='timeline';state.dailyFlows.weekday=[{id:'short',title:'五分钟任务',start:600,end:605}];ui.flowKind='weekday';renderPage('dailyflow',{transition:false})")
  assert page.locator('[data-tab="checklist"]').count()==0
+ assert page.locator('.flow-block').inner_text()=='五分钟任务'
+ assert page.locator('.flow-block').evaluate('e=>e.getBoundingClientRect().height')==20
+ assert page.locator('.flow-block button').count()==0
  page.locator('#flowTimeline').dblclick(position={'x':20,'y':100});page.wait_for_timeout(200)
  assert page.locator('#flowEditForm [name=start]').input_value()!='08:00'
  page.locator('[data-action="flow-modal-close"]').last.click();page.wait_for_timeout(100)
  page.locator('.flow-block').dblclick();page.wait_for_timeout(200)
  assert page.locator('.flow-modal').is_visible()
  page.evaluate("document.querySelector('.flow-modal')?.remove();document.querySelector('.flow-modal-backdrop')?.remove()")
- page.locator('#flowViewMode').select_option('checklist');page.wait_for_timeout(200)
+ page.locator('#flowViewToggle').click();page.wait_for_timeout(200)
  page.evaluate("ui.checklistDate='2026-11-06';renderPage('dailyflow',{transition:false})")
- page.locator('[data-checklist-index]').first.check();page.wait_for_timeout(300)
- assert page.evaluate("state.flowChecklist['2026-11-06'][0].done")
+ page.locator('[data-checklist-id]').first.check();page.wait_for_timeout(300)
+ assert page.evaluate("state.flowChecklist['2026-11-06'].find(x=>x.id==='short').done")
+ page.locator('#flowViewToggle').click();page.wait_for_timeout(200)
+ page.evaluate("state.dailyFlows.weekday[0].title='已修改任务';renderPage('dailyflow',{transition:false})")
+ page.locator('#flowViewToggle').click();page.wait_for_timeout(200)
+ assert page.locator('.flow-check-row strong').all_text_contents()==['已修改任务']
+ assert page.locator('[data-checklist-id]').first.is_checked()
  page.locator('.hub-tab[data-page="calendar"]').click();page.wait_for_timeout(250)
  page.locator('[data-action="calendar-toggle-create"]').click();page.wait_for_timeout(250)
  assert page.locator('#calendarTaskTitle').is_visible()
@@ -67,12 +75,19 @@ with sync_playwright() as pw:
  page.locator('[data-calendar-date]').first.dblclick();page.wait_for_timeout(250)
  assert page.locator('#calendarTaskTitle').is_visible()
  page.locator('.hub-tab[data-page="whiteboard"]').click();page.wait_for_timeout(200)
- page.evaluate("ui.whiteboardId='legacy';state.whiteboards=[{id:'legacy',title:'旧画板',strokes:[]}];renderPage('whiteboard',{transition:false})");page.wait_for_timeout(250)
- assert page.locator('#whiteCanvas').is_visible()
- canvas=page.locator('#whiteCanvas').bounding_box();page.mouse.move(canvas['x']+30,canvas['y']+30);page.mouse.down();page.mouse.move(canvas['x']+100,canvas['y']+100,steps=5);page.mouse.up();page.wait_for_timeout(200)
- assert page.evaluate('state.whiteboards[0].strokes.length')==1
- page.locator('[data-board="save"]').click();page.wait_for_timeout(200)
- assert seed['whiteboards']
+ assert '旧版画板' not in page.locator('#viewRoot').inner_text()
+ page.locator('.hub-tab[data-page="mindmap"]').click();page.wait_for_timeout(200)
+ page.locator('[data-mind="new"]').click();page.wait_for_timeout(200)
+ page.locator('[data-mind="child"]').click();page.wait_for_timeout(200)
+ page.locator('#mindmapNodeText').fill('分支测试');page.locator('[data-mind="rename"]').click();page.wait_for_timeout(200)
+ assert page.locator('[data-mind-node]').count()==2
+ assert seed['mindmaps'][0]['nodes'][1]['text']=='分支测试'
+ page.locator('[data-mind-node]').last.dblclick()
+ assert page.locator('#mindmapNodeText').evaluate('e=>document.activeElement===e')
+ page.reload();page.wait_for_timeout(500)
+ page.locator('.hub-tab[data-page="mindmap"]').click();page.wait_for_timeout(200)
+ page.locator('[data-mind="open"]').first.click();page.wait_for_timeout(200)
+ assert page.locator('[data-mind-node]').count()==2
  page.locator('.hub-tab[data-page="dailyflow"]').click();page.wait_for_timeout(200)
  page.locator('[data-tab="edit"]').click()
  page.screenshot(path='artifacts/xindeng-flow-desktop.png',full_page=False)

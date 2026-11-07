@@ -4,7 +4,12 @@ function checklistDay(date){
  if(!state.flowChecklist[date]){const d=new Date(date+'T12:00:00'),kind=[0,6].includes(d.getDay())?'restday':'weekday';state.flowChecklist[date]=(state.dailyFlows[kind]||[]).map(f=>({id:String(f.id),title:f.title,category:f.category||'日常',start:f.start,end:f.end,done:false}));}
  return state.flowChecklist[date];
 }
-function renderFlowChecklist(){const date=ui.checklistDate||todayKey(),rows=checklistDay(date);return `<section class="card"><div class="flow-check-toolbar"><h3>每日流程清单</h3><input type="date" aria-label="清单日期" id="checklistDate" value="${esc(date)}"><button class="btn" data-action="checklist-sync">补入新增流程</button><span>${rows.filter(x=>x.done).length}/${rows.length} 已完成</span></div>${rows.map((x,i)=>`<label class="flow-check-row ${x.done?'done':''}"><input type="checkbox" data-checklist-index="${i}" ${x.done?'checked':''}><span><strong>${esc(x.title)}</strong><small>${flowClock(x.start)}–${flowClock(x.end)} · ${esc(x.category)}</small></span>${x.done?'已打卡':'待完成'}</label>`).join('')||'<p>当天暂无流程，请先编排对应的工作日或休息日流程。</p>'}</section>`;}
+function flowChecklistRows(kind){
+ const date=ui.checklistDate||todayKey();state.flowChecklist ||= {};const records=state.flowChecklist[date] ||= [];
+ return [...(state.dailyFlows[kind]||[])].sort((a,b)=>n(a.start)-n(b.start)).map(f=>{let record=records.find(x=>x.id===String(f.id)&&(x.kind===kind||!x.kind));if(!record){record={id:String(f.id),kind,done:false};records.push(record);}Object.assign(record,{kind,title:f.title,start:f.start,end:f.end,category:f.category||'日常'});return record;});
+}
+function renderFlowChecklist(kind=ui.flowKind||flowDateKind()){const date=ui.checklistDate||todayKey(),rows=flowChecklistRows(kind);return `<section class="card"><div class="flow-check-toolbar"><h3>${kind==='weekday'?'工作日':'休息日'} · Checklist</h3><input type="date" aria-label="打卡日期" id="checklistDate" value="${esc(date)}"><span>${rows.filter(x=>x.done).length}/${rows.length} 已完成</span><button class="btn" data-action="flow-kind" data-kind="${kind==='weekday'?'restday':'weekday'}">切换${kind==='weekday'?'休息日':'工作日'}</button></div>${rows.map(x=>`<label class="flow-check-row ${x.done?'done':''}"><input type="checkbox" data-checklist-id="${esc(x.id)}" data-checklist-kind="${kind}" ${x.done?'checked':''}><span><strong>${esc(x.title)}</strong></span>${x.done?'已完成':'待完成'}</label>`).join('')||'<p>该类型暂无流程，请切换时间轴新增。</p>'}</section>`;}
+
 function renderChecklistStats(){
  const end=ui.checklistStatsDate||todayKey(),period=ui.checklistPeriod||'week',start=period==='day'?end:shiftDateKey(end,-6),days=[];
  for(let d=start;d<=end;d=shiftDateKey(d,1))days.push(d);
@@ -18,11 +23,12 @@ document.addEventListener('keydown',e=>{const b=e.target.closest('.flow-block');
 document.addEventListener('change',e=>{
  if(e.target.id==='flowViewMode'){ui.flowViewMode=e.target.value;renderPage('dailyflow');if(ui.flowViewMode==='checklist')persist({quiet:true});}
  if(e.target.id==='checklistDate'){ui.checklistDate=e.target.value;renderPage('dailyflow');persist({quiet:true});}
- if(e.target.matches('[data-checklist-index]')){const row=checklistDay(ui.checklistDate||todayKey())[Number(e.target.dataset.checklistIndex)];row.done=e.target.checked;row.completedAt=row.done?new Date().toISOString():null;saveAndRender();}
+ if(e.target.matches('[data-checklist-id]')){const row=flowChecklistRows(e.target.dataset.checklistKind).find(x=>x.id===e.target.dataset.checklistId);if(row){row.done=e.target.checked;row.completedAt=row.done?new Date().toISOString():null;saveAndRender();}}
  if(['checklistPeriod','checklistStatsDate'].includes(e.target.id)){ui[e.target.id]=e.target.value;renderPage('dailyflow');}
  if(e.target.id==='boardTitle'){const b=state.whiteboards.find(x=>x.id===ui.whiteboardId);b.title=e.target.value.trim()||'未命名画板';persist({quiet:true});}
 });
 document.addEventListener('click',async e=>{
+ if(e.target.closest('#flowViewToggle')){ui.flowViewMode=ui.flowViewMode==='checklist'?'timeline':'checklist';renderPage('dailyflow');if(ui.flowViewMode==='checklist')persist({quiet:true});return;}
  if(e.target.closest('[data-action="checklist-sync"]')){const date=ui.checklistDate||todayKey(),rows=checklistDay(date),kind=[0,6].includes(new Date(date+'T12:00:00').getDay())?'restday':'weekday';for(const f of state.dailyFlows[kind]||[])if(!rows.some(x=>x.id===String(f.id)))rows.push({id:String(f.id),title:f.title,category:f.category||'日常',start:f.start,end:f.end,done:false});saveAndRender('已补入新增流程');}
  const btn=e.target.closest('[data-board]');if(!btn)return;state.whiteboards ||= [];const action=btn.dataset.board;
  if(action==='new'){const b={id:crypto.randomUUID(),title:'画板 '+(state.whiteboards.length+1),strokes:[]};state.whiteboards.push(b);ui.whiteboardId=b.id;await saveAndRender();}
@@ -40,8 +46,8 @@ new MutationObserver(()=>{paintBoard();}).observe(document.querySelector('#viewR
 (async()=>{let version;try{version=(await api('/api/app-version')).version;}catch(_){return;}let checking=false;async function check(){if(checking||document.hidden||window.boardEditorDirty||unsavedChanges||document.querySelector('input:focus,textarea:focus,[role="dialog"],.flow-modal')||boardStroke)return;checking=true;try{const next=await api('/api/app-version');if(next.version!==version)location.reload();}catch(_){}finally{checking=false;}}setInterval(check,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)check();});})();
 
 function renderWhiteboard(){
- if(ui.whiteboardId)return `<button class="btn" data-xboard="legacy-close">返回 Excalidraw 画板</button>`+renderLegacyWhiteboard();
- return `${sectionHead('EXCALIDRAW','白布画板','Excalidraw 编辑器 · 自动保存到账户 · 历史版本可重新打开')}<div class="board-tools"><button class="btn btn-primary" data-xboard="new">新建 Excalidraw 画板</button><a class="btn" href="https://excalidraw.com/" target="_blank" rel="noopener noreferrer">Excalidraw 官网 ↗</a></div><div id="xBoardList">正在读取历史画板…</div>${(state.whiteboards||[]).length?'<details><summary>旧版画板（保留）</summary>'+state.whiteboards.map(b=>`<button class="btn" data-board="open" data-id="${esc(b.id)}">${esc(b.title)}</button>`).join('')+'</details>':''}${ui.xBoardId?`<iframe title="Excalidraw 账户画板" class="excal-frame" src="/static/whiteboard/index.html?id=${encodeURIComponent(ui.xBoardId)}"></iframe>`:''}`;
+
+ return `${sectionHead('EXCALIDRAW','白布画板','Excalidraw 编辑器 · 自动保存到账户 · 历史版本可重新打开')}<div class="board-tools"><button class="btn btn-primary" data-xboard="new">新建 Excalidraw 画板</button><a class="btn" href="https://excalidraw.com/" target="_blank" rel="noopener noreferrer">Excalidraw 官网 ↗</a></div><div id="xBoardList">正在读取历史画板…</div>${ui.xBoardId?`<iframe title="Excalidraw 账户画板" class="excal-frame" src="/static/whiteboard/index.html?id=${encodeURIComponent(ui.xBoardId)}"></iframe>`:''}`;
 }
 async function loadBoardList(){const el=document.querySelector('#xBoardList');if(!el)return;try{const d=await api('/api/boards');if(!el.isConnected)return;el.innerHTML=d.boards.map(b=>`<button class="btn" data-xboard="open" data-id="${esc(b.id)}">${esc(b.title)} · ${esc(new Date(b.updated_at).toLocaleString())} · v${b.version}</button>`).join('')||'<p>暂无历史画板，新建后会自动保存到你的账户。</p>';}catch(e){el.textContent='读取历史失败：'+e.message;}}
 new MutationObserver(loadBoardList).observe(document.querySelector('#viewRoot'),{childList:true});
