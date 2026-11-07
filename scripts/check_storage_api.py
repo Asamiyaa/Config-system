@@ -12,6 +12,18 @@ with tempfile.TemporaryDirectory() as tmp:
    import server
   with TestClient(server.app) as client:
    assert client.post('/api/login',json={'username':'demo','password':'Demo1234!'}).status_code==200
+   board=client.post('/api/boards').json()['id']
+   payload={'title':'历史保存测试','version':0,'scene':{'elements':[{'id':'test'}],'files':{}}}
+   assert client.put('/api/boards/'+board,json=payload).status_code==200
+   assert client.put('/api/boards/'+board,json=payload).status_code==409
+   saved=client.get('/api/boards/'+board).json()
+   assert saved['version']==1 and len(saved['revisions'])==1
+   assert client.get('/api/boards/'+board+'/revisions/1').json()['scene']==payload['scene']
+   server.init_db()
+   assert client.get('/api/boards/'+board).json()['scene']==payload['scene']
+   assert client.get('/api/boards').json()['boards'][0]['id']==board
+   with TestClient(server.app) as stranger:
+    assert stranger.get('/api/boards/'+board).status_code==401
    state=client.get('/api/state').json()['state']
    state['subscriptions']=[{'name':'AI test','fee':99}];state['agentStatuses']={'work':'busy'};state['notebookEntries']=[{'text':'个人记录持久化测试'}]
    result=client.put('/api/state',json={'state':state})

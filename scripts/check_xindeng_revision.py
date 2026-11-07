@@ -15,6 +15,7 @@ with sync_playwright() as pw:
    else: data={'state':seed}
   elif url.endswith('/api/session'): data={'authenticated':True,'username':'demo'}
   elif 'personal-vault/status' in url:data={'ok':True,'databasePath':'test/db.sqlite3','backupPath':'test/backups'}
+  elif url.endswith('/api/boards'): data={'boards':[]}
   else:data={'registrationEnabled':True,'demoEnabled':True,'jobs':[],'settings':{}}
   r.fulfill(json=data)
  page.route('**/api/**',route)
@@ -44,11 +45,15 @@ with sync_playwright() as pw:
  assert page.locator('.hub-tab').first.get_attribute('href')=='http://39.106.118.186/'
  page.locator('#mainNav [data-page="newconfig"]').click();page.wait_for_timeout(300)
  assert page.locator('#viewRoot').get_attribute('data-page')=='dailyflow'
- page.evaluate("state.dailyFlows.weekday=[{id:'short',title:'五分钟任务',start:600,end:605}];ui.flowKind='weekday';renderPage('dailyflow',{transition:false})")
+ page.evaluate("ui.flowViewMode='timeline';state.dailyFlows.weekday=[{id:'short',title:'五分钟任务',start:600,end:605}];ui.flowKind='weekday';renderPage('dailyflow',{transition:false})")
+ assert page.locator('[data-tab="checklist"]').count()==0
+ page.locator('#flowTimeline').dblclick(position={'x':20,'y':100});page.wait_for_timeout(200)
+ assert page.locator('#flowEditForm [name=start]').input_value()!='08:00'
+ page.locator('[data-action="flow-modal-close"]').last.click();page.wait_for_timeout(100)
  page.locator('.flow-block').dblclick();page.wait_for_timeout(200)
  assert page.locator('.flow-modal').is_visible()
  page.evaluate("document.querySelector('.flow-modal')?.remove();document.querySelector('.flow-modal-backdrop')?.remove()")
- page.locator('[data-tab="checklist"]').click();page.wait_for_timeout(200)
+ page.locator('#flowViewMode').select_option('checklist');page.wait_for_timeout(200)
  page.evaluate("ui.checklistDate='2026-11-06';renderPage('dailyflow',{transition:false})")
  page.locator('[data-checklist-index]').first.check();page.wait_for_timeout(300)
  assert page.evaluate("state.flowChecklist['2026-11-06'][0].done")
@@ -62,7 +67,7 @@ with sync_playwright() as pw:
  page.locator('[data-calendar-date]').first.dblclick();page.wait_for_timeout(250)
  assert page.locator('#calendarTaskTitle').is_visible()
  page.locator('.hub-tab[data-page="whiteboard"]').click();page.wait_for_timeout(200)
- page.locator('[data-board="new"]').click();page.wait_for_timeout(250)
+ page.evaluate("ui.whiteboardId='legacy';state.whiteboards=[{id:'legacy',title:'旧画板',strokes:[]}];renderPage('whiteboard',{transition:false})");page.wait_for_timeout(250)
  assert page.locator('#whiteCanvas').is_visible()
  canvas=page.locator('#whiteCanvas').bounding_box();page.mouse.move(canvas['x']+30,canvas['y']+30);page.mouse.down();page.mouse.move(canvas['x']+100,canvas['y']+100,steps=5);page.mouse.up();page.wait_for_timeout(200)
  assert page.evaluate('state.whiteboards[0].strokes.length')==1

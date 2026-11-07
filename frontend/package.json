@@ -1,0 +1,14 @@
+{
+  "name": "xindeng-whiteboard",
+  "private": true,
+  "version": "1.0.0",
+  "dependencies": {
+    "@excalidraw/excalidraw": "0.18.0",
+    "esbuild": "0.25.12",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "scripts": {
+    "build": "node build.mjs"
+  }
+}

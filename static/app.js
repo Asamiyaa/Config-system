@@ -371,6 +371,7 @@ function labelControls(root=document){
   });
 }
 function renderPage(page, {autoRefresh=false, transition=true, animate=true}={}) {  if (!state) return;
+  if(window.boardEditorDirty){toast('画板正在保存或保存失败，请先在画板内保存或导出备份',true);return;}
   if(page==='settings')page='schedules';
   if(page==='home'||page==='today')page='dailyflow';
   const renderStarted=performance.now();
@@ -984,15 +985,15 @@ function renderDailyFlow(){
  const kind=ui.flowKind||flowDateKind();
  const runs=state.dailyFlowRuns||[],items=[...(state.dailyFlows.weekday||[]),...(state.dailyFlows.restday||[])];
  return `${sectionHead('LIFE OS · DAILY RHYTHM','流程','流程编排与流程统计收进同一个工作台，用左右两个页签切换：编排看工作日/休息日时间轴，统计看记录、完成率、分类与趋势。电脑可拖动任务块调整时间；手机滑动浏览，点“编辑”修改时间。任务允许重叠。',`<button class="btn btn-primary" data-action="flow-new" data-kind="${kind}">＋ 新增流程块</button>`)}
- <div class="flow-page-shell" data-tab-shell data-tab-key="dailyflow" data-default-tab="edit">
-  <div class="flow-page-bar"><div class="flow-page-tabs" data-tabs role="tablist"><button class="flow-page-tab active" data-tab="edit" role="tab"><span>流程编排</span><small>${items.length} 个流程块</small></button><button class="flow-page-tab" data-tab="checklist" role="tab"><span>每日清单</span></button><button class="flow-page-tab" data-tab="stats" role="tab"><span>流程统计</span><small>${runs.length} 次记录</small></button></div><div class="flow-page-meta"><span class="live-dot"></span>${kind==='weekday'?'当前：工作日':'当前：休息日'} · 本地保存</div></div>
-  <div class="flow-page-panel active" data-tab-panel="edit">${flowEditorPanel(kind)}</div>
-  <div class="flow-page-panel" data-tab-panel="checklist">${renderFlowChecklist()}</div><div class="flow-page-panel" data-tab-panel="stats" id="flowStatsPanel">${flowStatsBody()}</div>
+ <div class="flow-page-shell" data-tab-shell data-tab-key="dailyflow-v2" data-default-tab="edit">
+  <div class="flow-page-bar"><div class="flow-page-tabs" data-tabs role="tablist"><button class="flow-page-tab active" data-tab="edit" role="tab"><span>流程编排</span><small>${items.length} 个流程块</small></button><button class="flow-page-tab" data-tab="stats" role="tab"><span>流程统计</span><small>${runs.length} 次记录</small></button></div><div class="flow-page-meta"><span class="live-dot"></span>${kind==='weekday'?'当前：工作日':'当前：休息日'} · 本地保存</div></div>
+  <div class="flow-page-panel active" data-tab-panel="edit"><div class="flow-check-toolbar"><label>编排视图 <select id="flowViewMode"><option value="timeline" ${ui.flowViewMode!=='checklist'?'selected':''}>时间轴模式</option><option value="checklist" ${ui.flowViewMode==='checklist'?'selected':''}>Checklist 模式</option></select></label></div>${ui.flowViewMode==='checklist'?renderFlowChecklist():flowEditorPanel(kind)}</div>
+  <div class="flow-page-panel" data-tab-panel="stats" id="flowStatsPanel">${flowStatsBody()}</div>
   <div id="flowModalMount"></div>
  </div>`;
 }
 function refreshFlowTabCounts(){
- const scope=document.querySelector('[data-tab-key="dailyflow"]');if(!scope)return;
+ const scope=document.querySelector('[data-tab-key="dailyflow-v2"]');if(!scope)return;
  const items=(state.dailyFlows.weekday||[]).length+(state.dailyFlows.restday||[]).length;
  const runs=(state.dailyFlowRuns||[]).length;
  const e=scope.querySelector('[data-tab="edit"] small'),s=scope.querySelector('[data-tab="stats"] small');
@@ -2386,7 +2387,7 @@ function bindDelegatedEvents() {
     if(a==='refresh-market') return refreshMarket();
     if(a==='export-json') return exportState();
     if(a==='import-json-open') {$('#importJsonFile')?.click();return;}
-    if(a==='logout') {try{await api('/api/logout',{method:'POST',body:JSON.stringify({})});state=null;showAuth();}catch(err){toast(err.message,true);}return;}
+    if(a==='logout') {if(window.boardEditorDirty){toast('请先保存画板或导出备份后退出',true);return;}try{await api('/api/logout',{method:'POST',body:JSON.stringify({})});state=null;showAuth();}catch(err){toast(err.message,true);}return;}
     if(a==='toggle-password') {const p=$('#authPassword');p.type=p.type==='password'?'text':'password';return;}
     if(a==='open-sidebar') return openSidebar();
     if(a==='close-sidebar') return closeSidebar();
@@ -2535,7 +2536,7 @@ document.addEventListener('pointerup',e=>{
 });
 document.addEventListener('pointercancel',()=>{bodyPointerState=null;$('#bodyModelCanvas')?.classList.remove('rotating');});
 document.addEventListener('wheel',e=>{const canvas=e.target.closest?.('#bodyModelCanvas');if(!canvas)return;e.preventDefault();ui.bodyView.scale=Math.max(.65,Math.min(1.75,ui.bodyView.scale+(e.deltaY<0?.08:-.08)));const svg=$('#anatomySvg');if(svg)svg.style.transform=`translate(${ui.bodyView.x}px,${ui.bodyView.y}px) rotateX(${ui.bodyView.rx}deg) rotateY(${ui.bodyView.ry}deg) scale(${ui.bodyView.scale})`;},{passive:false});
-document.addEventListener('click',e=>{const tab=e.target.closest?.('[data-tab-key="dailyflow"] [data-tab="stats"]');if(!tab)return;const panel=$('#flowStatsPanel');if(panel)panel.innerHTML=flowStatsBody();refreshFlowTabCounts();});
+document.addEventListener('click',e=>{const tab=e.target.closest?.('[data-tab-key="dailyflow-v2"] [data-tab="stats"]');if(!tab)return;const panel=$('#flowStatsPanel');if(panel)panel.innerHTML=flowStatsBody();refreshFlowTabCounts();});
 updateAuthMode();
 bindDelegatedEvents();
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();

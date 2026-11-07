@@ -97,6 +97,8 @@ def init_db() -> None:
             state_json TEXT NOT NULL,
             updated_at TEXT NOT NULL
         )""")
+        con.execute("CREATE TABLE IF NOT EXISTS boards (id TEXT PRIMARY KEY, user_id INTEGER NOT NULL, title TEXT NOT NULL, scene TEXT NOT NULL, version INTEGER NOT NULL, updated_at TEXT NOT NULL)")
+        con.execute("CREATE TABLE IF NOT EXISTS board_revisions (board_id TEXT NOT NULL, version INTEGER NOT NULL, scene TEXT NOT NULL, saved_at TEXT NOT NULL, PRIMARY KEY(board_id,version))")
         if os.getenv("DISABLE_DEMO_ACCOUNT", "0") != "1":
             exists = con.execute("SELECT id FROM users WHERE username='demo'").fetchone()
             if not exists:
@@ -1206,10 +1208,68 @@ threading.Thread(target=gymlib.get_catalogue, name="wealth-os-opengym-warmup", d
 
 @app.get("/api/app-version")
 def app_version():
-    files = ["index.html", "app.js", "flow_upgrade.js", "xindeng.css", "ui.js"]
+    files = sorted(p.relative_to(STATIC).as_posix() for p in STATIC.rglob("*") if p.is_file() and p.suffix in {".html", ".js", ".css"} and "models" not in p.parts and "vendor" not in p.parts)
     digest = hashlib.sha256()
     for name in files:
         path = STATIC / name
         if path.is_file():
             digest.update(path.read_bytes())
     return JSONResponse({"version": digest.hexdigest()[:20]}, headers={"Cache-Control": "no-store"})
+
+class BoardPayload(BaseModel):
+    title: str = Field(default="未命名画板", max_length=100)
+    scene: dict[str, Any] = Field(default_factory=dict)
+    version: int = 0
+
+@app.get("/api/boards")
+def list_boards(request: Request):
+    user = current_user(request)
+    with db() as con:
+        rows = con.execute("SELECT id,title,version,updated_at FROM boards WHERE user_id=? ORDER BY updated_at DESC", (user["id"],)).fetchall()
+    return {"boards": [dict(r) for r in rows]}
+
+@app.post("/api/boards")
+def create_board(request: Request):
+    user = current_user(request)
+    board_id = secrets.token_hex(16)
+    now = datetime.now(timezone.utc).isoformat()
+    with db() as con:
+        con.execute("INSERT INTO boards VALUES(?,?,?,?,?,?)", (board_id,user["id"],"未命名画板","{}",0,now))
+    backup_database(DB_PATH)
+    return {"id":board_id}
+
+@app.get("/api/boards/{board_id}")
+def get_board(board_id: str, request: Request):
+    user = current_user(request)
+    with db() as con:
+        row = con.execute("SELECT * FROM boards WHERE id=? AND user_id=?", (board_id,user["id"])).fetchone()
+        if not row: raise HTTPException(404,"画板不存在")
+        revisions = con.execute("SELECT version,saved_at FROM board_revisions WHERE board_id=? ORDER BY version DESC",(board_id,)).fetchall()
+    return {"id":board_id,"title":row["title"],"scene":json.loads(row["scene"]),"version":row["version"],"revisions":[dict(r) for r in revisions]}
+
+@app.get("/api/boards/{board_id}/revisions/{version}")
+def get_board_revision(board_id: str, version: int, request: Request):
+    get_board(board_id,request)
+    with db() as con:
+        row = con.execute("SELECT scene FROM board_revisions WHERE board_id=? AND version=?",(board_id,version)).fetchone()
+    if not row: raise HTTPException(404,"历史版本不存在")
+    return {"scene":json.loads(row["scene"])}
+
+@app.put("/api/boards/{board_id}")
+def save_board(board_id: str, payload: BoardPayload, request: Request):
+    user = current_user(request)
+    scene = json.dumps(payload.scene,ensure_ascii=False,allow_nan=False)
+    if len(scene.encode("utf-8"))>20_000_000: raise HTTPException(413,"画板超过20MB，请导出备份后拆分画板")
+    now = datetime.now(timezone.utc).isoformat()
+    with db() as con:
+        con.execute("BEGIN IMMEDIATE")
+        row=con.execute("SELECT version FROM boards WHERE id=? AND user_id=?",(board_id,user["id"])).fetchone()
+        if not row: raise HTTPException(404,"画板不存在")
+        if row["version"]!=payload.version: raise HTTPException(409,"其他窗口已更新此画板，请先导出当前画布，再重新打开")
+        version=payload.version+1
+        con.execute("UPDATE boards SET scene=?,title=?,version=?,updated_at=? WHERE id=?",(scene,payload.title,version,now,board_id))
+        con.execute("INSERT INTO board_revisions VALUES(?,?,?,?)",(board_id,version,scene,now))
+    warning=None
+    try: backup_database(DB_PATH)
+    except Exception: warning="画板已保存，数据库快照失败，请检查存储空间"
+    return {"ok":True,"version":version,"storageWarning":warning}

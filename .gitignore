@@ -25,3 +25,6 @@ Thumbs.db
 
 # Private database snapshots must never be deployed or committed
 data/backups/
+
+frontend/node_modules/
+.npm-cache/
