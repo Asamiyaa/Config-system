@@ -14,7 +14,7 @@ with sync_playwright() as pw:
    else:data={'registrationEnabled':True,'boards':[]}
    r.fulfill(json=data)
   p.route('**/api/**',api)
-  p.goto('http://127.0.0.1:8877/static/index.html');p.locator('#flowTimeline').wait_for()
+  p.goto('http://127.0.0.1:8877/static/index.html');p.locator('#viewRoot[data-page=dailyflow]').wait_for()
   p.evaluate("ui.flowKind='weekday';ui.flowViewMode='timeline';state.dailyFlows.weekday=[{id:'early',title:'凌晨任务',start:0,end:30},{id:'a',title:'五分钟任务',start:600,end:605},{id:'b',title:'相邻五分钟',start:605,end:610},{id:'c',title:'并行任务',start:600,end:660},{id:'late',title:'晚间任务',start:1380,end:1440}];renderPage('dailyflow',{transition:false})")
   p.wait_for_timeout(500)
   rect=p.locator('#flowTimeline').bounding_box();print(width,height,rect,flush=True)

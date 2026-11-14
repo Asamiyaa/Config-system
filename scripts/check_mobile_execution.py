@@ -22,7 +22,7 @@ with sync_playwright() as pw:
  p.locator('.quick-todo').click();p.locator('#quickTodo [name=title]').fill('饭后散步');p.locator('#quickTodo [name=date]').fill('2026-12-01');p.locator('#quickTodo [name=time]').fill('18:30');p.locator('#quickTodo [type=submit]').click();p.wait_for_timeout(500)
  assert seed['focusTasks'][-1]['time']=='18:30' and seed['focusTasks'][-1]['startDate']=='2026-12-01'
  p.evaluate("state.dailyFlows.weekday=[{id:'skin-test',title:'护肤',start:600,end:610,destination:'skin'}];ui.flowKind='weekday';ui.flowViewMode='checklist';renderPage('dailyflow',{transition:false})")
- p.locator('[data-flow-go]').click();p.wait_for_timeout(300);assert p.locator('#viewRoot').get_attribute('data-page')=='skin'
+ p.locator('.flow-check-row [data-flow-go]').click();p.wait_for_timeout(300);assert p.locator('#viewRoot').get_attribute('data-page')=='skin'
  p.evaluate("renderPage('dailyflow',{transition:false})");p.locator('[data-shortcuts]').click();p.locator('#executionSheet details summary').click();p.locator('#executionSheet [value=calendar]').check();p.locator('#executionSheet form button').click();p.wait_for_timeout(300);assert 'calendar' in seed['executionShortcuts']
  p.locator('[data-reminders]').click();p.locator('[data-enabled]').check();p.wait_for_timeout(400);assert seed['executionReminders'];assert p.evaluate('nativeCalls.at(-1).some(x=>x.weekly)')
  p.locator('#executionSheet [data-dismiss]').click()
