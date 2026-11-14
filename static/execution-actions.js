@@ -56,7 +56,14 @@
   div.querySelector('[data-shortcuts]').onclick=shortcuts;
   div.querySelector('[data-reminders]').onclick=()=>{const d=sheet('流程与待办提醒',`<label><input type="checkbox" data-enabled ${state.executionReminders?'checked':''}>启用到点提醒</label><p>流程按工作日/休息日重复，带日期和时间的待办单次提醒。</p><p>Android 需允许通知与精确闹钟；强行停止 App 后需重新打开。</p><button data-permission>允许系统通知</button><button data-alarm>允许准时提醒</button><p data-status></p>`);d.querySelector('[data-enabled]').onchange=async e=>{state.executionReminders=e.target.checked;await persist({quiet:true});schedule();};d.querySelector('[data-permission]').onclick=()=>window.AndroidApp?.requestReminderPermission?AndroidApp.requestReminderPermission():d.querySelector('[data-status]').textContent='当前浏览器仅支持页面打开时提醒；后台提醒请安装新版 Android App。';d.querySelector('[data-alarm]').onclick=()=>window.AndroidApp?.requestAlarmPermission?.();};
  }
- new MutationObserver(()=>{if(typeof state!=='undefined'&&state)settings();}).observe(document.querySelector('#viewRoot'),{childList:true});
+ function mobilePages(){
+  const root=document.querySelector('#viewRoot'),tabs=root.querySelector('.hub-tabs');
+  if(!tabs||root.querySelector('.mobile-page-picker'))return;
+  const button=document.createElement('button');button.className='mobile-page-picker';button.type='button';button.textContent='切换页面 ▾';
+  button.onclick=()=>{const items=[...tabs.querySelectorAll('.hub-tab')];const d=sheet('选择页面','<div class="execution-page-grid"></div>');const grid=d.querySelector('.execution-page-grid');items.forEach(item=>{const b=document.createElement('button');b.textContent=item.textContent.trim();b.classList.toggle('selected',item.classList.contains('active'));b.onclick=()=>{d.remove();item.click();scrollTo(0,0);};grid.append(b);});};
+  (root.querySelector('.page-head')||tabs).append(button);
+ }
+ new MutationObserver(()=>{if(typeof state!=='undefined'&&state){settings();mobilePages();}}).observe(document.querySelector('#viewRoot'),{childList:true});
  document.addEventListener('click',e=>{if(e.target.closest('[data-action=logout]')){window.AndroidApp?.syncReminders?.('[]');lastSchedule='';}},true);
  let scheduleTimer;for(const event of ['click','change'])document.addEventListener(event,()=>{clearTimeout(scheduleTimer);scheduleTimer=setTimeout(schedule,700);});
  setInterval(schedule,10000);document.addEventListener('visibilitychange',schedule);window.addEventListener('xindeng-resume',schedule);setTimeout(schedule,1500);
