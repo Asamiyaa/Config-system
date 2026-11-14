@@ -7,7 +7,7 @@
     return document.hidden || window.boardEditorDirty ||
       (typeof unsavedChanges !== 'undefined' && unsavedChanges) ||
       (typeof boardStroke !== 'undefined' && boardStroke) ||
-      [...document.querySelectorAll('input:focus,textarea:focus,[contenteditable="true"]:focus,[role="dialog"],.flow-modal')].some(visible) ||
+      [...document.querySelectorAll('input:focus,textarea:focus,[contenteditable="true"]:focus,[role="dialog"],dialog[open],.flow-modal')].some(visible) ||
       document.activeElement?.tagName === 'IFRAME';
   }
   function apply() {

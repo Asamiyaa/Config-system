@@ -69,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String HEALTH_URL = "https://config.39.106.118.186.nip.io/api/health";
     private static final int FILE_CHOOSER_REQUEST = 1;
 
+    private String executionRoute = "";
     private WebView webView;
     private SwipeRefreshLayout swipeRefresh;
     private LinearLayout loadingView;
@@ -87,6 +88,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        executionRoute=getIntent().getStringExtra("executionRoute");
         setContentView(R.layout.activity_main);
 
         webView = findViewById(R.id.webView);
@@ -362,6 +364,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode==72&&resultCode==Activity.RESULT_OK&&data!=null){java.util.ArrayList<String> words=data.getStringArrayListExtra(android.speech.RecognizerIntent.EXTRA_RESULTS);if(words!=null&&!words.isEmpty()&&trustedPage())webView.evaluateJavascript("window.dispatchEvent(new CustomEvent('native-voice',{detail:"+JSONObject.quote(words.get(0))+"}))",null);}
         if (requestCode == FILE_CHOOSER_REQUEST) {
             if (filePathCallback != null) {
                 Uri[] results = null;
@@ -400,7 +403,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // ---------- WebViewClient ----------
+    private boolean trustedPage() {return webView!=null && webView.getUrl()!=null && webView.getUrl().startsWith(SERVER_URL);}
+    @Override protected void onNewIntent(Intent intent){super.onNewIntent(intent);setIntent(intent);executionRoute=intent.getStringExtra("executionRoute");}
     private class AndroidBridge {
+        @JavascriptInterface public String consumeExecutionRoute(){String route=executionRoute;executionRoute="";return route==null?"":route;}
+        @JavascriptInterface public void configureShortcuts(String json){runOnUiThread(()->{if(!trustedPage()||Build.VERSION.SDK_INT<25)return;try{org.json.JSONArray rows=new org.json.JSONArray(json);java.util.List<android.content.pm.ShortcutInfo> shortcuts=new java.util.ArrayList<>();android.content.pm.ShortcutManager manager=getSystemService(android.content.pm.ShortcutManager.class);for(int n=0;n<Math.min(rows.length(),manager.getMaxShortcutCountPerActivity());n++){org.json.JSONObject row=rows.getJSONObject(n);String page=row.getString("page");Intent i=new Intent(MainActivity.this,MainActivity.class).setAction(Intent.ACTION_VIEW).putExtra("executionRoute",page);shortcuts.add(new android.content.pm.ShortcutInfo.Builder(MainActivity.this,page).setShortLabel(row.getString("label")).setIcon(android.graphics.drawable.Icon.createWithResource(MainActivity.this,R.mipmap.ic_launcher)).setIntent(i).build());}manager.setDynamicShortcuts(shortcuts);}catch(Exception ignored){}});}
+        @JavascriptInterface public void syncReminders(String json){runOnUiThread(()->{if(trustedPage())ReminderReceiver.sync(MainActivity.this,json);});}
+        @JavascriptInterface public void requestReminderPermission(){runOnUiThread(()->{if(!trustedPage())return;if(Build.VERSION.SDK_INT>=33)requestPermissions(new String[]{"android.permission.POST_NOTIFICATIONS"},71);else startActivity(new Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(android.provider.Settings.EXTRA_APP_PACKAGE,getPackageName()));});}
+        @JavascriptInterface public void requestAlarmPermission(){runOnUiThread(()->{if(trustedPage()&&Build.VERSION.SDK_INT>=31)startActivity(new Intent(android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,Uri.parse("package:"+getPackageName())));});}
+        @JavascriptInterface public void startVoiceInput(){runOnUiThread(()->{if(!trustedPage())return;try{Intent i=new Intent(android.speech.RecognizerIntent.ACTION_RECOGNIZE_SPEECH);i.putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE_MODEL,android.speech.RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);i.putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE,"zh-CN");startActivityForResult(i,72);}catch(Exception e){Toast.makeText(MainActivity.this,"系统未提供语音识别，请使用键盘麦克风",Toast.LENGTH_LONG).show();}});}
+
         @JavascriptInterface
         public void setBackVisible(final boolean visible) {
             runOnUiThread(() -> navBack.setVisibility(View.GONE));
@@ -428,6 +440,7 @@ public class MainActivity extends AppCompatActivity {
         private void injectMobileAdaptations(WebView view) {
             // Responsive styling belongs to the shared website, so web updates apply consistently.
             view.evaluateJavascript("window.dshAndroidBack=function(){try{"
+                + "var dialog=document.querySelector('dialog[open]');if(dialog){dialog.dispatchEvent(new Event('cancel'));dialog.remove();return true;}"
                 + "var sh=document.querySelector('#uiSheet.is-open');if(sh&&window.UISheet){UISheet.close();return true;}"
                 + "var modal=document.querySelector('.flow-modal');if(modal){document.querySelector('[data-action=flow-modal-close]')?.click();return true;}"
                 + "if(typeof currentPage!=='undefined'&&currentPage!=='dailyflow'){renderPage('dailyflow');return true;}"

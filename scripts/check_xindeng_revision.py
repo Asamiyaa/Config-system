@@ -105,6 +105,7 @@ with sync_playwright() as pw:
   for i in range(1,13):
    session.send('Input.dispatchTouchEvent',{'type':'touchMove','touchPoints':[{'x':190,'y':y1+(y2-y1)*i/12}]});m.wait_for_timeout(20)
   session.send('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[]});m.wait_for_timeout(300)
+ m.evaluate("state.dailyFlows.weekday=Array.from({length:25},(_,i)=>({id:'scroll-'+i,title:'滚动任务'+i,start:i*30,end:i*30+20}));ui.flowKind='weekday';ui.flowViewMode='checklist';renderPage('dailyflow',{transition:false})");m.wait_for_timeout(250)
  swipe(650,220)
  assert m.evaluate('scrollY')>100,'Swipe must scroll the document'
  m.screenshot(path='artifacts/xindeng-flow-mobile.png')
