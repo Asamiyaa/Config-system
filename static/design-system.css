@@ -97,3 +97,9 @@ body.spatial-ui #viewRoot .flow-checklist>.flow-check-toolbar button{border:0!im
 .ailearn-entry-link:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 .ailearn-entry-link:hover{filter:brightness(1.05)}
 @media(max-width:860px){.ailearn-entry{grid-template-columns:38px minmax(0,1fr);gap:10px;padding:12px}.ailearn-entry-mark{width:36px;height:36px}.ailearn-entry-copy p{font-size:12px}.ailearn-entry-link{grid-column:2;justify-self:start;min-height:40px;padding:8px 12px}}
+
+.scaffold-frame{display:block;width:100%;height:calc(100dvh - 205px);min-height:620px;border:1px solid var(--border);border-radius:12px;background:var(--surface)}
+@media(max-width:860px){.scaffold-frame{height:calc(100dvh - 145px);min-height:540px;border-radius:12px}}
+.opportunity-frame{display:block;width:100%;height:calc(100dvh - 205px);min-height:680px;border:1px solid var(--border);border-radius:12px;background:var(--surface)}
+@media(max-width:860px){.opportunity-frame{height:calc(100dvh - 145px);min-height:640px;border-radius:12px}}
+@media(max-width:860px){body.spatial-ui .spatial-dock button{gap:2px!important;font-size:8px!important}body.spatial-ui .spatial-dock svg{width:18px!important;height:18px!important}}

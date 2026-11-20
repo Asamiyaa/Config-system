@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light dark" />
+  <title>Opportunity OS · 机会情报与商业验证</title>
+  <link rel="icon" href="/opportunity-os/static/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="/opportunity-os/static/style.css" />
+  <script defer src="/opportunity-os/static/app.js"></script>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand"><div class="brand-mark">O<span>.</span></div><div><strong>OPPORTUNITY<span>OS</span></strong><small>INTELLIGENCE → REVENUE</small></div></div>
+      <div class="side-section-label">工作空间 / WORKSPACE</div>
+      <nav class="nav" aria-label="主导航">
+        <button class="nav-item active" data-view="overview"><span class="nav-icon">◫</span> 总览工作台 <span class="nav-meta">01</span></button>
+        <button class="nav-item" data-view="radar"><span class="nav-icon">◎</span> 机会雷达 <span class="nav-meta" id="side-total">—</span></button>
+        <button class="nav-item" data-view="pipeline"><span class="nav-icon">▤</span> 转化流水线</button>
+        <button class="nav-item" data-view="experiments"><span class="nav-icon">◇</span> 验证实验室</button>
+        <button class="nav-item" data-view="sources"><span class="nav-icon">⌁</span> 情报源中心</button>
+      </nav>
+      <div class="side-section-label second">系统 / SYSTEM</div>
+      <nav class="nav"><button class="nav-item" data-view="settings"><span class="nav-icon">⚙</span> 配置与说明</button></nav>
+      <div class="sidebar-spacer"></div>
+      <div class="sidebar-foot">
+        <div class="system-dot-row"><span class="state-dot" id="system-dot"></span><span id="system-text">正在检查服务...</span></div>
+        <div class="sidebar-tip">真实证据优先 · 不伪造市场数据</div>
+        <button class="theme-toggle" id="theme-toggle" aria-label="切换主题">◐ <span>切换深色 / 浅色</span></button>
+        <div class="build-tag">OPPORTUNITY OS / V1.1</div>
+      </div>
+    </aside>
+    <div class="main-area">
+      <header class="topbar">
+        <div class="header-breadcrumb"><button class="mobile-menu" id="mobile-menu" aria-label="打开菜单">☰</button><span>INTELLIGENCE</span><span class="breadcrumb-slash">/</span><strong id="breadcrumb">工作台</strong></div>
+        <div class="header-actions">
+          <span id="current-date" class="today-date"></span>
+          <button class="btn btn-outline btn-compact" id="manual-add">＋ 添加机会</button>
+          <button class="btn btn-primary" id="scan-btn"><span id="scan-icon">↻</span><span id="scan-text">扫描新机会</span></button>
+        </div>
+      </header>
+      <main id="content">
+        <section class="view active" id="view-overview">
+          <div class="hero">
+            <div class="hero-copy">
+              <div class="eyebrow"><span class="eyebrow-line"></span> YOUR PRIVATE OPPORTUNITY ENGINE</div>
+              <h1>从信息前沿，<br><em>走向可验证的收入。</em></h1>
+              <p>发现 GitHub · X · 开发者社区中的早期信号，判断真实问题，<br class="wide-only"/>用最小成本验证，再决定是否产品化。</p>
+              <div class="hero-actions"><button class="btn btn-primary" data-action="go-radar">查看机会雷达 <span>↗</span></button><button class="btn btn-ghost" data-action="go-experiments">打开验证实验室 →</button></div>
+            </div>
+            <div class="hero-art" aria-hidden="true"><div class="radar-orbit orbit-a"></div><div class="radar-orbit orbit-b"></div><div class="radar-orbit orbit-c"></div><div class="radar-center"><span>O</span></div><span class="radar-point a"></span><span class="radar-point b"></span><span class="radar-point c"></span><div class="radar-label r1">SIGNAL / 01</div><div class="radar-label r2">VALIDATE / 02</div></div>
+          </div>
+          <div class="section-top"><div><div class="section-kicker">01 / PULSE</div><h2>经营脉搏</h2></div><span class="caption-small" id="last-scan-text">尚未扫描</span></div>
+          <div class="metric-grid" id="metric-grid"></div>
+          <div class="dashboard-grid">
+            <div class="panel trend-panel"><div class="panel-head"><div><div class="section-kicker">02 / DISCOVERY</div><h3>机会发现趋势</h3></div><span class="muted-note">按首次入库日期 · 近14条记录日</span></div><div id="trend-chart" class="trend-chart"></div><div class="chart-foot"><span><i class="legend-square"></i> 新发现机会</span><span>不代表已获得付费需求</span></div></div>
+            <div class="panel source-panel"><div class="panel-head"><div><div class="section-kicker">03 / CHANNELS</div><h3>情报来源分布</h3></div></div><div id="source-distribution"></div><button class="text-link" data-action="go-sources">管理情报源 ↗</button></div>
+          </div>
+          <div class="section-top top-opps"><div><div class="section-kicker">04 / SHORTLIST</div><h2>优先验证的机会</h2></div><button class="text-link" data-action="go-radar">查看全部 →</button></div>
+          <div class="top-list" id="top-list"></div>
+          <div class="framework-strip"><div><strong>发现 / SCOUT</strong><span>公开来源与发布时间</span></div><div><strong>判断 / ANALYZE</strong><span>可解释打分与风险</span></div><div><strong>验证 / VALIDATE</strong><span>客户反馈与成交证据</span></div><div><strong>复利 / SCALE</strong><span>工具、交付与订阅</span></div></div>
+        </section>
+        <section class="view" id="view-radar">
+          <div class="page-heading"><div><div class="section-kicker">SIGNAL DISCOVERY / 机会数据库</div><h1>机会雷达</h1><p>排序的是假设的验证优先级，不是虚构的商业价值。</p></div><button class="btn btn-outline" id="export-btn">导出 CSV ↗</button></div>
+          <div class="toolbar"><label class="searchbox"><span>⌕</span><input id="search-input" placeholder="搜索项目、场景、关键词..." autocomplete="off" /></label><select id="source-filter" aria-label="来源"><option value="">全部来源</option><option value="github">GitHub 仓库</option><option value="github_trending">GitHub Trending</option><option value="xianyu">闲鱼</option><option value="xiaohongshu">小红书</option><option value="1688">1688</option><option value="hn">Hacker News</option><option value="rss">资讯 RSS</option><option value="x">X 动态</option><option value="manual">手动录入</option><option value="demo">体验数据</option></select><select id="stage-filter" aria-label="状态"><option value="">全部阶段</option><option>待评估</option><option>待验证</option><option>验证中</option><option>开发中</option><option>销售中</option><option>已成交</option><option>已归档</option></select><select id="category-filter" aria-label="方向"><option value="">全部方向</option><option>AI Agent</option><option>开发效率</option><option>企业自动化</option><option>多模态</option><option>API / Token</option><option>信息雷达</option><option>其他</option></select><select id="sort-filter" aria-label="排序"><option value="score">优先级最高</option><option value="new">最近入库</option><option value="stars">GitHub Stars</option><option value="revenue">实际收入</option></select></div>
+          <div class="list-overline"><span id="result-count">—</span><div><label class="check-wrap"><input type="checkbox" id="high-only" /> 仅看 80 分以上</label></div></div>
+          <div id="opportunity-list" class="opportunity-list"></div><div class="loadmore-wrap"><button class="btn btn-outline" id="load-more" hidden>加载更多</button></div>
+        </section>
+        <section class="view" id="view-pipeline">
+          <div class="page-heading"><div><div class="section-kicker">CONVERSION PIPELINE / 商业验证过程</div><h1>转化流水线</h1><p>点击卡片查看详情，或拖放改变阶段。每次阶段变动都保存在本地数据库。</p></div><button class="btn btn-outline" data-action="go-experiments">进入验证实验室 ↗</button></div>
+          <div id="pipeline-board" class="pipeline-board"></div>
+        </section>
+        <section class="view" id="view-experiments">
+          <div class="page-heading"><div><div class="section-kicker">LAB / EXPERIMENTS</div><h1>验证实验室</h1><p>建立实验假设，追踪实际接触、回复、订单和收入。没有记录即未知。</p></div><button class="btn btn-primary" id="create-experiment-btn">＋ 新建实验</button></div>
+          <div id="experiment-summary" class="experiment-summary"></div><div id="experiment-list" class="experiment-list"></div>
+        </section>
+        <section class="view" id="view-sources">
+          <div class="page-heading"><div><div class="section-kicker">COLLECTION / EVIDENCE</div><h1>情报源中心</h1><p>每个来源独立调度与记录状态。平台数据必须来自授权订阅或人工导入，缺少授权时明确提示。</p></div><button class="btn btn-primary" data-action="run-scan">↻ 立即采集</button></div>
+          <div class="source-status-grid" id="source-status-grid"></div>
+          <div class="panel market-import-panel"><div class="panel-head"><div><div class="section-kicker">MARKETPLACES</div><h3>闲鱼 / 小红书 / 1688 · 机会监控</h3></div><span class="muted-note">仅接收合规来源的真实记录</span></div>
+            <p class="market-intro">可在「配置与说明」填写你有权限使用的 RSS/JSON 适配器地址，由系统按独立周期增量读取。若尚无接口授权，可从依法获取的数据导出 CSV/JSON 后在此导入。不会抓取登录页面、绕过验证码或虚构销量。</p>
+            <div class="market-import-row"><select id="market-import-source" aria-label="导入平台"><option value="xianyu">闲鱼</option><option value="xiaohongshu">小红书</option><option value="1688">1688</option></select><input id="market-import-file" type="file" accept=".csv,.json,text/csv,application/json" aria-label="CSV 或 JSON 文件" /><button class="btn btn-primary btn-compact" id="market-import-btn">导入平台数据</button><button class="btn btn-outline btn-compact" id="download-template-btn">下载 CSV 模板</button></div>
+            <p class="field-hint">必须包含 title、url 两列；url 应为对应平台官方商品或笔记页面 HTTPS 链接。其余可选列：summary、price、sales、shop、published_at。导入仅证明记录存在，不自动认定有利润空间。</p>
+          </div>
+          <div class="two-col"><div class="panel"><div class="panel-head"><div><div class="section-kicker">WATCHLIST</div><h3>GitHub 搜索关键词</h3></div><span class="muted-note">单次最多 8 个</span></div><div class="watch-input-row"><input id="watch-input" placeholder="例：AI coding agent" /><button class="btn btn-primary btn-compact" id="add-watch-btn">添加</button></div><div id="watch-list" class="watch-list"></div></div>
+          <div class="panel"><div class="panel-head"><div><div class="section-kicker">COLLECTION LOG</div><h3>最近扫描日志</h3></div></div><div id="scan-history" class="scan-history"></div></div></div>
+          <div class="panel" style="margin-top:20px"><div class="panel-head"><div><div class="section-kicker">RSS SOURCES</div><h3>自定义资讯 RSS 订阅源</h3></div><span class="muted-note">最多启用 12 个</span></div>
+          <div class="feed-input-row"><input id="feed-name-input" placeholder="源名称，如：产品更新日志" aria-label="RSS 源名称" /><input id="feed-url-input" type="url" placeholder="https://example.com/feed.xml" aria-label="RSS 地址" /><button class="btn btn-primary btn-compact" id="add-feed-btn">添加订阅</button></div><div id="feed-list" class="watch-list"></div></div>
+        </section>
+        <section class="view" id="view-settings">
+          <div class="page-heading"><div><div class="section-kicker">SYSTEM / CONTROL</div><h1>配置与说明</h1><p>本地优先。真实网络采集、数据持久化、敏感凭据与 AI 分析相互隔离。</p></div></div>
+          <div class="panel source-schedule-panel"><div class="panel-head"><div><div class="section-kicker">PER-SOURCE SCHEDULE</div><h3>独立来源刷新策略</h3></div><span class="muted-note">每个来源独立保存设置</span></div>
+            <p class="market-intro">支持单独启停与设置刷新间隔（1 小时～7 天）。后台仅在到期时发起请求；未到期不联网。手动强制刷新可能产生 API 费用。</p>
+            <div id="source-config-list" class="source-config-list"></div>
+          </div>
+          <div class="two-col settings-grid"><div class="panel"><div class="panel-head"><h3>运行参数</h3></div><div id="settings-details" class="setting-details"></div></div><div class="panel"><div class="panel-head"><h3>外部能力接入</h3></div><div class="setting-details"><div><strong>GitHub</strong><span>仓库搜索 + GitHub Trending 榜单；不再采集 Issues。公开接口可能限流。</span></div><div><strong>X (可选)</strong><span>官方近期搜索 API，必须自行配置授权，可能收费。</span></div><div><strong>模型分析 (可选)</strong><span>支持兼容 /chat/completions 的模型服务（阿里百炼、其他兼容接口）。</span></div><div><strong>按源定时</strong><span>每个来源单独计时；可使用常开 Web 进程的轻量调度，或使用 Windows 每小时到期检查任务。</span></div></div></div></div>
+          <div class="panel scoring-panel"><div class="panel-head"><div><div class="section-kicker">TRANSPARENT MODEL</div><h3>机会评分模型（启发式）</h3></div></div><div class="weight-grid"><div><b>30%</b><span>需求信号</span></div><div><b>20%</b><span>7 天交付</span></div><div><b>20%</b><span>获客可达</span></div><div><b>15%</b><span>潜在毛利</span></div><div><b>10%</b><span>复购潜力</span></div><div><b>5%</b><span>许可可控</span></div></div><p class="disclaimer">重要：GitHub stars / HN 评论 / X 互动只能说明关注度，不能代替付费访谈、实际订单或合规审查。未经验证的报价均为测试价格。许可证不明时默认需进一步审查。</p></div>
+          <div class="panel demo-panel"><div><h3>体验与数据安全</h3><p>零演示数据启动；可以手动加载带有明显 DEMO 标识的样例，体验交互后随时删除。SQLite 数据存储在 DATA_DIR，不会因为软件升级自动清空。</p></div><div class="demo-buttons"><button class="btn btn-outline" id="load-demo-btn">加载体验数据</button><button class="btn btn-ghost" id="clear-demo-btn">删除体验数据</button><button class="btn btn-outline" id="download-report-btn">下载每日简报</button><button class="btn btn-outline" id="backup-btn">下载数据库备份</button></div></div>
+        </section>
+      </main>
+      <footer class="footer"><span>OPPORTUNITY OS © 2026 · LOCAL-FIRST INTELLIGENCE</span><span>信息 ≠ 需求 · 热度 ≠ 成交 · 分数 ≠ 利润</span></footer>
+    </div>
+  </div>
+  <div class="mobile-shade" id="mobile-shade"></div>
+  <div class="drawer-backdrop" id="drawer-backdrop"></div><aside class="detail-drawer" id="detail-drawer" aria-label="机会详情" aria-hidden="true"><div class="drawer-head"><span>OPPORTUNITY / DETAIL</span><button id="drawer-close" class="close-button" aria-label="关闭详情">×</button></div><div class="drawer-content" id="drawer-content"></div></aside>
+  <div class="modal-backdrop" id="modal-backdrop"><div class="modal" role="dialog" aria-modal="true"><div class="modal-head"><div><div class="section-kicker" id="modal-kicker">CREATE</div><h3 id="modal-title">新建</h3></div><button id="modal-close" class="close-button" aria-label="关闭">×</button></div><div id="modal-content"></div></div></div>
+  <div class="toast-stack" id="toast-stack" aria-live="polite"></div>
+</body>
+</html>

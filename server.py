@@ -146,6 +146,34 @@ def current_user(request: Request) -> sqlite3.Row:
     return user
 
 
+# Opportunity OS runs inside the existing authenticated New Deng session.
+# Its business database lives under the deployment's persistent data directory.
+from opportunity_os.app import config as opportunity_config, db as opportunity_db
+opportunity_config.DATA_DIR = DATA / "opportunity-os"
+opportunity_config.DB_PATH = opportunity_config.DATA_DIR / "default" / "opportunities.sqlite3"
+opportunity_config.AUTO_SCAN = False  # External collection stays user-initiated by default.
+opportunity_db.DB_PATH = opportunity_config.DB_PATH
+from opportunity_os.app.main import app as opportunity_app
+
+
+@opportunity_app.middleware("http")
+async def require_new_deng_session(request: Request, call_next):
+    try:
+        user = current_user(request)
+    except HTTPException as exc:
+        return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail}, headers={"Cache-Control": "no-store"})
+    token = opportunity_db.use_database(opportunity_config.DATA_DIR / str(user["id"]) / "opportunities.sqlite3")
+    try:
+        if not opportunity_db.current_db_path().exists():
+            opportunity_db.init_db()
+        return await call_next(request)
+    finally:
+        opportunity_db.reset_database(token)
+
+
+app.mount("/opportunity-os", opportunity_app, name="opportunity-os")
+
+
 def user_state(user_id: int) -> dict[str, Any]:
     with db() as con:
         row = con.execute("SELECT state_json FROM user_state WHERE user_id=?", (user_id,)).fetchone()

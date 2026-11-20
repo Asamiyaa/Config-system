@@ -1,0 +1,1957 @@
+{
+  "version": "2.0.0",
+  "count": 104,
+  "categories": [
+    "三维空间与镜头",
+    "专业生产力工作台",
+    "反馈与异步状态",
+    "导航与页面连续性",
+    "拖拽与手势",
+    "数据图表与可视化",
+    "时间轴与媒体",
+    "浮层与空间界面",
+    "移动端与无障碍",
+    "输入与表单微交互"
+  ],
+  "scenarios": [
+    {
+      "id": "01",
+      "title": "列表到详情共享元素过渡",
+      "category": "导航与页面连续性",
+      "keywords": [
+        "共享元素",
+        "列表详情",
+        "shared element",
+        "View Transitions",
+        "路由过渡"
+      ],
+      "goal": "保持封面和标题从列表到详情的稳定身份",
+      "filename": "01_SHARED_ELEMENT_ROUTE.md",
+      "engine": "首选现有路由与原生 View Transitions（有支持且集成安全时）；React 已有 Motion 可用 LayoutGroup/layoutId；通用后备为 FLIP/WAAPI/即时路由。避免两套引擎同时操作同一 transform。"
+    },
+    {
+      "id": "02",
+      "title": "滚动收缩导航栏",
+      "category": "导航与页面连续性",
+      "keywords": [
+        "滚动导航",
+        "sticky nav",
+        "收缩导航",
+        "scroll"
+      ],
+      "goal": "80到56px连续滚动映射",
+      "filename": "02_SCROLL_LINKED_NAV.md",
+      "engine": "首选现有路由与原生 View Transitions（有支持且集成安全时）；React 已有 Motion 可用 LayoutGroup/layoutId；通用后备为 FLIP/WAAPI/即时路由。避免两套引擎同时操作同一 transform。"
+    },
+    {
+      "id": "03",
+      "title": "按钮按压微反馈",
+      "category": "输入与表单微交互",
+      "keywords": [
+        "按钮反馈",
+        "按压",
+        "press feedback",
+        "微交互"
+      ],
+      "goal": "精确按压与恢复",
+      "filename": "03_PRESS_FEEDBACK.md",
+      "engine": "优先原生 HTML 控件及表单状态；CSS transition/WAAPI 为默认，真实提交由业务状态管理；不得新增与表单库冲突的独立值。"
+    },
+    {
+      "id": "04",
+      "title": "跨路由页面容器变形",
+      "category": "导航与页面连续性",
+      "keywords": [
+        "页面跳转",
+        "路由",
+        "容器形变"
+      ],
+      "goal": "列表到另一业务页面仍保留视图空间锚点",
+      "filename": "04_ROUTE_CONTAINER_MORPH.md",
+      "engine": "首选现有路由与原生 View Transitions（有支持且集成安全时）；React 已有 Motion 可用 LayoutGroup/layoutId；通用后备为 FLIP/WAAPI/即时路由。避免两套引擎同时操作同一 transform。",
+      "trigger": "点击导航链接/浏览器返回",
+      "beats": "测量源卡片边框→目标主容器；主体先移动，标题之后定位，最后恢复焦点",
+      "timing": "360ms；非线性 ease(.22,1,.36,1)，子信息延后50ms",
+      "reverse": "Back 沿相同容器路径与时长回源页面，恢复滚动",
+      "edge": "URL 与渲染提交必须一致；目标加载失败时退化为普通跳转",
+      "qa": "连续前进返回5次，截第0/180/360ms和返回，核对URL、焦点、scrollY"
+    },
+    {
+      "id": "05",
+      "title": "标签页滑动指示器",
+      "category": "导航与页面连续性",
+      "keywords": [
+        "Tabs",
+        "页签",
+        "选项卡"
+      ],
+      "goal": "保持选中标签的几何身份和内容语义",
+      "filename": "05_TABS_SLIDING_INDICATOR.md",
+      "engine": "首选现有路由与原生 View Transitions（有支持且集成安全时）；React 已有 Motion 可用 LayoutGroup/layoutId；通用后备为 FLIP/WAAPI/即时路由。避免两套引擎同时操作同一 transform。",
+      "trigger": "点击/键盘左右箭头切换",
+      "beats": "底部指示条从前一标签的x/宽度FLIP到目标；面板内容直接切换或轻微重排，不复制两个可聚焦面板",
+      "timing": "220ms 指示条ease-in-out；内容后置30ms",
+      "reverse": "返回前一标签沿同一测量路径与曲线",
+      "edge": "异步内容/隐藏标签/溢出滚动时重算；aria-selected 与焦点规则符合tabs模式",
+      "qa": "测量3个标签坐标、方向往返、键盘与隐藏面板可访问性"
+    },
+    {
+      "id": "06",
+      "title": "面包屑层级迁移",
+      "category": "导航与页面连续性",
+      "keywords": [
+        "Breadcrumb",
+        "层级",
+        "返回上级"
+      ],
+      "goal": "导航当前层级改变时用户不迷失上下文",
+      "filename": "06_BREADCRUMB_DEPTH.md",
+      "engine": "首选现有路由与原生 View Transitions（有支持且集成安全时）；React 已有 Motion 可用 LayoutGroup/layoutId；通用后备为 FLIP/WAAPI/即时路由。避免两套引擎同时操作同一 transform。",
+      "trigger": "点击层级/路由返回",
+      "beats": "路径末段向新层级相同位置迁移，旧层级收拢，主要标题保持识别",
+      "timing": "240–320ms 非线性，先路径后辅助信息",
+      "reverse": "返回子级使用相反路径并保留原层级焦点",
+      "edge": "长路径折叠、无权限节点、刷新直达必须可用",
+      "qa": "测试根→三级→根、长文本省略、键盘激活、历史栈"
+    },
+    {
+      "id": "07",
+      "title": "双栏主从详情联动",
+      "category": "导航与页面连续性",
+      "keywords": [
+        "Master Detail",
+        "双栏",
+        "列表详情"
+      ],
+      "goal": "桌面切换详情不丢列表位置，手机改为单页栈",
+      "filename": "07_MASTER_DETAIL.md",
+      "engine": "首选现有路由与原生 View Transitions（有支持且集成安全时）；React 已有 Motion 可用 LayoutGroup/layoutId；通用后备为 FLIP/WAAPI/即时路由。避免两套引擎同时操作同一 transform。",
+      "trigger": "点击列表项/键盘选择",
+      "beats": "桌面只更新右侧详情标题与主内容，选中态滑动；手机从列表卡片进入详情并提供返回",
+      "timing": "260–360ms 选中态与容器；桌面避免无意义整屏动画",
+      "reverse": "选择前项沿对应指示器返回；移动端返回到精确列表滚动",
+      "edge": "详情请求可能失败，选择维持并显示错误；窄屏路由和焦点可用",
+      "qa": "核对宽窄屏选中、网络失败、浏览器Back、滚动记忆"
+    },
+    {
+      "id": "08",
+      "title": "导航抽屉展开收起",
+      "category": "导航与页面连续性",
+      "keywords": [
+        "Navigation Drawer",
+        "导航抽屉"
+      ],
+      "goal": "隐藏次要导航但保留明确主入口",
+      "filename": "08_NAV_DRAWER.md",
+      "engine": "首选现有路由与原生 View Transitions（有支持且集成安全时）；React 已有 Motion 可用 LayoutGroup/layoutId；通用后备为 FLIP/WAAPI/即时路由。避免两套引擎同时操作同一 transform。",
+      "trigger": "点击菜单按钮/按Escape",
+      "beats": "抽屉从边缘按固定锚点进入；遮罩随主容器出现但不抢焦点；内容在抽屉启动后显露",
+      "timing": "320ms 容器，辅助内容40ms延后；同一曲线",
+      "reverse": "关闭沿相同x路径与时长返回菜单按钮",
+      "edge": "触摸拖拽可中断；背景不可交互、focus trap、滚动锁恢复",
+      "qa": "快开快关10次、背景Tab不可达、Esc/按钮关闭、焦点回菜单"
+    },
+    {
+      "id": "09",
+      "title": "路由前进后退堆栈",
+      "category": "导航与页面连续性",
+      "keywords": [
+        "Page Stack",
+        "浏览器历史",
+        "返回手势"
+      ],
+      "goal": "页面层级与浏览器History一致",
+      "filename": "09_PAGE_STACK_HISTORY.md",
+      "engine": "首选现有路由与原生 View Transitions（有支持且集成安全时）；React 已有 Motion 可用 LayoutGroup/layoutId；通用后备为 FLIP/WAAPI/即时路由。避免两套引擎同时操作同一 transform。",
+      "trigger": "点击下一步/返回/浏览器Back",
+      "beats": "前进时下一层由主视口下一级定位进入，上一层保持语义锚点；后退同一层轨迹退回",
+      "timing": "300ms 配对时间轴；主层先动",
+      "reverse": "popstate逆向使用同一进度控制器而非重新淡入",
+      "edge": "深链直接打开不应假造上一页，滚动/表单状态不丢",
+      "qa": "深链访问、前进三层再后退、重复点击、浏览器刷新"
+    },
+    {
+      "id": "10",
+      "title": "菜单项展开到内容区",
+      "category": "导航与页面连续性",
+      "keywords": [
+        "Menu-to-Content",
+        "导航焦点"
+      ],
+      "goal": "从导航选择到内容区域保持视觉指向",
+      "filename": "10_MENU_TO_CONTENT.md",
+      "engine": "首选现有路由与原生 View Transitions（有支持且集成安全时）；React 已有 Motion 可用 LayoutGroup/layoutId；通用后备为 FLIP/WAAPI/即时路由。避免两套引擎同时操作同一 transform。",
+      "trigger": "点击侧栏菜单项",
+      "beats": "高亮块在菜单内平滑迁移，主内容按数据区块重组；不把菜单变成无意义全屏动画",
+      "timing": "200ms 高亮、260ms 内容布局；轻时差",
+      "reverse": "回原菜单项高亮从当前位置迁移，内容恢复",
+      "edge": "权限项消失、路由竞态时保持有效选中",
+      "qa": "10次快速切换、不同长度标签、焦点和aria-current"
+    },
+    {
+      "id": "11",
+      "title": "分页方向连续性",
+      "category": "导航与页面连续性",
+      "keywords": [
+        "Pagination",
+        "数据页",
+        "翻页"
+      ],
+      "goal": "大量内容分页仍感知前后关系",
+      "filename": "11_PAGINATION_DIRECTION.md",
+      "engine": "首选现有路由与原生 View Transitions（有支持且集成安全时）；React 已有 Motion 可用 LayoutGroup/layoutId；通用后备为 FLIP/WAAPI/即时路由。避免两套引擎同时操作同一 transform。",
+      "trigger": "点击上一页/下一页或键盘",
+      "beats": "页码选中底座位移，表格数据整体替换而非每行瀑布动画；保留表头和列宽",
+      "timing": "180ms 页码，数据真实加载则仅状态提示",
+      "reverse": "反向页码按同路径返回；历史查询可回滚",
+      "edge": "服务端请求取消/乱序返回；不显示伪造中间页",
+      "qa": "慢网/乱序返回、首页末页禁用、分页焦点、筛选保持"
+    },
+    {
+      "id": "12",
+      "title": "侧栏折叠后的宽度迁移",
+      "category": "导航与页面连续性",
+      "keywords": [
+        "Sidebar Collapse",
+        "导航栏",
+        "展开"
+      ],
+      "goal": "收起侧栏增加内容区域，同时保持导航锚点",
+      "filename": "12_SIDEBAR_COLLAPSE.md",
+      "engine": "首选现有路由与原生 View Transitions（有支持且集成安全时）；React 已有 Motion 可用 LayoutGroup/layoutId；通用后备为 FLIP/WAAPI/即时路由。避免两套引擎同时操作同一 transform。",
+      "trigger": "点击收起/展开",
+      "beats": "侧栏宽度240→68px；主内容宽度同步重排；icon稳定位置，文字裁剪而非闪现",
+      "timing": "280ms 非线性；正文标签容器开始后淡出/进入",
+      "reverse": "再展开68→240同一个时间轴，焦点不丢",
+      "edge": "用户配置持久化，路由切换、移动断点恢复",
+      "qa": "0/140/280ms核验侧栏宽、主区横向溢出、二次操作"
+    },
+    {
+      "id": "13",
+      "title": "Morphing 弹窗由按钮生长",
+      "category": "浮层与空间界面",
+      "keywords": [
+        "Morph",
+        "弹窗",
+        "模态框",
+        "Dialog"
+      ],
+      "goal": "用户理解触发源与详情弹窗的关系",
+      "filename": "13_BUTTON_TO_DIALOG_MORPH.md",
+      "engine": "优先浏览器原生 dialog/popover 语义或项目已有 Radix/Headless UI；外观运动用 WAAPI/Motion/GSAP。语义与焦点控制绝不能由动画完成。",
+      "trigger": "点击卡片/按钮、Escape返回",
+      "beats": "触发源边界框→对话框边界框，以共享容器FLIP变形；先容器后内容50ms；背景惯性不夸张",
+      "timing": "340ms 同曲线，遮罩与容器同步",
+      "reverse": "关窗回同一触发源，路径/时长/缓动一致",
+      "edge": "focus trap、aria-modal、背景inert、锚点消失回退普通关闭",
+      "qa": "点击/ESC/遮罩策略、Tab约束、连续反向、滚动锁清理"
+    },
+    {
+      "id": "14",
+      "title": "锚点 Popover 气泡定位",
+      "category": "浮层与空间界面",
+      "keywords": [
+        "Popover",
+        "筛选气泡",
+        "下拉层"
+      ],
+      "goal": "小任务浮层仍明确来源位置",
+      "filename": "14_ANCHORED_POPOVER.md",
+      "engine": "优先浏览器原生 dialog/popover 语义或项目已有 Radix/Headless UI；外观运动用 WAAPI/Motion/GSAP。语义与焦点控制绝不能由动画完成。",
+      "trigger": "点击过滤/更多按钮",
+      "beats": "相对锚点从轻微缩放0.985到1并调整位置，文本不逐项表演",
+      "timing": "160ms 非线性、transform-origin指向锚点",
+      "reverse": "原锚点方向收拢160ms后移除",
+      "edge": "碰撞检测自动翻转方向，窗口resize/scroll重定位",
+      "qa": "顶部右侧边缘定位、Esc、点击外部、触摸、焦点恢复"
+    },
+    {
+      "id": "15",
+      "title": "Bottom Sheet 底部抽屉",
+      "category": "浮层与空间界面",
+      "keywords": [
+        "Bottom Sheet",
+        "移动端弹层"
+      ],
+      "goal": "移动端不跳转即可完成一组操作",
+      "filename": "15_MOBILE_BOTTOM_SHEET.md",
+      "engine": "优先浏览器原生 dialog/popover 语义或项目已有 Radix/Headless UI；外观运动用 WAAPI/Motion/GSAP。语义与焦点控制绝不能由动画完成。",
+      "trigger": "点击筛选/编辑、手指下滑关闭",
+      "beats": "面板从底部进入安全区，背景根据活动状态变暗；拖拽位移映射手指，停止后吸附到开/关稳定点",
+      "timing": "280ms 开合，拖动时1:1追随手指",
+      "reverse": "下滑时沿同一垂直路径返回，非对称阈值需解释",
+      "edge": "触摸滚动嵌套、惯性冲突、软键盘、屏幕安全区",
+      "qa": "顶部/底部安全区、手势冲突、Esc、内容滚动与背景锁"
+    },
+    {
+      "id": "16",
+      "title": "上下文菜单原位展开",
+      "category": "浮层与空间界面",
+      "keywords": [
+        "Context Menu",
+        "右键菜单"
+      ],
+      "goal": "右键或键盘菜单键可得到操作列表",
+      "filename": "16_CONTEXT_MENU.md",
+      "engine": "优先浏览器原生 dialog/popover 语义或项目已有 Radix/Headless UI；外观运动用 WAAPI/Motion/GSAP。语义与焦点控制绝不能由动画完成。",
+      "trigger": "右键/Shift+F10/菜单按钮",
+      "beats": "从锚点向可用屏幕象限展开，选中项高亮不乱跳",
+      "timing": "120–180ms 非线性；菜单静止后可用",
+      "reverse": "Esc/选择沿原边界收起或瞬时无动画收束（菜单语义优先）",
+      "edge": "边界碰撞、嵌套子菜单、快捷键与焦点顺序",
+      "qa": "右下角反向定位，键盘方向键、Escape、屏幕阅读器角色"
+    },
+    {
+      "id": "17",
+      "title": "图片 Lightbox 共享放大",
+      "category": "浮层与空间界面",
+      "keywords": [
+        "Lightbox",
+        "图片放大",
+        "画廊"
+      ],
+      "goal": "看大图不失去来源缩略图位置",
+      "filename": "17_GALLERY_LIGHTBOX.md",
+      "engine": "优先浏览器原生 dialog/popover 语义或项目已有 Radix/Headless UI；外观运动用 WAAPI/Motion/GSAP。语义与焦点控制绝不能由动画完成。",
+      "trigger": "点击图片缩略图",
+      "beats": "同一图片从缩略图矩形平滑到适应屏幕的contain矩形；说明文字后入",
+      "timing": "360ms 共享图片；背景150ms",
+      "reverse": "关闭从当前大图返回对应缩略图同轨迹",
+      "edge": "图片加载失败保留占位；切图时稳定容器，画面不跳布局",
+      "qa": "纵横图片、Esc/箭头、键盘焦点、快速开关、resize"
+    },
+    {
+      "id": "18",
+      "title": "确认对话框危险操作",
+      "category": "浮层与空间界面",
+      "keywords": [
+        "Confirmation Dialog",
+        "删除",
+        "警告"
+      ],
+      "goal": "危险动作前明确后果不误触",
+      "filename": "18_DANGEROUS_CONFIRM.md",
+      "engine": "优先浏览器原生 dialog/popover 语义或项目已有 Radix/Headless UI；外观运动用 WAAPI/Motion/GSAP。语义与焦点控制绝不能由动画完成。",
+      "trigger": "点击删除/清空",
+      "beats": "从相应操作触点衍生简洁确认层；动作结果不能抢先播放成功动画",
+      "timing": "220ms 过渡，按压80–120ms",
+      "reverse": "取消回原操作触点，确认成功后完成业务状态更新",
+      "edge": "异步删除失败保留原数据，按钮loading禁重复",
+      "qa": "取消10次无数据变更、失败重试、焦点陷阱、Enter/Esc"
+    },
+    {
+      "id": "19",
+      "title": "嵌套浮层层级管理",
+      "category": "浮层与空间界面",
+      "keywords": [
+        "Overlay Stack",
+        "嵌套菜单弹层"
+      ],
+      "goal": "多级浮层关闭按栈顺序，不发生焦点泄漏",
+      "filename": "19_NESTED_OVERLAY_STACK.md",
+      "engine": "优先浏览器原生 dialog/popover 语义或项目已有 Radix/Headless UI；外观运动用 WAAPI/Motion/GSAP。语义与焦点控制绝不能由动画完成。",
+      "trigger": "弹窗内打开选择器/二级详情",
+      "beats": "新浮层从当前交互点生长，层级z-index以overlay manager维护，底层仍在其位置",
+      "timing": "每层180–320ms，组合避免累积过久",
+      "reverse": "Esc只关最上层并恢复其触发焦点，下一次才关闭父层",
+      "edge": "背景滚动锁引用计数，多个浮层销毁不泄漏",
+      "qa": "两层/三层Tab、Esc三次、快切、外部点击规则"
+    },
+    {
+      "id": "20",
+      "title": "Notification Center 通知抽屉",
+      "category": "浮层与空间界面",
+      "keywords": [
+        "Notifications",
+        "消息中心"
+      ],
+      "goal": "在原页面看未读并处理通知",
+      "filename": "20_NOTIFICATION_CENTER.md",
+      "engine": "优先浏览器原生 dialog/popover 语义或项目已有 Radix/Headless UI；外观运动用 WAAPI/Motion/GSAP。语义与焦点控制绝不能由动画完成。",
+      "trigger": "点击铃铛",
+      "beats": "铃铛高亮迁移到通知面板标题，面板按按钮锚点展开；未读状态有文本提示",
+      "timing": "260ms 容器，列表延后40ms",
+      "reverse": "收起返回铃铛锚点，保留已读状态",
+      "edge": "真实消息异步到达只更新计数，不做无意义自动晃动",
+      "qa": "未读已读、空状态、键盘、离线数据、关闭返回"
+    },
+    {
+      "id": "21",
+      "title": "步骤式表单弹层",
+      "category": "浮层与空间界面",
+      "keywords": [
+        "Wizard Modal",
+        "向导弹窗"
+      ],
+      "goal": "在同一弹层内顺序完成业务任务",
+      "filename": "21_WIZARD_MODAL.md",
+      "engine": "优先浏览器原生 dialog/popover 语义或项目已有 Radix/Headless UI；外观运动用 WAAPI/Motion/GSAP。语义与焦点控制绝不能由动画完成。",
+      "trigger": "点击创建→下一步/返回",
+      "beats": "固定弹层外壳，内容高度随步骤FLIP；步骤指示器按实际进度移动，保持焦点",
+      "timing": "260ms 内容布局；主容器先变",
+      "reverse": "上一步同一路径返回，保留表单值和校验",
+      "edge": "错误不可跳关、草稿与取消确认、焦点到新步骤标题",
+      "qa": "3步往返、错误校验、ESC取消、草稿保持"
+    },
+    {
+      "id": "22",
+      "title": "Switch 开关轨道迁移",
+      "category": "输入与表单微交互",
+      "keywords": [
+        "开关",
+        "Switch",
+        "toggle"
+      ],
+      "goal": "准确区分开关提交中与真实状态",
+      "filename": "22_SWITCH_THUMB.md",
+      "engine": "优先原生 HTML 控件及表单状态；CSS transition/WAAPI 为默认，真实提交由业务状态管理；不得新增与表单库冲突的独立值。",
+      "trigger": "点击/空格按键",
+      "beats": "thumb沿轨道x=0→20px移动、轨道对比颜色连续变化；若保存失败回滚位置并解释",
+      "timing": "170ms 非线性，无弹跳",
+      "reverse": "关闭按相同曲线、同20px轨道逆向",
+      "edge": "异步提交中禁双操作或最后意图合并；aria-checked按真实状态",
+      "qa": "连续切换10次、网络失败、键盘space、reduced-motion"
+    },
+    {
+      "id": "23",
+      "title": "分段控制选中底座",
+      "category": "输入与表单微交互",
+      "keywords": [
+        "Segmented Control",
+        "选段",
+        "过滤"
+      ],
+      "goal": "相互排斥选项有统一的活动锚点",
+      "filename": "23_SEGMENTED_CONTROL.md",
+      "engine": "优先原生 HTML 控件及表单状态；CSS transition/WAAPI 为默认，真实提交由业务状态管理；不得新增与表单库冲突的独立值。",
+      "trigger": "鼠标/键盘选择",
+      "beats": "活动底座从旧按钮边界FLIP到新按钮x/width；文字保持静止清晰",
+      "timing": "210ms ease-in-out",
+      "reverse": "返回旧选项沿同一轨迹移动",
+      "edge": "选项变化、字体加载、容器收缩时重测",
+      "qa": "3选项往返、宽文本、焦点/aria-pressed"
+    },
+    {
+      "id": "24",
+      "title": "输入框焦点与浮动标签",
+      "category": "输入与表单微交互",
+      "keywords": [
+        "Floating Label",
+        "文本框"
+      ],
+      "goal": "焦点与已填值状态一目了然",
+      "filename": "24_FLOATING_LABEL.md",
+      "engine": "优先原生 HTML 控件及表单状态；CSS transition/WAAPI 为默认，真实提交由业务状态管理；不得新增与表单库冲突的独立值。",
+      "trigger": "Focus、输入、Blur",
+      "beats": "标签从占位位置移动到字段顶部并缩小；边框态精准增强；已有值不重叠",
+      "timing": "160ms 轻微位移非线性",
+      "reverse": "空且失焦返回占位，已有值保持顶部",
+      "edge": "自动填充、输入法组合、禁用、错误与辅助文案",
+      "qa": "空/有值/自动填充/错误、IME输入、阅读器label"
+    },
+    {
+      "id": "25",
+      "title": "异步输入校验反馈",
+      "category": "输入与表单微交互",
+      "keywords": [
+        "Validation",
+        "错误校验",
+        "实时检测"
+      ],
+      "goal": "提示出错原因而不是摇晃表单",
+      "filename": "25_ASYNC_FIELD_VALIDATION.md",
+      "engine": "优先原生 HTML 控件及表单状态；CSS transition/WAAPI 为默认，真实提交由业务状态管理；不得新增与表单库冲突的独立值。",
+      "trigger": "Blur/提交/停顿后的真实校验",
+      "beats": "字段边线和错误区同步更新，提示在字段下保留预留空间；错误内容清晰",
+      "timing": "140ms 图标变化，避免布局跳动",
+      "reverse": "修正后状态沿相同位置返回正确态",
+      "edge": "异步校验竞态、离线错误、提交前数据真实性",
+      "qa": "输入快速变化、旧请求返回不覆盖新结果、aria-describedby"
+    },
+    {
+      "id": "26",
+      "title": "可搜索 Combobox",
+      "category": "输入与表单微交互",
+      "keywords": [
+        "ComboBox",
+        "搜索选择",
+        "自动完成"
+      ],
+      "goal": "输入并通过键盘选择真实选项",
+      "filename": "26_SEARCHABLE_COMBOBOX.md",
+      "engine": "优先原生 HTML 控件及表单状态；CSS transition/WAAPI 为默认，真实提交由业务状态管理；不得新增与表单库冲突的独立值。",
+      "trigger": "焦点/输入/箭头/Enter",
+      "beats": "列表锚定输入框，当前选项高亮迁移；搜索结果原位更新，不逐项随机飞入",
+      "timing": "150ms 列表打开、120ms高亮",
+      "reverse": "Escape回到输入并撤销未提交选择",
+      "edge": "请求防抖、空结果、键盘aria-activedescendant、长列表虚拟化",
+      "qa": "键盘全流程、请求乱序、部分文本、Escape和Tab"
+    },
+    {
+      "id": "27",
+      "title": "密码显隐与强度提示",
+      "category": "输入与表单微交互",
+      "keywords": [
+        "Password Reveal",
+        "密码",
+        "强度"
+      ],
+      "goal": "显示密码不改变表单结构",
+      "filename": "27_PASSWORD_REVEAL.md",
+      "engine": "优先原生 HTML 控件及表单状态；CSS transition/WAAPI 为默认，真实提交由业务状态管理；不得新增与表单库冲突的独立值。",
+      "trigger": "点击眼睛图标",
+      "beats": "按钮图标转换并立即更新input type；强度条仅根据真实输入值变化",
+      "timing": "100ms 图标、150ms强度条",
+      "reverse": "再次隐藏使用同一图标路径",
+      "edge": "密码值/光标位置不丢失，复制行为尊重系统策略",
+      "qa": "保持输入选区、键盘激活、空密码不误报成功"
+    },
+    {
+      "id": "28",
+      "title": "搜索框展开到结果页",
+      "category": "输入与表单微交互",
+      "keywords": [
+        "Search Expand",
+        "搜索",
+        "全局搜索"
+      ],
+      "goal": "搜索从小入口扩展到真正结果区域",
+      "filename": "28_SEARCH_EXPAND.md",
+      "engine": "优先原生 HTML 控件及表单状态；CSS transition/WAAPI 为默认，真实提交由业务状态管理；不得新增与表单库冲突的独立值。",
+      "trigger": "点击搜索/快捷键",
+      "beats": "搜索按钮或搜索框扩展为可输入的搜索区域，结果在数据到达后出现；标题保持可辨",
+      "timing": "300ms 主容器，内容延后60ms",
+      "reverse": "Escape回缩到原搜索入口并保持关键词策略",
+      "edge": "输入法、空搜索、分页、取消旧请求、历史状态",
+      "qa": "关键词输入→结果→Esc→重开、快速请求、focus"
+    },
+    {
+      "id": "29",
+      "title": "文件上传拖放与进度",
+      "category": "输入与表单微交互",
+      "keywords": [
+        "Upload",
+        "文件",
+        "拖入"
+      ],
+      "goal": "文件选择与上传反馈明确、可信",
+      "filename": "29_FILE_UPLOAD.md",
+      "engine": "优先原生 HTML 控件及表单状态；CSS transition/WAAPI 为默认，真实提交由业务状态管理；不得新增与表单库冲突的独立值。",
+      "trigger": "点击选择或拖放文件",
+      "beats": "拖入时边框/占位轻微形变；提交后进度从真实上传字节更新，完成后替换内容",
+      "timing": "120ms drop反馈，进度按真实网络变化",
+      "reverse": "取消后恢复原占位，失败可重试",
+      "edge": "不允许伪进度、类型/大小校验、拖出取消与断网",
+      "qa": "非法文件、断网取消、真实progress事件、可键盘选择"
+    },
+    {
+      "id": "30",
+      "title": "滑块区间选择",
+      "category": "输入与表单微交互",
+      "keywords": [
+        "Range Slider",
+        "价格区间",
+        "刻度"
+      ],
+      "goal": "精确调节区间不被装饰性延迟干扰",
+      "filename": "30_RANGE_SLIDER.md",
+      "engine": "优先原生 HTML 控件及表单状态；CSS transition/WAAPI 为默认，真实提交由业务状态管理；不得新增与表单库冲突的独立值。",
+      "trigger": "指针拖动/键盘箭头",
+      "beats": "thumb即时绑定指针值，已选范围宽度随值连续更新，松手后仅辅助提示收束",
+      "timing": "拖动直接映射；提示收束120ms",
+      "reverse": "回拉同映射，区间min≤max稳定",
+      "edge": "双拇指交叉策略、键盘步骤、触摸目标、数值格式",
+      "qa": "边界、交叉、键盘步进、数值准确"
+    },
+    {
+      "id": "31",
+      "title": "日期时间选择面板",
+      "category": "输入与表单微交互",
+      "keywords": [
+        "Date Picker",
+        "日历",
+        "时间选择"
+      ],
+      "goal": "有明确选中态和有效日期限制",
+      "filename": "31_DATE_TIME_PICKER.md",
+      "engine": "优先原生 HTML 控件及表单状态；CSS transition/WAAPI 为默认，真实提交由业务状态管理；不得新增与表单库冲突的独立值。",
+      "trigger": "点击日期输入/日历日",
+      "beats": "选中底座从旧日期迁移到新日期，月份切换保持网格尺寸与焦点",
+      "timing": "200ms 选中态、260ms月份布局",
+      "reverse": "上月/撤回选择按相同位移路径",
+      "edge": "时区、本地日期、禁用日期、周起始/闰年",
+      "qa": "月末跨月、禁用日、键盘Home/End、时区边界"
+    },
+    {
+      "id": "32",
+      "title": "表单步骤进度器",
+      "category": "输入与表单微交互",
+      "keywords": [
+        "Form Stepper",
+        "步骤",
+        "下一步"
+      ],
+      "goal": "跨步骤输入状态可恢复",
+      "filename": "32_FORM_STEPPER.md",
+      "engine": "优先原生 HTML 控件及表单状态；CSS transition/WAAPI 为默认，真实提交由业务状态管理；不得新增与表单库冲突的独立值。",
+      "trigger": "点击下一步/上一步",
+      "beats": "进度条向右扩展、步骤数字替换状态，字段内容保持容器连续",
+      "timing": "240ms 非线性，步骤标题稍后40ms",
+      "reverse": "上一步沿相反进度返回原输入，不清空值",
+      "edge": "错误时停留当前步骤并滚动到首个错误",
+      "qa": "3步进退、错误纠正、刷新草稿、reduced-motion"
+    },
+    {
+      "id": "33",
+      "title": "拖拽列表重新排序",
+      "category": "拖拽与手势",
+      "keywords": [
+        "Drag Reorder",
+        "拖拽排序",
+        "列表"
+      ],
+      "goal": "拖动一个元素重排有稳定占位与明确提交",
+      "filename": "33_DRAG_LIST_REORDER.md",
+      "engine": "优先已有 dnd-kit、SortableJS 或 Motion Reorder；仅简单列表可使用原生 pointer+FLIP；React Reorder.Group 适合简单单列排序，复杂跨列不盲用。",
+      "trigger": "从拖动手柄pointerdown或键盘抓取",
+      "beats": "抓起项抬升2px、影子占位跟随；其它项用FLIP避让；松手落在目标序号",
+      "timing": "拖动直接随指针，落位200ms ease-out",
+      "reverse": "取消/ESC时按当前轨迹回原索引并恢复焦点",
+      "edge": "唯一key、长列表自动滚动、服务端失败回滚及键盘上下移动",
+      "qa": "重排1→5、取消、跨滚动容器、键盘、持久化失败"
+    },
+    {
+      "id": "34",
+      "title": "看板跨列拖动",
+      "category": "拖拽与手势",
+      "keywords": [
+        "Kanban Drag",
+        "任务看板",
+        "跨列"
+      ],
+      "goal": "任务在列之间移动且正确更新业务状态",
+      "filename": "34_KANBAN_CROSS_COLUMN.md",
+      "engine": "优先已有 dnd-kit、SortableJS 或 Motion Reorder；仅简单列表可使用原生 pointer+FLIP；React Reorder.Group 适合简单单列排序，复杂跨列不盲用。",
+      "trigger": "抓取任务卡→目标列",
+      "beats": "拖动卡保持原尺寸、目标列出现占位；其它卡主动让位而非瞬间跳动",
+      "timing": "拖拽直接跟手，落位240ms",
+      "reverse": "取消/失败从当前位置退回原列和原位置",
+      "edge": "目标权限、列空态、触屏滚动、滚动容器边缘",
+      "qa": "跨列/同列/失败回滚、触摸自动滚动、Esc"
+    },
+    {
+      "id": "35",
+      "title": "分栏拖拽调整尺寸",
+      "category": "拖拽与手势",
+      "keywords": [
+        "Resizable Split",
+        "分割条",
+        "调整宽度"
+      ],
+      "goal": "两个工作区实时响应用户拖动",
+      "filename": "35_SPLIT_PANE_RESIZE.md",
+      "engine": "优先已有 dnd-kit、SortableJS 或 Motion Reorder；仅简单列表可使用原生 pointer+FLIP；React Reorder.Group 适合简单单列排序，复杂跨列不盲用。",
+      "trigger": "pointerdown分割线/键盘方向键",
+      "beats": "分割位置1:1映射指针，左右面板按约束同步变形，文本不缩放",
+      "timing": "拖动无滞后；松手可在120ms贴合合理范围",
+      "reverse": "朝反方向拖回相同尺寸映射",
+      "edge": "最小宽、折叠阈值、resize，双击复位",
+      "qa": "拖到上下限、键盘操作、布局溢出、保存偏好"
+    },
+    {
+      "id": "36",
+      "title": "滑动卡片露出操作",
+      "category": "拖拽与手势",
+      "keywords": [
+        "Swipe Actions",
+        "滑动删除",
+        "列表"
+      ],
+      "goal": "移动端明确露出次要操作不误触",
+      "filename": "36_SWIPE_ACTIONS.md",
+      "engine": "优先已有 dnd-kit、SortableJS 或 Motion Reorder；仅简单列表可使用原生 pointer+FLIP；React Reorder.Group 适合简单单列排序，复杂跨列不盲用。",
+      "trigger": "水平触摸滑动卡片",
+      "beats": "卡片在最大90px范围沿x位移，操作按钮在背后露出；只有确认操作才影响数据",
+      "timing": "拖动跟手；放开180ms归位/吸附",
+      "reverse": "反方向完全收回，ESC/其他项选择也收回",
+      "edge": "横竖手势判别、删除确认、屏幕阅读器有显式按钮",
+      "qa": "轻扫/重扫/竖向滚动、取消删除、键盘可达"
+    },
+    {
+      "id": "37",
+      "title": "图片画布拖拽与平移",
+      "category": "拖拽与手势",
+      "keywords": [
+        "Canvas Pan",
+        "画布",
+        "节点编辑"
+      ],
+      "goal": "可平移大画布但不失选中目标",
+      "filename": "37_CANVAS_PAN.md",
+      "engine": "优先已有 dnd-kit、SortableJS 或 Motion Reorder；仅简单列表可使用原生 pointer+FLIP；React Reorder.Group 适合简单单列排序，复杂跨列不盲用。",
+      "trigger": "按空格+拖动或空白处拖动",
+      "beats": "画布统一transform平移，网格和节点坐标同一世界矩阵",
+      "timing": "拖动跟手，松开可选择小幅阻尼但不假改数据",
+      "reverse": "反向按同世界坐标移动；重置回明确初始视图",
+      "edge": "缩放后坐标换算、边界夹取、多指冲突",
+      "qa": "pan→zoom→pan→reset，精确点击节点与坐标"
+    },
+    {
+      "id": "38",
+      "title": "双指捏合缩放",
+      "category": "拖拽与手势",
+      "keywords": [
+        "Pinch Zoom",
+        "双指",
+        "缩放"
+      ],
+      "goal": "手势以两指中心为锚点调整缩放",
+      "filename": "38_PINCH_ZOOM.md",
+      "engine": "优先已有 dnd-kit、SortableJS 或 Motion Reorder；仅简单列表可使用原生 pointer+FLIP；React Reorder.Group 适合简单单列排序，复杂跨列不盲用。",
+      "trigger": "两个touch/pointer同时操作",
+      "beats": "距离比映射scale，中心点保持图像上相同内容不漂移；边界约束",
+      "timing": "拖动实时映射，松手<=180ms收束",
+      "reverse": "缩回时内容锚点保持，重置为原图",
+      "edge": "touch-action与页面滚动冲突、min/max zoom、Safari输入事件",
+      "qa": "双指放大缩小、边界、旋转不触发、坐标核对"
+    },
+    {
+      "id": "39",
+      "title": "拖拽文件导入区",
+      "category": "拖拽与手势",
+      "keywords": [
+        "Drag Drop File",
+        "拖入文件",
+        "导入"
+      ],
+      "goal": "拖动文件到合法区域才显示接收状态",
+      "filename": "39_FILE_DROP_ZONE.md",
+      "engine": "优先已有 dnd-kit、SortableJS 或 Motion Reorder；仅简单列表可使用原生 pointer+FLIP；React Reorder.Group 适合简单单列排序，复杂跨列不盲用。",
+      "trigger": "dragenter/dragover/drop",
+      "beats": "拖入时容器边框定位增强，底层页面不移动；drop后立即进入真实校验/上传状态",
+      "timing": "120ms 高亮；上传真实进度",
+      "reverse": "dragleave归位同120ms，高危操作保留取消",
+      "edge": "文件类型、同名、外部URL/文本、拖入子节点计数",
+      "qa": "进入子节点不闪烁、无效文件、外部拖走、键盘等价"
+    },
+    {
+      "id": "40",
+      "title": "卡片网格重排",
+      "category": "拖拽与手势",
+      "keywords": [
+        "Grid Rearrange",
+        "磁贴",
+        "仪表盘布局"
+      ],
+      "goal": "用户自定义组件排列但页面不塌陷",
+      "filename": "40_GRID_REARRANGE.md",
+      "engine": "优先已有 dnd-kit、SortableJS 或 Motion Reorder；仅简单列表可使用原生 pointer+FLIP；React Reorder.Group 适合简单单列排序，复杂跨列不盲用。",
+      "trigger": "抓住卡片手柄拖到网格位置",
+      "beats": "被拖卡片提升并随指针；其它卡片使用FLIP重排；drop区域用稳定网格编号",
+      "timing": "拖动跟手，落位260ms",
+      "reverse": "撤销时全部卡片沿计算后的路径回到原排序",
+      "edge": "不同尺寸网格、碰撞、响应式列数、保存失败",
+      "qa": "3列/1列、重叠、取消、保存撤销、性能"
+    },
+    {
+      "id": "41",
+      "title": "框选多对象",
+      "category": "拖拽与手势",
+      "keywords": [
+        "Lasso Select",
+        "框选",
+        "节点"
+      ],
+      "goal": "快速选中画布中的一组对象",
+      "filename": "41_LASSO_SELECT.md",
+      "engine": "优先已有 dnd-kit、SortableJS 或 Motion Reorder；仅简单列表可使用原生 pointer+FLIP；React Reorder.Group 适合简单单列排序，复杂跨列不盲用。",
+      "trigger": "在画布空白pointerdown并拖动",
+      "beats": "矩形选框实时由起点到当前点；选中对象轮廓实时更新，无随机动画",
+      "timing": "直接映射；释放后120ms确认反馈",
+      "reverse": "反向框选减少范围，ESC恢复选前选择集",
+      "edge": "滚动/缩放矩阵、Shift增加、权限锁定元素",
+      "qa": "拖动四象限、缩放后坐标、Shift/ESC、键盘替代"
+    },
+    {
+      "id": "42",
+      "title": "可排序表格列宽",
+      "category": "拖拽与手势",
+      "keywords": [
+        "Column Resize",
+        "表格列宽",
+        "表头"
+      ],
+      "goal": "用户调整列宽不破坏数据与排序",
+      "filename": "42_TABLE_COLUMN_RESIZE.md",
+      "engine": "优先已有 dnd-kit、SortableJS 或 Motion Reorder；仅简单列表可使用原生 pointer+FLIP；React Reorder.Group 适合简单单列排序，复杂跨列不盲用。",
+      "trigger": "拖列分隔线/双击自动适配",
+      "beats": "列宽实时更新，后续列位置连续迁移；表头与数据行同步",
+      "timing": "drag实时，完成后120ms边线反馈",
+      "reverse": "反向拉动原轨迹，双击恢复精确尺寸",
+      "edge": "sticky列、横向滚动、最小最大宽、数据列真实值不变",
+      "qa": "500行/宽表、拖极限、排序后宽度保持"
+    },
+    {
+      "id": "43",
+      "title": "拖拽式时间区间选择",
+      "category": "拖拽与手势",
+      "keywords": [
+        "Drag Time Range",
+        "时间段",
+        "范围选择"
+      ],
+      "goal": "在图表上精确选取统计窗口",
+      "filename": "43_TIME_RANGE_DRAG.md",
+      "engine": "优先已有 dnd-kit、SortableJS 或 Motion Reorder；仅简单列表可使用原生 pointer+FLIP；React Reorder.Group 适合简单单列排序，复杂跨列不盲用。",
+      "trigger": "拖动时间轴区间左右手柄",
+      "beats": "区间边缘与时间值同步，始终对应数据点；选择范围背景真实覆盖相应时间",
+      "timing": "跟手无过渡；释放180ms确认",
+      "reverse": "反向拖动按同时间刻度返回原范围",
+      "edge": "时间轴缺口、时区、双手柄交叉与缩放",
+      "qa": "跨周末交易日、边界、缩放后区间准确"
+    },
+    {
+      "id": "44",
+      "title": "折线图数据集形变",
+      "category": "数据图表与可视化",
+      "keywords": [
+        "Line Chart Morph",
+        "图表切换",
+        "折线过渡"
+      ],
+      "goal": "从A数据集切到B时保持坐标与曲线关系",
+      "filename": "44_LINE_CHART_MORPH.md",
+      "engine": "优先复用现有 ECharts/D3/uPlot/Plotly 数据与坐标系统；读真实 series/timestamps，不用图形动画伪造数据；Canvas/WebGL 在数据量要求时启用。",
+      "trigger": "点击指标/时间范围/标的",
+      "beats": "使用相同x域/y域做数据点匹配；曲线路径按点插值，坐标轴尺度同一个时间轴重排，tooltip位置重算",
+      "timing": "320ms 配对ease(.22,1,.36,1)",
+      "reverse": "回A沿同数据点映射反向，不复用旧数据快照冒充实时",
+      "edge": "缺失值断线、不同采样密度先重采样、时间戳唯一、禁止伪数据",
+      "qa": "同长度/不同长度、NaN缺口、切10次、末值一致"
+    },
+    {
+      "id": "45",
+      "title": "柱状图排序重排",
+      "category": "数据图表与可视化",
+      "keywords": [
+        "Bar Sort FLIP",
+        "排名",
+        "柱状图"
+      ],
+      "goal": "值变化后的名次可追踪而不跳行",
+      "filename": "45_BAR_SORT_FLIP.md",
+      "engine": "优先复用现有 ECharts/D3/uPlot/Plotly 数据与坐标系统；读真实 series/timestamps，不用图形动画伪造数据；Canvas/WebGL 在数据量要求时启用。",
+      "trigger": "点击排序/更新排序字段",
+      "beats": "每行bar用稳定实体id，条长跟随新值，行y位置FLIP迁移，轴尺度协调",
+      "timing": "360ms y变换；条长300ms",
+      "reverse": "切回原排序恢复对应位置和顺序",
+      "edge": "同值排序稳定、负值基线、动态label和ARIA表格",
+      "qa": "前5名换序、负值/零值、降序升序、键盘"
+    },
+    {
+      "id": "46",
+      "title": "堆叠面积图序列切换",
+      "category": "数据图表与可视化",
+      "keywords": [
+        "Stacked Area",
+        "面积图",
+        "分项"
+      ],
+      "goal": "显示贡献变化不发生不合理交叉",
+      "filename": "46_STACKED_AREA_TRANSITION.md",
+      "engine": "优先复用现有 ECharts/D3/uPlot/Plotly 数据与坐标系统；读真实 series/timestamps，不用图形动画伪造数据；Canvas/WebGL 在数据量要求时启用。",
+      "trigger": "点击系列开关",
+      "beats": "隐藏系列值逐渐收缩到零，剩余序列基线重算；总量与tooltip按真实值更新",
+      "timing": "340ms 曲线插值，辅助图例立即可用",
+      "reverse": "重新加入逆向恢复相同数据尺度路径",
+      "edge": "归一化100%与绝对值逻辑分开、缺失序列",
+      "qa": "开关3条序列、总量核对、legend键盘、反向"
+    },
+    {
+      "id": "47",
+      "title": "真实行情流式曲线",
+      "category": "数据图表与可视化",
+      "keywords": [
+        "Streaming Chart",
+        "实时曲线",
+        "行情"
+      ],
+      "goal": "连续观察实时数据同时准确暴露陈旧程度",
+      "filename": "47_LIVE_STREAM_CHART.md",
+      "engine": "优先复用现有 ECharts/D3/uPlot/Plotly 数据与坐标系统；读真实 series/timestamps，不用图形动画伪造数据；Canvas/WebGL 在数据量要求时启用。",
+      "trigger": "用户开启实时监控/选择标的",
+      "beats": "每次真实数据到达，仅追加新时间点并推进时间窗口；可合批一次短变换，延迟/断流显示last-success标识",
+      "timing": "更新过渡100–250ms（不改变时间戳），背压时直接落位",
+      "reverse": "停止监控冻结当前曲线，重新开始从真实快照接续",
+      "edge": "时间序乱序去重、断流、重连、无真实数据不得模拟",
+      "qa": "真实API禁用/断线/恢复、重复时间戳、性能与状态"
+    },
+    {
+      "id": "48",
+      "title": "Dashboard 下钻图表联动",
+      "category": "数据图表与可视化",
+      "keywords": [
+        "Drill-down",
+        "看板",
+        "图表联动"
+      ],
+      "goal": "从总览点到板块/标的明细保持数据语义",
+      "filename": "48_DASHBOARD_DRILLDOWN.md",
+      "engine": "优先复用现有 ECharts/D3/uPlot/Plotly 数据与坐标系统；读真实 series/timestamps，不用图形动画伪造数据；Canvas/WebGL 在数据量要求时启用。",
+      "trigger": "点击图表柱/扇区/表格行",
+      "beats": "选中区域高亮并迁移为明细页标题锚点，旁侧图表按真实过滤结果更新",
+      "timing": "300–420ms 容器优先，数据加载状态真实",
+      "reverse": "返回总览同空间路径，筛选/时间范围保留",
+      "edge": "权限/无数据/异步竞态、URL可直达明细",
+      "qa": "点击两级下钻返回、网络失败、值与筛选一致"
+    },
+    {
+      "id": "49",
+      "title": "KPI 数字过渡",
+      "category": "数据图表与可视化",
+      "keywords": [
+        "Number Transition",
+        "数字滚动",
+        "指标"
+      ],
+      "goal": "指标数值变化可被辨认而不造成虚假的实时波动",
+      "filename": "49_KPI_COUNT_TRANSITION.md",
+      "engine": "优先复用现有 ECharts/D3/uPlot/Plotly 数据与坐标系统；读真实 series/timestamps，不用图形动画伪造数据；Canvas/WebGL 在数据量要求时启用。",
+      "trigger": "用户切换报表维度或真实状态更新",
+      "beats": "数字按计量单位与最终精度插值，正负/单位/百分比保持语义；变化幅度可用旁注说明",
+      "timing": "200–320ms 轻微插值，大幅变更优先直接落位",
+      "reverse": "选择旧维度同格式返回；真实推送不可逆则不伪造倒放",
+      "edge": "NaN、货币、千分符、负数、文本读屏不要逐帧播报",
+      "qa": "负→正、1e6、缺失、浮点精度、读屏最终值"
+    },
+    {
+      "id": "50",
+      "title": "热力图渐变与筛选",
+      "category": "数据图表与可视化",
+      "keywords": [
+        "Heatmap",
+        "热力图",
+        "矩阵"
+      ],
+      "goal": "切换指标时格子保持业务身份",
+      "filename": "50_HEATMAP_FILTER.md",
+      "engine": "优先复用现有 ECharts/D3/uPlot/Plotly 数据与坐标系统；读真实 series/timestamps，不用图形动画伪造数据；Canvas/WebGL 在数据量要求时启用。",
+      "trigger": "点击指标/日期范围",
+      "beats": "每格以稳定cell key按真实色标插值；行列重排采用FLIP，不用随机亮光",
+      "timing": "250ms 色标，320ms空间重排",
+      "reverse": "切回原筛选反向映射色标；不因顺序变更丢坐标",
+      "edge": "颜色盲可读、空值专用图例、数据过期明显",
+      "qa": "值→颜色映射核对、无值、多行虚拟化"
+    },
+    {
+      "id": "51",
+      "title": "图表 Brush 缩放与平移",
+      "category": "数据图表与可视化",
+      "keywords": [
+        "Chart Brush",
+        "框选缩放",
+        "K线"
+      ],
+      "goal": "手势明确控制可见数据域",
+      "filename": "51_CHART_BRUSH_ZOOM.md",
+      "engine": "优先复用现有 ECharts/D3/uPlot/Plotly 数据与坐标系统；读真实 series/timestamps，不用图形动画伪造数据；Canvas/WebGL 在数据量要求时启用。",
+      "trigger": "拖动brush区域或快捷键",
+      "beats": "选择矩形跟手，松开后x轴domain连续放大到真实选择域；y轴按选择范围真实值重算",
+      "timing": "拖动直接映射，变焦320ms",
+      "reverse": "点击重置沿同域变换回原时间窗",
+      "edge": "交易非连续日历、缺数据、极端放大与边缘",
+      "qa": "选20天放至5天再重置、tooltip与关键位一致"
+    },
+    {
+      "id": "52",
+      "title": "蜡烛图周期切换",
+      "category": "数据图表与可视化",
+      "keywords": [
+        "Candlestick Interval",
+        "K线周期",
+        "日线15分钟"
+      ],
+      "goal": "周期切换保留时间中心和选定标的上下文",
+      "filename": "52_CANDLE_INTERVAL_CHANGE.md",
+      "engine": "优先复用现有 ECharts/D3/uPlot/Plotly 数据与坐标系统；读真实 series/timestamps，不用图形动画伪造数据；Canvas/WebGL 在数据量要求时启用。",
+      "trigger": "点击D/15m/5m/1m",
+      "beats": "固定当前时间中心与水平关键位，待真实新周期数据到达后用容器尺度过渡；禁止逐根虚构插值K线",
+      "timing": "240ms容器与轴，蜡烛数据真实落位",
+      "reverse": "切回周期恢复先前时间窗和选中K线",
+      "edge": "分钟数据缺失明确失败/过期状态，非交易时段不造数据",
+      "qa": "各周期跨越测试、真实时间对齐、断线与缺字段"
+    },
+    {
+      "id": "53",
+      "title": "关系网络节点聚焦",
+      "category": "数据图表与可视化",
+      "keywords": [
+        "Network Graph Focus",
+        "关系图",
+        "拓扑"
+      ],
+      "goal": "从杂乱网络聚焦一个节点的邻接结构",
+      "filename": "53_NETWORK_NODE_FOCUS.md",
+      "engine": "优先复用现有 ECharts/D3/uPlot/Plotly 数据与坐标系统；读真实 series/timestamps，不用图形动画伪造数据；Canvas/WebGL 在数据量要求时启用。",
+      "trigger": "点击节点/键盘选择",
+      "beats": "选中节点移向视图焦点，邻近节点按拓扑约束重新排布，非关联降低对比",
+      "timing": "450ms 阻尼趋近目标，结束后稳定不漂浮",
+      "reverse": "取消焦点按保存的布局坐标回原拓扑",
+      "edge": "大图性能、保持稳定节点key、避免随机重排、键盘对象列表",
+      "qa": "中心节点切换、回到原始布局、无关联图、缩放"
+    },
+    {
+      "id": "54",
+      "title": "地理地图区域钻取",
+      "category": "数据图表与可视化",
+      "keywords": [
+        "Map Drill",
+        "地图",
+        "地区下钻"
+      ],
+      "goal": "省→市等层级切换保持空间地理位置",
+      "filename": "54_MAP_REGION_DRILL.md",
+      "engine": "优先复用现有 ECharts/D3/uPlot/Plotly 数据与坐标系统；读真实 series/timestamps，不用图形动画伪造数据；Canvas/WebGL 在数据量要求时启用。",
+      "trigger": "点击地图区域",
+      "beats": "地图摄像机/投影平移缩放至真实区域边界，边线/数据标签随级别更新",
+      "timing": "400–700ms 非线性；地理图层先于标签",
+      "reverse": "点击返回使viewport恢复先前bound和中心",
+      "edge": "无地理子数据不能假造，跨国际日期线，移动端触摸",
+      "qa": "层级来回、几何bounds、地图标签错位、空地区"
+    },
+    {
+      "id": "55",
+      "title": "可拖动时间轴 Scrubber",
+      "category": "时间轴与媒体",
+      "keywords": [
+        "Timeline Scrubber",
+        "时间轴",
+        "进度"
+      ],
+      "goal": "从时间拖拽直接预览对应状态",
+      "filename": "55_TIMELINE_SCRUBBER.md",
+      "engine": "选真实媒体时间、用户控制的 timeline progress 或真实历史时间戳为唯一事实来源；GSAP timeline 可用于显式播放/逆播，但绝不在页面载入时 autoplay。",
+      "trigger": "拖动handle/方向键",
+      "beats": "进度0..1直接驱动场景/视频/历史图层，时间标签反映精确时间；拖动无额外缓动滞后",
+      "timing": "拖动严格1:1；释放时仅手柄阴影120ms收束",
+      "reverse": "反向拖动应精确回到同一时间状态与值",
+      "edge": "离散数据插值规则、音视频seek异步、数据缺口",
+      "qa": "0/25/50/75/100%状态精确、快拖、键盘"
+    },
+    {
+      "id": "56",
+      "title": "可逆多步骤故事时间线",
+      "category": "时间轴与媒体",
+      "keywords": [
+        "Story Timeline",
+        "交互讲解",
+        "阶段"
+      ],
+      "goal": "用户每次前进只推进一段叙事",
+      "filename": "56_STORY_TIMELINE.md",
+      "engine": "选真实媒体时间、用户控制的 timeline progress 或真实历史时间戳为唯一事实来源；GSAP timeline 可用于显式播放/逆播，但绝不在页面载入时 autoplay。",
+      "trigger": "点击下一段/上一段/拖动阶段控制",
+      "beats": "核心图形按阶段从形态A重组到B；标题和解释在主图稳定后更新",
+      "timing": "每段450–900ms，统一曲线/可逆标签",
+      "reverse": "上一段使用同一段时间轴.reverse()，支持半途倒向",
+      "edge": "步骤动态增删/回看/章节深链，初始静止",
+      "qa": "1→4→2→1、半程反向、无自动播放"
+    },
+    {
+      "id": "57",
+      "title": "带章节的视频进度条",
+      "category": "时间轴与媒体",
+      "keywords": [
+        "Video Chapters",
+        "视频章节",
+        "预览"
+      ],
+      "goal": "准确跳转指定章节并知晓当前位置",
+      "filename": "57_VIDEO_CHAPTERS.md",
+      "engine": "选真实媒体时间、用户控制的 timeline progress 或真实历史时间戳为唯一事实来源；GSAP timeline 可用于显式播放/逆播，但绝不在页面载入时 autoplay。",
+      "trigger": "点击章节/拖进度条",
+      "beats": "章节标记稳定，播放进度由真实媒体currentTime驱动；tooltip显示对应帧时间",
+      "timing": "进度拖动即时；辅助缩放120ms",
+      "reverse": "往前seek同媒体时间，不伪造缓动过场",
+      "edge": "seek未完成状态、视频无法加载、媒体缓冲与时长未知",
+      "qa": "章节跳转、失败、循环拖动、字幕与时间一致"
+    },
+    {
+      "id": "58",
+      "title": "媒体画廊相邻切换",
+      "category": "时间轴与媒体",
+      "keywords": [
+        "Media Gallery",
+        "图库",
+        "左右切换"
+      ],
+      "goal": "连续浏览媒体不丢当前编号",
+      "filename": "58_MEDIA_GALLERY.md",
+      "engine": "选真实媒体时间、用户控制的 timeline progress 或真实历史时间戳为唯一事实来源；GSAP timeline 可用于显式播放/逆播，但绝不在页面载入时 autoplay。",
+      "trigger": "点击箭头/左右键/水平滑动",
+      "beats": "当前图向方向移动、目标图从邻侧衔接；容器保持高宽比，标题后更新",
+      "timing": "320ms 非线性",
+      "reverse": "上一张沿反向相同轨迹回位",
+      "edge": "边界停住不绕圈（除非明确循环）、加载与失败占位",
+      "qa": "第一张最后一张、快切10次、键盘与焦点"
+    },
+    {
+      "id": "59",
+      "title": "前后对比拖动分割",
+      "category": "时间轴与媒体",
+      "keywords": [
+        "Before After Slider",
+        "对比滑杆"
+      ],
+      "goal": "同一坐标观看修改前后效果",
+      "filename": "59_BEFORE_AFTER_COMPARE.md",
+      "engine": "选真实媒体时间、用户控制的 timeline progress 或真实历史时间戳为唯一事实来源；GSAP timeline 可用于显式播放/逆播，但绝不在页面载入时 autoplay。",
+      "trigger": "拖动分割手柄/左右键",
+      "beats": "一张图固定，第二张使用clip-path按百分比展示；分割线直接跟随指针，无移动两张图",
+      "timing": "拖动跟手；无惯性",
+      "reverse": "反方向拖回0%时严格同像素对齐",
+      "edge": "两张图需统一坐标尺寸、无数据不能作假",
+      "qa": "0/25/50/75/100%，触屏与键盘"
+    },
+    {
+      "id": "60",
+      "title": "音频波形裁剪区间",
+      "category": "时间轴与媒体",
+      "keywords": [
+        "Audio Trim",
+        "波形",
+        "裁剪"
+      ],
+      "goal": "选取真实音频时间段而非装饰波形",
+      "filename": "60_AUDIO_WAVEFORM_TRIM.md",
+      "engine": "选真实媒体时间、用户控制的 timeline progress 或真实历史时间戳为唯一事实来源；GSAP timeline 可用于显式播放/逆播，但绝不在页面载入时 autoplay。",
+      "trigger": "拖动波形区间/键盘",
+      "beats": "选区x与真实duration绑定，音频波形从解码数据生成，播放头随媒体当前时间走",
+      "timing": "选区跟手、播放头由媒体时钟控制",
+      "reverse": "拖回恢复区间位置，Undo恢复编辑前trim",
+      "edge": "多音轨时基、缓冲不伪造、波形不可得展示静态区",
+      "qa": "精确1秒区间、播放暂停、反向、源音频不变"
+    },
+    {
+      "id": "61",
+      "title": "时间表事件拖动排期",
+      "category": "时间轴与媒体",
+      "keywords": [
+        "Schedule Timeline",
+        "日历拖动",
+        "排期"
+      ],
+      "goal": "可视化调整事项起止时间",
+      "filename": "61_SCHEDULE_DRAG.md",
+      "engine": "选真实媒体时间、用户控制的 timeline progress 或真实历史时间戳为唯一事实来源；GSAP timeline 可用于显式播放/逆播，但绝不在页面载入时 autoplay。",
+      "trigger": "拖动事件卡/两端把手",
+      "beats": "卡片随时段映射x/宽，吸附15分钟网格；冲突段展示明确阻止提示",
+      "timing": "跟手，释放160ms对齐网格",
+      "reverse": "取消/撤销回原UTC时间戳，不只回视觉位置",
+      "edge": "跨日/时区/DST/并发编辑冲突、可键盘输入",
+      "qa": "跨午夜、拖出范围、冲突失败、日期一致性"
+    },
+    {
+      "id": "62",
+      "title": "图表历史回放播放器",
+      "category": "时间轴与媒体",
+      "keywords": [
+        "Historical Replay",
+        "历史回放",
+        "资金流"
+      ],
+      "goal": "以真实历史快照逐帧回放，不误认为实时",
+      "filename": "62_HISTORICAL_REPLAY.md",
+      "engine": "选真实媒体时间、用户控制的 timeline progress 或真实历史时间戳为唯一事实来源；GSAP timeline 可用于显式播放/逆播，但绝不在页面载入时 autoplay。",
+      "trigger": "明确点击播放、暂停/拖动进度",
+      "beats": "按真实时间序列重建曲线累计进度，位置、时间标签、数据来源同步显示",
+      "timing": "播放速度0.5/1/2倍用户选择，不用伪造时间轴",
+      "reverse": "拖回任一点得到同样历史状态；暂停停止调度",
+      "edge": "无历史点时禁播放；last-success与实时状态分隔",
+      "qa": "快进回放、缺失日、暂停无后台动画、最终值一致"
+    },
+    {
+      "id": "63",
+      "title": "滚动驱动章节图解",
+      "category": "时间轴与媒体",
+      "keywords": [
+        "Scroll Scrub Story",
+        "滚动叙事",
+        "章节"
+      ],
+      "goal": "用户滚动主动推动图解状态，不是自动入场",
+      "filename": "63_SCROLL_SCRUB_STORY.md",
+      "engine": "选真实媒体时间、用户控制的 timeline progress 或真实历史时间戳为唯一事实来源；GSAP timeline 可用于显式播放/逆播，但绝不在页面载入时 autoplay。",
+      "trigger": "主动页面滚动经过指定段落",
+      "beats": "根据段落相对位置计算progress并连续映射图形变化，文字始终可读",
+      "timing": "直接跟随真实scroll progress，不能二次延迟",
+      "reverse": "向上滚动按同映射精确恢复",
+      "edge": "锚点跳转/resize/首屏深链状态、reduced-motion静态关键帧",
+      "qa": "0/25/50/100% scroll、往返、键盘滚动"
+    },
+    {
+      "id": "64",
+      "title": "3D 摄像机轨道观察",
+      "category": "三维空间与镜头",
+      "keywords": [
+        "Orbit Camera",
+        "3D轨道",
+        "旋转"
+      ],
+      "goal": "查看三维物体多个方向且空间稳定",
+      "filename": "64_ORBIT_CAMERA.md",
+      "engine": "Three.js/React Three Fiber 仅在项目已有或明确需要 3D 时选用；摄像机与模型变换需唯一控制器，渲染循环在不可见时停掉，支持 Canvas2D/静态图降级。",
+      "trigger": "拖动空白场景/双指触摸",
+      "beats": "摄像机绕模型pivot变化azimuth/elevation，视点始终指向同一target，地平线不翻转",
+      "timing": "拖动跟手；释放可有限阻尼<=240ms",
+      "reverse": "反向拖动恢复同方位，重置按钮回预设cameraPose",
+      "edge": "限制仰角/缩放、相机穿透、移动GPU限制",
+      "qa": "上下左右/缩放/重置、物体不穿模、无WebGL降级"
+    },
+    {
+      "id": "65",
+      "title": "电影式镜头推入",
+      "category": "三维空间与镜头",
+      "keywords": [
+        "Cinematic Camera",
+        "镜头推进",
+        "3D叙事"
+      ],
+      "goal": "从总览精确引导到目标空间",
+      "filename": "65_CINEMATIC_CAMERA_DOLLY.md",
+      "engine": "Three.js/React Three Fiber 仅在项目已有或明确需要 3D 时选用；摄像机与模型变换需唯一控制器，渲染循环在不可见时停掉，支持 Canvas2D/静态图降级。",
+      "trigger": "点击进入房间/下一镜头",
+      "beats": "相机position、target、fov沿同一显式cameraPose轨迹插值，先建立目标视觉，再揭示标签",
+      "timing": "800–1500ms 可中断非线性，绝不自动加载播放",
+      "reverse": "返回沿同一关键帧相反进度倒放，回到全景",
+      "edge": "resize重新投影、路径避障、视点锁定、切镜头中断",
+      "qa": "总览→室内→半程返回、无穿墙、镜头终点一致"
+    },
+    {
+      "id": "66",
+      "title": "2D 户型变成 3D 沙盘",
+      "category": "三维空间与镜头",
+      "keywords": [
+        "2D转3D",
+        "户型",
+        "沙盘"
+      ],
+      "goal": "准确展示二维墙线与三维房间的空间对应",
+      "filename": "66_FLOORPLAN_2D_TO_3D.md",
+      "engine": "Three.js/React Three Fiber 仅在项目已有或明确需要 3D 时选用；摄像机与模型变换需唯一控制器，渲染循环在不可见时停掉，支持 Canvas2D/静态图降级。",
+      "trigger": "点击3D模式/拖动进度",
+      "beats": "平面中每段墙线用同一wallId从线→墙体挤出，家具保持真实尺度，camera从俯视→斜视",
+      "timing": "总时长1000–1600ms，墙体先、家具后、镜头最后收束",
+      "reverse": "回2D按原wallId倒放墙体高度和相机位姿",
+      "edge": "没有真实户型尺寸不能承诺1:1，缺尺寸时标注估算",
+      "qa": "每墙id位置误差、快反向、viewport变化、尺寸校验"
+    },
+    {
+      "id": "67",
+      "title": "3D 热点注释锚定",
+      "category": "三维空间与镜头",
+      "keywords": [
+        "3D Hotspot",
+        "热点",
+        "标注"
+      ],
+      "goal": "标签永远对应真实模型表面位置",
+      "filename": "67_WORLD_HOTSPOT.md",
+      "engine": "Three.js/React Three Fiber 仅在项目已有或明确需要 3D 时选用；摄像机与模型变换需唯一控制器，渲染循环在不可见时停掉，支持 Canvas2D/静态图降级。",
+      "trigger": "点击热点按钮/选模型面",
+      "beats": "热点位置从世界坐标project到屏幕；镜头移动时标签追随投影，打开解释卡从热点延展",
+      "timing": "180–260ms解释卡，投影跟随每帧真实camera",
+      "reverse": "关闭回同一热点锚点，Esc恢复焦点",
+      "edge": "遮挡检测隐藏背面标签、模型卸载、屏幕边缘避让",
+      "qa": "旋转360度、标签遮挡、点击/键盘、窗口resize"
+    },
+    {
+      "id": "68",
+      "title": "3D 产品爆炸分解",
+      "category": "三维空间与镜头",
+      "keywords": [
+        "Exploded View",
+        "拆解",
+        "装配"
+      ],
+      "goal": "按真实零件关系理解内部结构",
+      "filename": "68_EXPLODED_VIEW.md",
+      "engine": "Three.js/React Three Fiber 仅在项目已有或明确需要 3D 时选用；摄像机与模型变换需唯一控制器，渲染循环在不可见时停掉，支持 Canvas2D/静态图降级。",
+      "trigger": "点击拆解/拖slider",
+      "beats": "每个partId沿预设轴向从装配位移至分解位，连接方向/材质保持",
+      "timing": "700–1200ms 同一progress控制",
+      "reverse": "装回反向归位，所有变换精确回初始矩阵",
+      "edge": "零件穿透、坐标系统不同、局部变换与父级层次",
+      "qa": "0/50/100%位置矩阵、逆向重合、低性能降级"
+    },
+    {
+      "id": "69",
+      "title": "3D 日照时间模拟",
+      "category": "三维空间与镜头",
+      "keywords": [
+        "Sunlight Simulation",
+        "光照",
+        "日照"
+      ],
+      "goal": "比较一天不同时刻真实光照方向",
+      "filename": "69_SUNLIGHT_TIME.md",
+      "engine": "Three.js/React Three Fiber 仅在项目已有或明确需要 3D 时选用；摄像机与模型变换需唯一控制器，渲染循环在不可见时停掉，支持 Canvas2D/静态图降级。",
+      "trigger": "用户拖动时间滑块",
+      "beats": "根据太阳方位角/高度角更新directional light与阴影，时间/位置/朝向明确标注",
+      "timing": "拖动直接映射；渲染合帧优化",
+      "reverse": "拖回某时间得到相同光线、阴影不跳帧",
+      "edge": "没经纬度/日期时必须标注示意而非真实日照",
+      "qa": "早晨/正午/傍晚、阴影方向、时区、低端GPU"
+    },
+    {
+      "id": "70",
+      "title": "3D 材质替换对比",
+      "category": "三维空间与镜头",
+      "keywords": [
+        "Material Swap",
+        "材质",
+        "PBR"
+      ],
+      "goal": "更换真实材质但维持空间与光照不变",
+      "filename": "70_MATERIAL_SWAP.md",
+      "engine": "Three.js/React Three Fiber 仅在项目已有或明确需要 3D 时选用；摄像机与模型变换需唯一控制器，渲染循环在不可见时停掉，支持 Canvas2D/静态图降级。",
+      "trigger": "点击材质选项",
+      "beats": "仅材质roughness/metalness/texture变化，模型几何与摄像机保持稳定；纹理加载就绪后更新",
+      "timing": "180–300ms 限定材质过渡，不对纹理图无依据插帧",
+      "reverse": "切回恢复材质参数与贴图",
+      "edge": "贴图CORS、色彩空间、PBR贴图一致、内存释放",
+      "qa": "切3种材质、资源失败、帧率与清理"
+    },
+    {
+      "id": "71",
+      "title": "3D 物体拾取与高亮",
+      "category": "三维空间与镜头",
+      "keywords": [
+        "3D Raycast Pick",
+        "物体选中"
+      ],
+      "goal": "正确指出模型实际被点击的面或对象",
+      "filename": "71_RAYCAST_PICK.md",
+      "engine": "Three.js/React Three Fiber 仅在项目已有或明确需要 3D 时选用；摄像机与模型变换需唯一控制器，渲染循环在不可见时停掉，支持 Canvas2D/静态图降级。",
+      "trigger": "指针点击/键盘对象列表",
+      "beats": "Raycaster得到partId，轮廓高亮位置/强度轻变，信息面板由选中对象关联",
+      "timing": "140ms 高亮，面板260ms",
+      "reverse": "取消从同物体撤回高亮与面板",
+      "edge": "透明物穿透、遮挡命中、实例化mesh映射、触屏",
+      "qa": "重叠模型点击、选空白、键盘与焦点、移动端"
+    },
+    {
+      "id": "72",
+      "title": "3D 物件拖动摆放",
+      "category": "三维空间与镜头",
+      "keywords": [
+        "3D Placement",
+        "拖家具",
+        "室内摆放"
+      ],
+      "goal": "按房间真实平面将物品拖放到合法位置",
+      "filename": "72_MODEL_PLACEMENT.md",
+      "engine": "Three.js/React Three Fiber 仅在项目已有或明确需要 3D 时选用；摄像机与模型变换需唯一控制器，渲染循环在不可见时停掉，支持 Canvas2D/静态图降级。",
+      "trigger": "用户抓取家具并拖动",
+      "beats": "射线投射到指定地板平面，物品世界坐标与指针映射；碰撞边界显示是否合法",
+      "timing": "跟手，落位180ms",
+      "reverse": "ESC/非法落点回原世界矩阵，Undo恢复原pose",
+      "edge": "避免穿墙、旋转与缩放、物件真实尺寸、物理碰撞",
+      "qa": "拖墙边、重叠、撤销、移动端控制"
+    },
+    {
+      "id": "73",
+      "title": "镜头路径关键帧编辑",
+      "category": "三维空间与镜头",
+      "keywords": [
+        "Camera Path Editor",
+        "镜头轨迹"
+      ],
+      "goal": "用户编辑镜头运动而非接受随机轨迹",
+      "filename": "73_CAMERA_PATH_EDITOR.md",
+      "engine": "Three.js/React Three Fiber 仅在项目已有或明确需要 3D 时选用；摄像机与模型变换需唯一控制器，渲染循环在不可见时停掉，支持 Canvas2D/静态图降级。",
+      "trigger": "拖动关键帧/时间轴/预览",
+      "beats": "相机姿态用可见keyframes与spline过渡，可编辑轨迹控制点；预览仅明确播放",
+      "timing": "每段按关键帧时长，主动播放可暂停",
+      "reverse": "时间轴逆向回放路径精确，关键帧撤销可回退",
+      "edge": "曲线过冲/穿墙、视线方向、保存精度",
+      "qa": "首末帧坐标、播放暂停、编辑后刷新持久化"
+    },
+    {
+      "id": "74",
+      "title": "3D 层级剖切展示",
+      "category": "三维空间与镜头",
+      "keywords": [
+        "3D Section Cut",
+        "剖面",
+        "建筑分层"
+      ],
+      "goal": "揭示建筑内部而不打乱主体坐标",
+      "filename": "74_SECTION_PLANE_3D.md",
+      "engine": "Three.js/React Three Fiber 仅在项目已有或明确需要 3D 时选用；摄像机与模型变换需唯一控制器，渲染循环在不可见时停掉，支持 Canvas2D/静态图降级。",
+      "trigger": "拖动剖切面/选择楼层",
+      "beats": "剖切平面沿真实模型世界法线移动，隐藏部分使用clipping plane；楼层结构保持共同坐标",
+      "timing": "拖动实时，楼层切换320ms",
+      "reverse": "反向滑动恢复截面，重置还原所有模型面",
+      "edge": "深度冲突、PBR裁切边、移动GPU、空层",
+      "qa": "从0→100%剖切、边缘、缩放/旋转后仍正确"
+    },
+    {
+      "id": "75",
+      "title": "空间视差层级交互",
+      "category": "三维空间与镜头",
+      "keywords": [
+        "Spatial Parallax",
+        "空间视差"
+      ],
+      "goal": "通过指针探索辅助感知深度，不持续自动运动",
+      "filename": "75_SPATIAL_PARALLAX.md",
+      "engine": "Three.js/React Three Fiber 仅在项目已有或明确需要 3D 时选用；摄像机与模型变换需唯一控制器，渲染循环在不可见时停掉，支持 Canvas2D/静态图降级。",
+      "trigger": "在指定画布内主动移动指针/拖动",
+      "beats": "前景/中景/背景以不同小幅位移响应输入，最大幅度严格限幅；离开恢复中立",
+      "timing": "指针直接映射；离开180ms复位",
+      "reverse": "指针反方向相同映射，不带永久漂移",
+      "edge": "触摸禁用纯hover视差，不能遮挡文字",
+      "qa": "四角限幅、指针离开、静止5秒无动画"
+    },
+    {
+      "id": "76",
+      "title": "真实请求加载进度",
+      "category": "反馈与异步状态",
+      "keywords": [
+        "Async Progress",
+        "进度条",
+        "加载"
+      ],
+      "goal": "用户知道请求正在做什么且可失败恢复",
+      "filename": "76_REAL_REQUEST_PROGRESS.md",
+      "engine": "真实请求/缓存/队列驱动状态，不得用 mock API 进度代替业务完成；CSS 负责小幅反馈，明确失败、取消、重试与恢复。",
+      "trigger": "用户主动提交/下载/导入",
+      "beats": "按钮原位变为可读进度表面，数值仅根据真实事件更新；无可测进度用不定状态文字",
+      "timing": "开始反馈<=100ms，进度真实事件驱动",
+      "reverse": "取消回原表单并保持可重试",
+      "edge": "不得伪造百分比/成功，超时与离线明确",
+      "qa": "慢请求、取消、失败、网络恢复、无进度API"
+    },
+    {
+      "id": "77",
+      "title": "乐观更新及撤销",
+      "category": "反馈与异步状态",
+      "keywords": [
+        "Optimistic Update",
+        "撤销",
+        "收藏"
+      ],
+      "goal": "响应及时但失败可恢复数据一致性",
+      "filename": "77_OPTIMISTIC_UPDATE_UNDO.md",
+      "engine": "真实请求/缓存/队列驱动状态，不得用 mock API 进度代替业务完成；CSS 负责小幅反馈，明确失败、取消、重试与恢复。",
+      "trigger": "点击收藏/移动任务",
+      "beats": "局部选中态马上切换并显示pending，提交确认后稳定；失败按同位置回滚并告知",
+      "timing": "100–160ms按钮；响应实际到达后确认",
+      "reverse": "撤销/失败沿同一个局部状态轨迹恢复旧值",
+      "edge": "并发点击按序列号处理，撤销时服务端一致性",
+      "qa": "成功/失败/连续5次、刷新后与服务端一致"
+    },
+    {
+      "id": "78",
+      "title": "Toast 消息队列",
+      "category": "反馈与异步状态",
+      "keywords": [
+        "Toast Stack",
+        "提示",
+        "消息"
+      ],
+      "goal": "不打断主操作且重要结果可感知",
+      "filename": "78_TOAST_QUEUE.md",
+      "engine": "真实请求/缓存/队列驱动状态，不得用 mock API 进度代替业务完成；CSS 负责小幅反馈，明确失败、取消、重试与恢复。",
+      "trigger": "用户操作产生成功/失败/撤销",
+      "beats": "Toast从其固定容器边缘短距离出现，后续消息推动队列有序FLIP而非突然跳",
+      "timing": "180–240ms；紧急错误不延迟内容",
+      "reverse": "手动关闭按原通道收回；若自动消失需用户明确产品策略且不丢重要信息",
+      "edge": "aria-live公告、可撤销操作时长、队列上限",
+      "qa": "连续发10条、不遮挡主要按钮、读屏、缩放"
+    },
+    {
+      "id": "79",
+      "title": "Inline Error 原位纠错",
+      "category": "反馈与异步状态",
+      "keywords": [
+        "Inline Error",
+        "字段错误"
+      ],
+      "goal": "让用户知道错误所在与具体修复",
+      "filename": "79_INLINE_ERROR.md",
+      "engine": "真实请求/缓存/队列驱动状态，不得用 mock API 进度代替业务完成；CSS 负责小幅反馈，明确失败、取消、重试与恢复。",
+      "trigger": "提交失败/字段校验",
+      "beats": "错误文本在字段预留区域出现，边框仅轻微着色变化；必要时滚动至首错",
+      "timing": "120–180ms 原位反馈",
+      "reverse": "纠正后原位收起而不引发布局跳动",
+      "edge": "错误与label关联，异步错误不能被旧请求覆盖",
+      "qa": "空值/格式错/网络错、修正后可提交"
+    },
+    {
+      "id": "80",
+      "title": "Skeleton 与内容稳定替换",
+      "category": "反馈与异步状态",
+      "keywords": [
+        "Skeleton Loading",
+        "骨架屏"
+      ],
+      "goal": "避免真实加载导致阅读位置跳跃",
+      "filename": "80_SKELETON_STABLE.md",
+      "engine": "真实请求/缓存/队列驱动状态，不得用 mock API 进度代替业务完成；CSS 负责小幅反馈，明确失败、取消、重试与恢复。",
+      "trigger": "用户导航到需要请求的内容",
+      "beats": "按内容已知尺寸保留几何占位，请求成功后在同一边界替换文字/图表",
+      "timing": "有真实请求时才存在；转换150ms",
+      "reverse": "返回已缓存数据立即显示；无需逆向假装重新加载",
+      "edge": "首屏静止不做呼吸闪烁；布局估算不准时留滚动位置",
+      "qa": "慢网/失败/缓存命中，累计布局偏移"
+    },
+    {
+      "id": "81",
+      "title": "连接中断与重连",
+      "category": "反馈与异步状态",
+      "keywords": [
+        "Reconnect Status",
+        "实时断流"
+      ],
+      "goal": "明确区分新鲜与陈旧数据",
+      "filename": "81_RECONNECT_STATUS.md",
+      "engine": "真实请求/缓存/队列驱动状态，不得用 mock API 进度代替业务完成；CSS 负责小幅反馈，明确失败、取消、重试与恢复。",
+      "trigger": "用户开启监控后连接断开/恢复",
+      "beats": "数据图不变更数值，状态标签从实时→最后快照→重连中，时间戳持续准确显示",
+      "timing": "状态切换120ms，小幅不循环",
+      "reverse": "重连成功回实时标签，不回放伪数据",
+      "edge": "推送重复、心跳超时、指数退避、手动重试",
+      "qa": "离线5分钟、缓存时间准确、无模拟价格"
+    },
+    {
+      "id": "82",
+      "title": "保存状态反馈",
+      "category": "反馈与异步状态",
+      "keywords": [
+        "Autosave Status",
+        "保存中",
+        "草稿"
+      ],
+      "goal": "操作数据变更的保存结果可见",
+      "filename": "82_AUTOSAVE_STATUS.md",
+      "engine": "真实请求/缓存/队列驱动状态，不得用 mock API 进度代替业务完成；CSS 负责小幅反馈，明确失败、取消、重试与恢复。",
+      "trigger": "编辑字段/显式保存",
+      "beats": "显示“待保存→正在保存→已保存”的语义文字和小图标，位置固定避免界面跳动",
+      "timing": "180ms图标变化，真实异步状态驱动",
+      "reverse": "编辑撤销产生新的保存事务，不能简单视觉倒放成功",
+      "edge": "防抖、离线本地草稿与远端状态区分、冲突",
+      "qa": "快速连改、离线、服务端失败、刷新还原"
+    },
+    {
+      "id": "83",
+      "title": "删除与撤销缓冲",
+      "category": "反馈与异步状态",
+      "keywords": [
+        "Delete Undo",
+        "删除撤销"
+      ],
+      "goal": "误删可恢复且操作反馈清晰",
+      "filename": "83_DELETE_UNDO.md",
+      "engine": "真实请求/缓存/队列驱动状态，不得用 mock API 进度代替业务完成；CSS 负责小幅反馈，明确失败、取消、重试与恢复。",
+      "trigger": "点击删除→撤销",
+      "beats": "项先占位收缩后列表FLIP整理，显示撤销入口；真正删除按后端契约",
+      "timing": "250ms 列表重排",
+      "reverse": "撤销将相同itemId按原排序位置恢复",
+      "edge": "软删除/硬删除/权限、回滚数据确认",
+      "qa": "删除3项+撤销、刷新、接口失败与并发"
+    },
+    {
+      "id": "84",
+      "title": "空状态到首个内容",
+      "category": "反馈与异步状态",
+      "keywords": [
+        "Empty to First Item",
+        "空列表"
+      ],
+      "goal": "首次创建成功时让用户感知内容如何出现",
+      "filename": "84_EMPTY_FIRST_ITEM.md",
+      "engine": "真实请求/缓存/队列驱动状态，不得用 mock API 进度代替业务完成；CSS 负责小幅反馈，明确失败、取消、重试与恢复。",
+      "trigger": "用户点击创建→真实成功",
+      "beats": "空状态容器的位置转成第一条内容承载区，主要CTA的上下文保留",
+      "timing": "280ms容器形变",
+      "reverse": "撤销最后一项时沿同一表面回空状态",
+      "edge": "无法创建/离线时仍保留空状态和错误反馈",
+      "qa": "空→1→空、错误/权限、响应式"
+    },
+    {
+      "id": "85",
+      "title": "复制/下载完成反馈",
+      "category": "反馈与异步状态",
+      "keywords": [
+        "Clipboard Download",
+        "复制",
+        "导出"
+      ],
+      "goal": "清楚表明真实系统操作完成",
+      "filename": "85_CLIPBOARD_EXPORT_FEEDBACK.md",
+      "engine": "真实请求/缓存/队列驱动状态，不得用 mock API 进度代替业务完成；CSS 负责小幅反馈，明确失败、取消、重试与恢复。",
+      "trigger": "点击复制/下载",
+      "beats": "点击立即按压，只有系统clipboard.writeText成功或下载实际开始后才显示确认文本",
+      "timing": "100ms按压，150ms状态过渡",
+      "reverse": "重试返回待执行态，不重复提示伪成功",
+      "edge": "权限拒绝、移动端复制、下载失败/取消",
+      "qa": "模拟权限拒绝、文件不存在、真实剪贴板内容"
+    },
+    {
+      "id": "86",
+      "title": "命令面板 Command Palette",
+      "category": "专业生产力工作台",
+      "keywords": [
+        "Command Palette",
+        "快捷命令",
+        "搜索命令"
+      ],
+      "goal": "一个快捷入口直达应用合法操作",
+      "filename": "86_COMMAND_PALETTE.md",
+      "engine": "优先当前项目的路由、状态、键盘命令和设计 Token；组件视图层复用现有 React/Vue/Svelte，无障碍语义由正确 HTML/ARIA 模式提供。",
+      "trigger": "Ctrl/Cmd+K或顶部搜索按钮",
+      "beats": "由顶部搜索入口展开居中命令层，输入聚焦，结果列表稳定并以选中底座位移",
+      "timing": "260ms 面板，键盘结果同步",
+      "reverse": "Esc返回原搜索入口，恢复先前焦点和scroll",
+      "edge": "热键输入框冲突、禁用命令不执行、无结果、权限过滤",
+      "qa": "Ctrl+K→输入→方向键→Enter、Esc、焦点恢复"
+    },
+    {
+      "id": "87",
+      "title": "全局快捷键可视反馈",
+      "category": "专业生产力工作台",
+      "keywords": [
+        "Keyboard Shortcuts",
+        "快捷键"
+      ],
+      "goal": "热键有明确但不干扰输入框的反馈",
+      "filename": "87_KEYBOARD_SHORTCUTS.md",
+      "engine": "优先当前项目的路由、状态、键盘命令和设计 Token；组件视图层复用现有 React/Vue/Svelte，无障碍语义由正确 HTML/ARIA 模式提供。",
+      "trigger": "明确快捷键组合",
+      "beats": "目标功能局部状态更新，使用小型操作提示，绝不抢当前输入焦点",
+      "timing": "100–200ms，仅反馈",
+      "reverse": "Undo热键恢复旧状态/视觉轨迹",
+      "edge": "IME、平台差异、组合键冲突、禁用状态",
+      "qa": "Mac/Win映射、表单输入、冲突、连续触发"
+    },
+    {
+      "id": "88",
+      "title": "树形导航逐级展开",
+      "category": "专业生产力工作台",
+      "keywords": [
+        "Tree Disclosure",
+        "树",
+        "文件目录"
+      ],
+      "goal": "多级目录展开时保留当前节点位置",
+      "filename": "88_TREE_DISCLOSURE.md",
+      "engine": "优先当前项目的路由、状态、键盘命令和设计 Token；组件视图层复用现有 React/Vue/Svelte，无障碍语义由正确 HTML/ARIA 模式提供。",
+      "trigger": "点击箭头/左右键",
+      "beats": "子树高度由0到内容测量高度展开，父节点位置稳定；选中底座在同级迁移",
+      "timing": "220ms展开/收起同曲线",
+      "reverse": "收起沿相同高度路径返回箭头节点",
+      "edge": "大量懒加载节点、未知子数、树键盘语义、焦点删除",
+      "qa": "三级节点、10次快速开合、键盘aria-expanded"
+    },
+    {
+      "id": "89",
+      "title": "工作台左右对比视图",
+      "category": "专业生产力工作台",
+      "keywords": [
+        "Side-by-side Diff",
+        "对比",
+        "差异"
+      ],
+      "goal": "用户可靠对比两个版本的数据",
+      "filename": "89_SIDE_BY_SIDE_DIFF.md",
+      "engine": "优先当前项目的路由、状态、键盘命令和设计 Token；组件视图层复用现有 React/Vue/Svelte，无障碍语义由正确 HTML/ARIA 模式提供。",
+      "trigger": "点击开启对比/选择版本",
+      "beats": "单视图容器分为两半，每半数据独立可滚/可锁同步；中间分割稳定",
+      "timing": "360ms 主布局形变",
+      "reverse": "退出对比恢复原单视图宽度与滚动上下文",
+      "edge": "不同长度文档同步映射、空内容、权限",
+      "qa": "开→关→开、diff位置、长文档、窄屏"
+    },
+    {
+      "id": "90",
+      "title": "过滤器 Chips 增删重排",
+      "category": "专业生产力工作台",
+      "keywords": [
+        "Filter Chips",
+        "标签过滤",
+        "筛选"
+      ],
+      "goal": "用户能追踪哪些条件正在生效",
+      "filename": "90_FILTER_CHIPS.md",
+      "engine": "优先当前项目的路由、状态、键盘命令和设计 Token；组件视图层复用现有 React/Vue/Svelte，无障碍语义由正确 HTML/ARIA 模式提供。",
+      "trigger": "点击添加/删除条件",
+      "beats": "过滤chip在现有布局插入/删除时其余chip用FLIP重排；结果列表依真实查询刷新",
+      "timing": "200–260ms布局变化",
+      "reverse": "撤销删除按原序号恢复同chip",
+      "edge": "大量tag换行、异步过滤竞态、重复条件去重",
+      "qa": "多条件快速切换、最后条件清空、筛选URL"
+    },
+    {
+      "id": "91",
+      "title": "多选表格操作栏",
+      "category": "专业生产力工作台",
+      "keywords": [
+        "Selection Toolbar",
+        "多选",
+        "批量操作"
+      ],
+      "goal": "选中数量与可操作批量动作明确",
+      "filename": "91_MULTISELECT_TOOLBAR.md",
+      "engine": "优先当前项目的路由、状态、键盘命令和设计 Token；组件视图层复用现有 React/Vue/Svelte，无障碍语义由正确 HTML/ARIA 模式提供。",
+      "trigger": "点击复选框/Shift区间选中",
+      "beats": "行复选状态即刻更新，底部批量栏从工具位置滑出但不遮挡行",
+      "timing": "220ms 工具栏、选中即时",
+      "reverse": "全部取消同路径回收工具栏",
+      "edge": "分页跨页选择、权限、批量失败逐行报告",
+      "qa": "Shift+click、跨页、部分失败、读屏选择数"
+    },
+    {
+      "id": "92",
+      "title": "面板停靠与拖动",
+      "category": "专业生产力工作台",
+      "keywords": [
+        "Dockable Panels",
+        "停靠",
+        "工作台"
+      ],
+      "goal": "工具面板自定义位置不破坏主要内容",
+      "filename": "92_DOCKABLE_PANELS.md",
+      "engine": "优先当前项目的路由、状态、键盘命令和设计 Token；组件视图层复用现有 React/Vue/Svelte，无障碍语义由正确 HTML/ARIA 模式提供。",
+      "trigger": "拖动面板标题到停靠区",
+      "beats": "拖动面板保留尺寸，目标停靠位可视占位，放开后面板FLIP迁移",
+      "timing": "拖动跟手，落位300ms",
+      "reverse": "拖回同槽/重置布局恢复存储矩阵",
+      "edge": "移动端禁不必要拖动、窗口尺寸变化、布局版本迁移",
+      "qa": "三种停靠位置、失败/取消、复位"
+    },
+    {
+      "id": "93",
+      "title": "编辑器聚焦模式",
+      "category": "专业生产力工作台",
+      "keywords": [
+        "Focus Mode",
+        "专注模式",
+        "阅读模式"
+      ],
+      "goal": "需要时减少噪音并可原位恢复",
+      "filename": "93_FOCUS_MODE.md",
+      "engine": "优先当前项目的路由、状态、键盘命令和设计 Token；组件视图层复用现有 React/Vue/Svelte，无障碍语义由正确 HTML/ARIA 模式提供。",
+      "trigger": "点击聚焦/ESC",
+      "beats": "侧栏与辅助栏折叠，主编辑容器扩大，主文档滚动与选择位置保持",
+      "timing": "300ms容器FLIP，文字不做缩放",
+      "reverse": "关闭按同路径恢复周围面板和编辑焦点",
+      "edge": "用户输入未保存、复杂编辑器高度、浮动工具栏位置",
+      "qa": "光标位置前后、快速往返、窄屏、未保存提示"
+    },
+    {
+      "id": "94",
+      "title": "无限列表虚拟滚动",
+      "category": "专业生产力工作台",
+      "keywords": [
+        "Virtual List",
+        "无限滚动",
+        "大量数据"
+      ],
+      "goal": "快速移动海量条目并保持交互稳定",
+      "filename": "94_VIRTUAL_INFINITE_LIST.md",
+      "engine": "优先当前项目的路由、状态、键盘命令和设计 Token；组件视图层复用现有 React/Vue/Svelte，无障碍语义由正确 HTML/ARIA 模式提供。",
+      "trigger": "用户实际滚动列表",
+      "beats": "仅可视行渲染，scrollTop关联真实偏移，不对数据行做连片入场动画",
+      "timing": "滚动由系统惯性直接控制，选中态160ms",
+      "reverse": "回滚同位置恢复相同itemId与选中",
+      "edge": "可变行高、键盘定位、分页加载真实状态",
+      "qa": "1万条滚动、锚点稳定、屏幕阅读器替代导航"
+    },
+    {
+      "id": "95",
+      "title": "全局搜索结果定位高亮",
+      "category": "专业生产力工作台",
+      "keywords": [
+        "Search Result Jump",
+        "结果跳转"
+      ],
+      "goal": "从结果到页面目标保留指向关系",
+      "filename": "95_SEARCH_RESULT_JUMP.md",
+      "engine": "优先当前项目的路由、状态、键盘命令和设计 Token；组件视图层复用现有 React/Vue/Svelte，无障碍语义由正确 HTML/ARIA 模式提供。",
+      "trigger": "点击搜索结果",
+      "beats": "定位目标DOM/时间点/图表实体，目标短暂可见高亮，滚动遵守用户减少动态偏好",
+      "timing": "用户触发滚动250–400ms；高亮≤600ms后静止",
+      "reverse": "Back恢复搜索列表滚动与选择项",
+      "edge": "目标卸载/权限/虚拟列表需先加载对应行",
+      "qa": "搜索→定位→返回、目标不存在、焦点"
+    },
+    {
+      "id": "96",
+      "title": "AI Agent 流程节点执行态",
+      "category": "专业生产力工作台",
+      "keywords": [
+        "Agent Workflow",
+        "执行图",
+        "节点"
+      ],
+      "goal": "运行中可辨真实步骤与依赖，不被假动画误导",
+      "filename": "96_AGENT_WORKFLOW_STATES.md",
+      "engine": "优先当前项目的路由、状态、键盘命令和设计 Token；组件视图层复用现有 React/Vue/Svelte，无障碍语义由正确 HTML/ARIA 模式提供。",
+      "trigger": "点击运行/单步执行",
+      "beats": "节点从idle→running→success/error按真实事件变状态，连线只在实际执行期间可有限显示流向",
+      "timing": "节点反馈150ms；执行由事件驱动",
+      "reverse": "撤销编辑返回旧图形，但真实执行不能假装逆转",
+      "edge": "断线/重试/部分失败、明确任务ID、禁止虚构token进度",
+      "qa": "执行失败、手动重试、后台事件延迟、节点历史"
+    },
+    {
+      "id": "97",
+      "title": "移动底部导航选中迁移",
+      "category": "移动端与无障碍",
+      "keywords": [
+        "Mobile Tab Bar",
+        "底部导航"
+      ],
+      "goal": "移动端高频任务一步可达",
+      "filename": "97_MOBILE_BOTTOM_NAV.md",
+      "engine": "优先系统原生手势、滚动、focus 与 prefers-reduced-motion；不要覆盖浏览器默认行为；所有重要操作提供非手势替代路径。",
+      "trigger": "点击底部Tab",
+      "beats": "活动指示块沿相邻Tab槽位x迁移，标签状态更新；不做大范围页面飞入",
+      "timing": "200ms 非线性",
+      "reverse": "回Tab沿相同水平路径返回",
+      "edge": "安全区、可达最小44px触点、系统返回",
+      "qa": "4/5项往返、触屏、VoiceOver/读屏"
+    },
+    {
+      "id": "98",
+      "title": "下拉刷新真实数据",
+      "category": "移动端与无障碍",
+      "keywords": [
+        "Pull to Refresh",
+        "下拉刷新"
+      ],
+      "goal": "主动刷新而非自动频繁请求",
+      "filename": "98_PULL_REFRESH.md",
+      "engine": "优先系统原生手势、滚动、focus 与 prefers-reduced-motion；不要覆盖浏览器默认行为；所有重要操作提供非手势替代路径。",
+      "trigger": "列表顶部下拉超阈值释放",
+      "beats": "下拉距离有阻尼映射，释放达阈值进入真实loading状态；结束回到原位置",
+      "timing": "拖动跟手，收回220ms",
+      "reverse": "未达阈值回原位；取消不发请求",
+      "edge": "与浏览器原生刷新冲突、离线、不伪造刷新成功",
+      "qa": "短拉/长拉/失败/恢复，列表滚动位置"
+    },
+    {
+      "id": "99",
+      "title": "移动端滑动返回",
+      "category": "移动端与无障碍",
+      "keywords": [
+        "Swipe Back",
+        "边缘返回"
+      ],
+      "goal": "触摸手势返回不丢当前页面",
+      "filename": "99_MOBILE_SWIPE_BACK.md",
+      "engine": "优先系统原生手势、滚动、focus 与 prefers-reduced-motion；不要覆盖浏览器默认行为；所有重要操作提供非手势替代路径。",
+      "trigger": "屏幕边缘水平拖动",
+      "beats": "前一页承载视图按手势进度露出，当前页跟随位移；超过阈值提交history.back",
+      "timing": "跟手；松手260ms归位或完成",
+      "reverse": "未过阈值完整回当前页，动画同一进度器",
+      "edge": "浏览器系统边缘手势优先，冲突则禁用自定义",
+      "qa": "边缘/中间拖动、系统Back、快速反向、数据未保存"
+    },
+    {
+      "id": "100",
+      "title": "长按出现操作菜单",
+      "category": "移动端与无障碍",
+      "keywords": [
+        "Long Press Menu",
+        "长按菜单"
+      ],
+      "goal": "触摸屏显式获得对象上下文操作",
+      "filename": "100_LONG_PRESS_MENU.md",
+      "engine": "优先系统原生手势、滚动、focus 与 prefers-reduced-motion；不要覆盖浏览器默认行为；所有重要操作提供非手势替代路径。",
+      "trigger": "长按350–500ms且不发生滚动",
+      "beats": "触摸点附近出现可访问菜单，按压反馈轻微；释放后菜单保留以便操作",
+      "timing": "按压100ms，菜单160ms",
+      "reverse": "取消长按或Esc沿原触点收起",
+      "edge": "触摸滚动发生则取消，误触防护，保留显式“更多”按钮",
+      "qa": "长按/滚动/取消、触屏、多指"
+    },
+    {
+      "id": "101",
+      "title": "减少动态效果降级",
+      "category": "移动端与无障碍",
+      "keywords": [
+        "Reduced Motion",
+        "无动画",
+        "可访问"
+      ],
+      "goal": "系统减少动态时仍完整保留业务和焦点",
+      "filename": "101_REDUCED_MOTION_MODE.md",
+      "engine": "优先系统原生手势、滚动、focus 与 prefers-reduced-motion；不要覆盖浏览器默认行为；所有重要操作提供非手势替代路径。",
+      "trigger": "OS prefers-reduced-motion / 用户设置",
+      "beats": "移除大面积位移/缩放/视差和3D自动镜头；内容即时呈现，必要状态标识仍存在",
+      "timing": "0ms或极短非空间反馈，不隐藏数据",
+      "reverse": "撤回操作仍正确改变状态与焦点",
+      "edge": "动态系统设置需响应，避免隐藏元素仅靠动画显示",
+      "qa": "on/off实时切换、全键盘流程、静态截图"
+    },
+    {
+      "id": "102",
+      "title": "键盘拖拽与焦点迁移",
+      "category": "移动端与无障碍",
+      "keywords": [
+        "Keyboard DnD",
+        "键盘重排"
+      ],
+      "goal": "不可使用鼠标的用户也能重排",
+      "filename": "102_KEYBOARD_REORDER.md",
+      "engine": "优先系统原生手势、滚动、focus 与 prefers-reduced-motion；不要覆盖浏览器默认行为；所有重要操作提供非手势替代路径。",
+      "trigger": "按Space抓取、上下箭头调序、Enter放置、Escape取消",
+      "beats": "当前item有可读抓取状态，其他项按位置移动，live region读出新索引",
+      "timing": "每次移动180ms布局FLIP",
+      "reverse": "Escape回原序号，焦点保持同一稳定itemId",
+      "edge": "不可自动抓取、禁用项跳过、ARIA描述操作提示",
+      "qa": "按键抓取/移动/取消、屏幕阅读器信息"
+    },
+    {
+      "id": "103",
+      "title": "响应式密度平衡",
+      "category": "移动端与无障碍",
+      "keywords": [
+        "Responsive Density",
+        "响应式",
+        "高密度"
+      ],
+      "goal": "小屏优先核心任务而不隐藏关键事实",
+      "filename": "103_RESPONSIVE_DENSITY.md",
+      "engine": "优先系统原生手势、滚动、focus 与 prefers-reduced-motion；不要覆盖浏览器默认行为；所有重要操作提供非手势替代路径。",
+      "trigger": "用户resize/设备旋转",
+      "beats": "容器基于断点即时重排布局；交互导致宽度变化时才做FLIP，不能每次resize都炫技",
+      "timing": "resize直接落位，用户切换布局260ms",
+      "reverse": "恢复宽屏同数据顺序与交互上下文",
+      "edge": "表格横向滚动、触控密度、图例/轴文字换行",
+      "qa": "390/768/1440视口，无横向溢出/失踪操作"
+    },
+    {
+      "id": "104",
+      "title": "触摸安全交互目标",
+      "category": "移动端与无障碍",
+      "keywords": [
+        "Touch Target",
+        "触摸",
+        "可触达"
+      ],
+      "goal": "减少误触并保留操作反馈",
+      "filename": "104_TOUCH_TARGETS.md",
+      "engine": "优先系统原生手势、滚动、focus 与 prefers-reduced-motion；不要覆盖浏览器默认行为；所有重要操作提供非手势替代路径。",
+      "trigger": "指尖点击触屏按钮",
+      "beats": "触摸down使用小幅压缩，视觉图标不误导，tap完成实际操作才变成功态",
+      "timing": "按压80ms释放120ms（可复用03）",
+      "reverse": "取消触点重置，不能留下pressed",
+      "edge": "目标≥44px可用区域建议，安全区、相邻按钮间距",
+      "qa": "触控检查、快速点按、touchcancel、disabled"
+    }
+  ]
+}

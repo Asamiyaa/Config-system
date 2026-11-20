@@ -3,6 +3,7 @@
 __pycache__/
 *.py[cod]
 data/wealth_os.sqlite3
+data/opportunity-os/
 *.sqlite3-shm
 *.sqlite3-wal
 data/market_refresh_logs.jsonl
