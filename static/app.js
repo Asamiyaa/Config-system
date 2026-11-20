@@ -280,7 +280,7 @@ function setHeader(page) {
 }
 
 const HUB_OF={
-  uilearning:'newconfig',mindmap:'newconfig',whiteboard:'newconfig',home:'newconfig',today:'newconfig',xindeng:'newconfig',growthplan:'newconfig',review:'newconfig',
+  uilearning:'dashboard',mindmap:'newconfig',whiteboard:'newconfig',home:'newconfig',today:'newconfig',xindeng:'newconfig',growthplan:'newconfig',review:'newconfig',
   inbox:'newconfig',schedules:'settings',settings:'settings',dailyflow:'newconfig',mistakes:'newconfig',calendar:'newconfig',matrix:'newconfig',stats:'newconfig',important:'newconfig',alltasks:'newconfig',flowstats:'newconfig',
   dashboard:'dashboard',allocation:'dashboard',nasdaq:'dashboard',ashare:'dashboard',execution:'dashboard',alpharadar:'dashboard',
   health:'health',checkin:'health',diet:'health',fitness:'health',skin:'health',sleep:'health',style:'health',
@@ -288,8 +288,8 @@ const HUB_OF={
 };
 const HUB_TABS={
   settings:{label:'设置',items:[['schedules','自动化'],['archive','归档']]},
-  dashboard:{label:'资产',items:[['http://39.106.118.186/','市场引擎 ↗'],['dashboard','总览'],['allocation','配置'],['nasdaq','纳指'],['ashare','A股'],['execution','执行'],['alpharadar','实验']]},
-  newconfig:{label:'成长',items:[['dailyflow','流程'],['calendar','周历'],['growthplan','90天计划'],['xindeng','新登'],['agents','平衡'],['newconfig','成长总览'],['mistakes','避坑'],['review','每周复盘'],['whiteboard','白布画板'],['mindmap','思维导图'],['uilearning','UI 学习']]},
+  dashboard:{label:'资产',items:[['http://39.106.118.186/','市场引擎 ↗'],['dashboard','总览'],['uilearning','UI 学习'],['allocation','配置'],['nasdaq','纳指'],['ashare','A股'],['execution','执行'],['alpharadar','实验']]},
+  newconfig:{label:'成长',items:[['dailyflow','流程'],['calendar','周历'],['growthplan','90天计划'],['xindeng','新登'],['agents','平衡'],['newconfig','成长总览'],['mistakes','避坑'],['review','每周复盘'],['whiteboard','白布画板'],['mindmap','思维导图']]},
   health:{label:'健康',items:[['health','总览'],['checkin','打卡'],['diet','饮食'],['fitness','健身'],['skin','皮肤'],['sleep','睡眠'],['style','穿搭']]}
 };
 function renderHubTabs(page){
@@ -2608,3 +2608,4 @@ window.addEventListener('message',e=>{
  if(e.data?.type==='ui-learning-dirty')window.uiLearningDirty=!!e.data.dirty;
 });
 window.addEventListener('beforeunload',e=>{if(window.uiLearningDirty){e.preventDefault();e.returnValue='';}});
+

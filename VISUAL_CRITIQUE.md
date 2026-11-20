@@ -26,3 +26,6 @@
 check_design_system.py（含原节点/焦点/坐标断言）、check_mobile_execution.py、check_compact_timeline.py、check_experience_motion.py通过。学习站新增测试见 UI_LEARNING_INTEGRATION.md。
 
 未做真实低端Android设备的帧率、能耗、系统键盘顶起测试，也未逐个验收学习库中的104个配方。此报告不以自评分数宣称专业等级；截图说明静态布局，交互断言说明对应状态，不能据此证明全站无障碍合规或稳定60fps。
+
+
+导航后续调整：UI 学习已移至“资产”，放在“总览”后。该变更已在本次 2026-11-21 导航复核中确认。

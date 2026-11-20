@@ -1,0 +1,93 @@
+{
+  "id": "case_demo_c_002",
+  "title": "C端电商商品详情页",
+  "cover_image_id": "img_demo_c_1",
+  "images": [
+    {
+      "id": "img_demo_c_1",
+      "name": "sample-c-page.svg",
+      "src": "assets/images/sample-c-page.svg",
+      "is_seed": true,
+      "annotations": [
+        {
+          "id": "ann_c_1",
+          "x": 50,
+          "y": 8,
+          "text": "商品主图",
+          "color": "#3b6ea5"
+        }
+      ]
+    }
+  ],
+  "style_tags": [
+    "亮色",
+    "移动端",
+    "简约"
+  ],
+  "business_tags": [
+    "C端",
+    "电商",
+    "商品详情"
+  ],
+  "favorite": false,
+  "analysis": {
+    "layout_structure": {
+      "content": "移动端纵向单列信息流，从上到下为商品主图、价格与标题、规格选择、图文详情与评价，底部固定购买操作条，形成清晰的浏览到转化路径。",
+      "source": "ai_generated",
+      "updated_at": "2026-11-01T09:00:00.000Z"
+    },
+    "visual_style": {
+      "content": "亮色简约风格，留白充足，圆角卡片承载信息，主按钮使用高强调品牌色；字体层级对比明显，整体轻松、亲和。",
+      "source": "ai_generated",
+      "updated_at": "2026-11-01T09:00:00.000Z"
+    },
+    "interaction": {
+      "content": "静态截图，动态交互需手动补充；可推断：主图支持左右滑动与放大，规格区点击选择，底部按钮触发加购或下单，评价区可展开查看。",
+      "source": "ai_generated",
+      "updated_at": "2026-11-01T09:00:00.000Z"
+    },
+    "color_mood": {
+      "content": "以白色/浅灰中性色为底，品牌色集中在价格与行动按钮，点缀少量暖色营造促销氛围；整体明亮、干净、有购买引导性。",
+      "source": "ai_generated",
+      "updated_at": "2026-11-01T09:00:00.000Z"
+    },
+    "layout_strengths": {
+      "content": "单列信息流符合拇指操作与阅读习惯；固定底部操作条让转化入口随时可达；信息按决策顺序排布，降低下单前的认知成本。",
+      "source": "ai_generated",
+      "updated_at": "2026-11-01T09:00:00.000Z"
+    }
+  },
+  "use_cases": {
+    "content": "适用于电商、零售、本地生活等需要在移动端完成商品了解与下单转化的消费级页面。",
+    "source": "human",
+    "updated_at": "2026-11-01T09:00:00.000Z"
+  },
+  "pitfalls": {
+    "avoid_pitfalls": {
+      "content": "避免首屏信息过载挤掉主图与价格；避免底部操作条遮挡内容；规格与库存状态需即时反馈，减少下单挫败。",
+      "source": "human",
+      "updated_at": "2026-11-01T09:00:00.000Z"
+    },
+    "forbidden_scenarios": {
+      "content": "不适合高密度、多控件并列的专业后台场景；也不适合需要长时间多任务并行处理的工作台。",
+      "source": "human",
+      "updated_at": "2026-11-01T09:00:00.000Z"
+    }
+  },
+  "ai_raw_result": "{\"layout_structure\":\"移动端纵向单列信息流……\",\"visual_style\":\"亮色简约风格，留白充足……\",\"interaction\":\"静态截图，动态交互需手动补充……\",\"color_mood\":\"以白色/浅灰中性色为底……\",\"layout_strengths\":\"单列信息流符合拇指操作与阅读习惯……\"}",
+  "ai_meta": {
+    "model": "mock-demo",
+    "template_id": "c_page",
+    "parsed_at": "2026-11-01T09:00:00.000Z",
+    "static_screenshot_note": true
+  },
+  "versions": [
+    {
+      "version": 1,
+      "saved_at": "2026-11-01T09:00:00.000Z",
+      "note": "初始归档"
+    }
+  ],
+  "created_at": "2026-11-01T09:00:00.000Z",
+  "updated_at": "2026-11-01T09:00:00.000Z"
+}
