@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="color-scheme" content="light" />
+  <title>Creative Interaction Studio · 可交互实验室</title>
+  <link rel="stylesheet" href="studio.css" />
+  <script defer src="studio.js"></script>
+</head>
+<body>
+  <main class="shell">
+    <aside class="navigation" id="studioNav" aria-label="实验室导航">
+      <div class="brand" aria-label="Creative Interaction Studio"><div class="brand-icon">C<span>.</span></div><div class="brand-copy"><b>Creative</b><small>INTERACTION STUDIO</small></div></div>
+      <div class="nav-caption">SEVEN LIVE PATTERNS</div>
+      <nav id="sideNav" class="nav-list" aria-label="场景索引">
+        <a href="#morph"><span class="nav-id">01</span><span class="nav-label">Morphing Dialog</span></a>
+        <a href="#reorder"><span class="nav-id">02</span><span class="nav-label">Drag Reorder</span></a>
+        <a href="#chart"><span class="nav-id">03</span><span class="nav-label">Chart Morph</span></a>
+        <a href="#timeline"><span class="nav-id">04</span><span class="nav-label">Timeline Scrubber</span></a>
+        <a href="#camera"><span class="nav-id">05</span><span class="nav-label">Spatial Camera</span></a>
+        <a href="#command"><span class="nav-id">06</span><span class="nav-label">Command Palette</span></a>
+        <a href="#press"><span class="nav-id">07</span><span class="nav-label">Press Feedback</span></a>
+      </nav>
+      <div class="nav-bottom"><span class="status-dot"></span><span class="brand-copy">NO AUTOPLAY / NO DEPENDENCIES</span></div>
+    </aside>
+    <div class="content-frame">
+      <header class="topbar"><div class="path">LAB <span>/</span> INTERACTION RECIPES <span>/</span> V2.0</div><button class="ghost" id="toggleSidebar" aria-label="折叠或展开侧栏" aria-expanded="true">⇤ 侧栏</button></header>
+      <div class="main-content">
+        <section class="hero">
+          <div class="eyebrow"><span class="live-pip"></span> EXPERIMENTAL INTERACTIONS · 2026</div>
+          <h1>动效不负责炫耀。<br><em>动效负责解释变化。</em></h1>
+          <p>7 个可操作示例展示真实触发、状态连续、双向反馈与精确时序。104 个完整 Codex 配方见 <code>.agents/scenarios/</code>。每个模块初始静止，只有你的操作才会改变它。</p>
+          <div class="hero-stats"><span><strong>104</strong> 场景配方</span><span><strong>10</strong> 领域分类</span><span><strong>07</strong> 现场示范</span></div>
+        </section>
+        <div class="section-heading"><span>LIVE INTERACTION LAB</span><span>CLICK · DRAG · SCRUB · REVERSE</span></div>
+        <div class="panels">
+          <section class="panel" id="morph" aria-labelledby="morph-title"><div class="panel-head"><span class="index">01 / OVERLAY</span><h2 id="morph-title">从按钮生长的详情层</h2><p>从真实点击坐标到完整对话框；关闭时原路返回，支持 Escape 与半程反向。</p></div><div class="panel-demo center-panel"><button class="primary-btn" id="openMorph">查看交互细节 <span aria-hidden="true">↗</span></button></div><div class="meta"><code>13_BUTTON_TO_DIALOG_MORPH</code><span>340ms · same anchor</span></div></section>
+          <section class="panel" id="reorder" aria-labelledby="reorder-title"><div class="panel-head"><span class="index">02 / GESTURE</span><h2 id="reorder-title">排序是一种空间迁移</h2><p>拖拽左侧手柄重排，也可使用 ↑↓ 按钮。每个条目保留稳定 ID。</p></div><div class="panel-demo"><ul class="sort-list" id="sortList" aria-label="可调整顺序的任务"><li draggable="true" data-id="design"><span class="handle" title="拖拽移动">⠿</span><span class="item-main">设计信息层级<small>DESIGN / 01</small></span><div class="reorder-actions"><button aria-label="设计信息层级向上移动" data-dir="-1">↑</button><button aria-label="设计信息层级向下移动" data-dir="1">↓</button></div></li><li draggable="true" data-id="motion"><span class="handle" title="拖拽移动">⠿</span><span class="item-main">编排交互节奏<small>MOTION / 02</small></span><div class="reorder-actions"><button aria-label="编排交互节奏向上移动" data-dir="-1">↑</button><button aria-label="编排交互节奏向下移动" data-dir="1">↓</button></div></li><li draggable="true" data-id="test"><span class="handle" title="拖拽移动">⠿</span><span class="item-main">浏览器实测验收<small>QA / 03</small></span><div class="reorder-actions"><button aria-label="浏览器实测验收向上移动" data-dir="-1">↑</button><button aria-label="浏览器实测验收向下移动" data-dir="1">↓</button></div></li></ul><p class="demo-caption" id="sortStatus" role="status">选择一项改变顺序。</p></div><div class="meta"><code>33_DRAG_LIST_REORDER</code><span>FLIP · stable identity</span></div></section>
+          <section class="panel" id="chart" aria-labelledby="chart-title"><div class="panel-head"><span class="index">03 / DATA</span><h2 id="chart-title">图表状态是连续的</h2><p>在两组明确标注的演示数据间切换，保持点位坐标与曲线身份。非真实市场数据。</p></div><div class="panel-demo"><div class="chart-controls"><span>示例指标 / SAMPLE SERIES</span><div class="switcher" role="group" aria-label="选择样例图表数据"><button id="chartA" aria-pressed="true">A · 趋势</button><button id="chartB" aria-pressed="false">B · 波动</button></div></div><svg class="line-chart" viewBox="0 0 480 160" role="img" aria-label="演示数据折线图。可切换 A 与 B 两组数据。"><defs><linearGradient id="chartFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#b5d8c9" stop-opacity=".52"/><stop offset="1" stop-color="#b5d8c9" stop-opacity="0"/></linearGradient></defs><g class="grid-lines"><line x1="12" x2="468" y1="35" y2="35"/><line x1="12" x2="468" y1="78" y2="78"/><line x1="12" x2="468" y1="121" y2="121"/></g><path id="fillPath" fill="url(#chartFill)"/><path id="chartPath" fill="none" stroke="#236e57" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg><div class="chart-foot"><span>10:00</span><span>10:30</span><span>11:00</span><span>11:30</span><span id="chartState">演示数据 A</span></div></div><div class="meta"><code>44_LINE_CHART_MORPH</code><span>320ms · user triggered</span></div></section>
+          <section class="panel" id="timeline" aria-labelledby="timeline-title"><div class="panel-head"><span class="index">04 / TIMELINE</span><h2 id="timeline-title">时间由你的手指控制</h2><p>拖动进度到任意一帧，图形与说明同步更新。没有后台播放、没有第二条滞后曲线。</p></div><div class="panel-demo"><div class="timeline-visual"><div id="timelineSquare"></div><span id="timelineStep">INITIAL STATE</span></div><div class="scrubbar"><label for="timelineRange">SCENE PROGRESS</label><output id="timelineValue" for="timelineRange">0%</output></div><input id="timelineRange" type="range" min="0" max="100" value="0" step="1" aria-label="场景进度"/><div class="timeline-marks"><span>0 · 起点</span><span>50 · 转换</span><span>100 · 终点</span></div></div><div class="meta"><code>55_TIMELINE_SCRUBBER</code><span>1:1 scrub · no delay</span></div></section>
+          <section class="panel" id="camera" aria-labelledby="camera-title"><div class="panel-head"><span class="index">05 / SPATIAL</span><h2 id="camera-title">空间镜头 · 受控推进</h2><p>手动滑动摄像机视角参数。此处是 CSS 3D 空间示意；真实 3D 项目应使用 Three.js 与碰撞检测。</p></div><div class="panel-demo"><div class="room-viewport"><div class="room-camera" id="roomCamera"><div class="room-floor"></div><div class="room-wall wall-back"></div><div class="room-wall wall-left"></div><div class="room-furniture furniture-one"></div><div class="room-furniture furniture-two"></div></div><span class="room-label">CSS 3D / ILLUSTRATIVE GEOMETRY</span></div><div class="scrubbar"><label for="cameraRange">CAMERA POSITION</label><output id="cameraValue">0%</output></div><input id="cameraRange" type="range" min="0" max="100" value="0" aria-label="摄像机推进位置"/></div><div class="meta"><code>65_CINEMATIC_CAMERA_DOLLY</code><span>user scrub · reversible</span></div></section>
+          <section class="panel" id="command" aria-labelledby="command-title"><div class="panel-head"><span class="index">06 / PRODUCTIVITY</span><h2 id="command-title">命令入口保持轻巧</h2><p>点击或按 <kbd>Ctrl</kbd> / <kbd>⌘</kbd> + <kbd>K</kbd>，输入过滤命令，方向键和 Enter 执行，Escape 关闭。</p></div><div class="panel-demo center-panel"><button class="command-open" id="openCommand"><span>⌕&nbsp; 搜索命令、跳转场景…</span><kbd>⌘ K</kbd></button><p class="demo-caption" id="commandStatus" role="status">尚未执行命令。</p></div><div class="meta"><code>86_COMMAND_PALETTE</code><span>keyboard first · focus safe</span></div></section>
+          <section class="panel" id="press" aria-labelledby="press-title"><div class="panel-head"><span class="index">07 / MICRO</span><h2 id="press-title">反馈应该立刻发生</h2><p>按住时压缩到 0.96，松开返回；取消或移出时不会卡在 pressed 状态。</p></div><div class="panel-demo center-panel"><button id="pressButton" class="press-button">按住感受反馈 <span aria-hidden="true">↗</span></button><p class="demo-caption" id="pressStatus" role="status">IDLE</p></div><div class="meta"><code>03_PRESS_FEEDBACK</code><span>80ms press · 120ms release</span></div></section>
+        </div>
+        <footer class="footer">本页面只展示 7 个可运行交互切片。完整 104 份配方是 Codex 实施规范，不代表 104 个可运行组件。<br>所有测试均应以实际浏览器行为及其可复现证据为准。</footer>
+      </div>
+    </div>
+  </main>
+  <dialog id="morphDialog" class="morph-dialog" aria-labelledby="dialogTitle"><div class="dialog-body"><div class="dialog-eyebrow">INTERACTION CONTRACT / 013</div><h3 id="dialogTitle">形变，而不是闪现。</h3><p>容器以触发按钮为起点，完成 340ms 的空间迁移；内容随后出现。关闭时精确沿原路径返回。</p><div class="dialog-spec"><span>TRIGGER</span><b>Button / Enter</b><span>REVERSAL</span><b>Same geometry &amp; easing</b><span>INTERRUPTION</span><b>Reverse mid-flight</b></div><div class="dialog-actions"><button id="closeMorph" class="primary-btn">返回原位置 ↙</button></div></div></dialog>
+  <dialog id="commandDialog" class="command-dialog" aria-label="命令面板"><div class="cmd-input"><span aria-hidden="true">⌕</span><input id="commandInput" role="combobox" aria-autocomplete="list" aria-controls="commandResults" aria-expanded="true" autocomplete="off" aria-label="搜索命令" placeholder="输入命令或场景名称…"/><kbd>Esc</kbd></div><div id="commandResults" class="command-results" role="listbox" aria-label="命令结果"></div><div class="command-hint">↑ ↓ 选择 <span>↵ 执行</span> <span>Esc 关闭</span></div></dialog>
+</body>
+</html>

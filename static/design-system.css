@@ -37,3 +37,53 @@ body.spatial-ui #viewRoot .execution-focus h2{color:#f3f8f1!important;font-famil
 body.spatial-ui #viewRoot h1,body.spatial-ui #viewRoot h2,body.spatial-ui #viewRoot h3,body.spatial-ui #viewRoot h4{font-family:"Public Sans","Microsoft YaHei","PingFang SC",sans-serif!important}
 body.spatial-ui #viewRoot .flow-check-row button{min-height:44px;border:1px solid var(--border);border-radius:10px;background:var(--raised);color:var(--accent);padding:8px 14px;font-weight:550}
 body.spatial-ui #viewRoot .flow-page-tab{border-bottom:0!important}body.spatial-ui #viewRoot .flow-page-tab::after{display:none!important}
+
+/* Visual critique refinement: fewer competing surfaces, stable execution rows. */
+body.spatial-ui #viewRoot .flow-is-checklist.active{display:flex;flex-direction:column}
+.flow-is-checklist>.execution-focus{order:0;margin-top:12px;margin-bottom:8px}
+.flow-is-checklist>.flow-check-toolbar{order:1}
+.flow-is-checklist>.flow-checklist{order:2}
+body.spatial-ui #viewRoot .flow-is-checklist>.flow-check-toolbar{padding:4px 0 12px!important;gap:12px}
+body.spatial-ui #viewRoot .flow-is-checklist>.flow-check-toolbar button{background:transparent!important;box-shadow:none!important;border-color:transparent!important;padding:8px;color:var(--muted);min-height:44px}
+body.spatial-ui #viewRoot .flow-is-checklist>.flow-check-toolbar #flowViewToggle{color:var(--accent);padding-left:0}
+body.spatial-ui #viewRoot .flow-checklist{border-radius:12px!important;box-shadow:none!important;padding:4px 20px 8px}
+body.spatial-ui #viewRoot .flow-checklist>.flow-check-toolbar{display:grid;grid-template-columns:1fr auto auto;gap:12px;padding:12px 0!important;margin:0!important;border-bottom:1px solid var(--rule)}
+body.spatial-ui #viewRoot .flow-checklist>.flow-check-toolbar h3{font-size:16px!important;margin:0;letter-spacing:0}
+body.spatial-ui #viewRoot .flow-checklist>.flow-check-toolbar button{border:0;background:transparent!important;color:var(--muted);padding:8px 0;min-height:44px}
+body.spatial-ui #viewRoot .flow-checklist #checklistDate{max-width:100%;width:148px;font-size:13px!important;padding:8px}
+body.spatial-ui #viewRoot .flow-checklist .flow-check-row{margin:0;padding:16px 0;min-height:72px}
+body.spatial-ui #viewRoot .flow-check-row button{background:transparent!important;border-color:transparent!important;color:var(--accent);padding:8px 6px;font-size:13px}
+body.spatial-ui #viewRoot .flow-check-row.done{opacity:1;background:transparent}
+body.spatial-ui #viewRoot .flow-check-row.done strong{opacity:1;color:var(--muted);font-weight:400}
+body.spatial-ui #viewRoot .flow-check-row.done button{color:var(--muted)}
+body.spatial-ui #viewRoot .execution-focus{min-height:128px}
+body.spatial-ui #viewRoot .execution-focus h2{line-height:1.4!important}
+#quickTodo .todo-schedule{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+#quickTodo .todo-schedule label,#quickTodo .todo-schedule input{min-width:0;width:100%;box-sizing:border-box}
+#quickTodo .todo-actions{display:grid;grid-template-columns:1fr 2fr;gap:12px;margin-top:8px}
+#quickTodo [data-feedback]:empty{display:none}
+body.spatial-ui #quickTodo [data-voice]{justify-self:start;border:0;background:transparent;padding:6px 0;color:var(--accent)}
+body.spatial-ui #quickTodo h2{font-size:22px;margin:0 0 4px}
+body.spatial-ui #quickTodo form>p{font-size:13px;color:var(--muted);margin:0}
+@media(max-width:860px){
+ body.spatial-ui #viewRoot[data-page=dailyflow]>.page-head{margin-bottom:4px!important}
+ body.spatial-ui #viewRoot .flow-is-checklist>.execution-focus{padding:18px 20px 22px;flex-wrap:nowrap;align-items:center;gap:10px}
+ body.spatial-ui #viewRoot .flow-is-checklist>.execution-focus>div{min-width:0}
+ body.spatial-ui #viewRoot .execution-focus h2{font-size:20px!important;max-width:none;overflow-wrap:anywhere}
+ body.spatial-ui #viewRoot .execution-focus button{padding:10px 12px}
+ body.spatial-ui #viewRoot .flow-checklist{padding:0 16px 8px}
+ body.spatial-ui #viewRoot .flow-checklist>.flow-check-toolbar{grid-template-columns:minmax(0,1fr) auto;gap:0 8px}
+ body.spatial-ui #viewRoot .flow-checklist>.flow-check-toolbar button{grid-column:1/-1;justify-self:start;font-size:12px;min-height:36px;padding:4px 0}
+ body.spatial-ui #viewRoot .flow-is-checklist>.flow-check-toolbar{gap:4px}
+ body.spatial-ui #viewRoot .flow-is-checklist>.flow-check-toolbar button{font-size:12px;padding:8px 4px}
+ body.spatial-ui #viewRoot .flow-checklist .flow-check-row{gap:12px;padding:14px 0}
+}
+
+body.spatial-ui #viewRoot .flow-checklist>.flow-check-toolbar button{border:0!important;border-radius:0!important}
+@media(max-width:860px){
+ body.spatial-ui #viewRoot .flow-checklist>.flow-check-toolbar{padding:12px 0 4px!important}
+ body.spatial-ui #viewRoot .flow-checklist>.flow-check-toolbar button{min-height:32px}
+}
+
+.ui-learning-frame{display:block;width:100%;height:calc(100dvh - 255px);min-height:560px;border:1px solid var(--border);border-radius:12px;background:var(--surface)}
+@media(max-width:860px){.ui-learning-frame{height:calc(100dvh - 180px);min-height:480px;border-radius:12px}body.spatial-ui .main-panel:has(#viewRoot[data-page=uilearning]) .app-footer{display:none}}

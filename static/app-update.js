@@ -4,7 +4,7 @@
   let checking = false, pending = false, reloading = false;
   const visible = el => !!el.getClientRects().length && getComputedStyle(el).visibility !== 'hidden';
   function busy() {
-    return document.hidden || window.boardEditorDirty ||
+    return document.hidden || window.boardEditorDirty || window.uiLearningDirty ||
       (typeof unsavedChanges !== 'undefined' && unsavedChanges) ||
       (typeof boardStroke !== 'undefined' && boardStroke) ||
       [...document.querySelectorAll('input:focus,textarea:focus,[contenteditable="true"]:focus,[role="dialog"],dialog[open],.flow-modal')].some(visible) ||

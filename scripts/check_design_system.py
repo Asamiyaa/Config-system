@@ -25,8 +25,14 @@ with sync_playwright() as pw:
   box=p.locator('#quickTodo').bounding_box();assert box['x']>=-1 and box['x']+box['width']<=width+1
   p.screenshot(path=f'artifacts/design-dialog-{width}-{theme}.png',full_page=False)
   p.locator('#quickTodo [data-close]').click()
+  p.evaluate("window.qaCheckbox=document.querySelector('[data-checklist-id]');window.qaCheckboxY=qaCheckbox.getBoundingClientRect().y")
   p.locator('[data-checklist-id]').first.check();p.wait_for_timeout(250)
   assert p.locator('.execution-focus progress').get_attribute('value')=='1'
+  assert p.evaluate("qaCheckbox===document.querySelector('[data-checklist-id]') && document.activeElement===qaCheckbox && Math.abs(qaCheckbox.getBoundingClientRect().y-qaCheckboxY)<1")
+  p.get_by_role('tab',name='流程统计').click()
+  assert not p.locator('.execution-focus').is_visible()
+  p.get_by_role('tab',name='流程编排').click()
+  assert p.locator('.execution-focus').is_visible()
   assert not errors,errors
   p.close()
  b.close()

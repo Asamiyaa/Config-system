@@ -30,7 +30,7 @@ const WORKBOOKS = [
 ];
 function shiftDateKey(key, days) { if(!key) return ''; const d=new Date(`${key}T12:00:00`); d.setDate(d.getDate()+days); return todayKey(d); }
 function dayDiff(start,end) { if(!start||!end) return 0; return Math.round((new Date(`${end}T12:00:00`)-new Date(`${start}T12:00:00`))/86400000); }
-const PAGE_NAMES = {schedules:'自动化',agents:'平衡',settings:'设置',mistakes:'避坑',home:'工作台',inbox:'今日任务',upcoming:'未来 7 天',calendar:'周历 / 日程',matrix:'任务四象限',stats:'执行统计',important:'重要事项',alltasks:'全部任务',dashboard:'资产总览',allocation:'全球资产配置',nasdaq:'纳斯达克 AI 策略',ashare:'A股 ETF 轮动',xindeng:'新登',newconfig:'成长总览',health:'健康',checkin:'打卡与统计',diet:'饮食饮水',fitness:'健身管理',skin:'皮肤护理',sleep:'睡眠与恢复',style:'发型与穿搭',english:'英语',reading:'阅读',execution:'每日执行与日志',archive:'归档',dailyflow:'流程',flowstats:'流程统计',alpharadar:'Alpha Radar'};
+const PAGE_NAMES = {uilearning:"UI 学习",schedules:'自动化',agents:'平衡',settings:'设置',mistakes:'避坑',home:'工作台',inbox:'今日任务',upcoming:'未来 7 天',calendar:'周历 / 日程',matrix:'任务四象限',stats:'执行统计',important:'重要事项',alltasks:'全部任务',dashboard:'资产总览',allocation:'全球资产配置',nasdaq:'纳斯达克 AI 策略',ashare:'A股 ETF 轮动',xindeng:'新登',newconfig:'成长总览',health:'健康',checkin:'打卡与统计',diet:'饮食饮水',fitness:'健身管理',skin:'皮肤护理',sleep:'睡眠与恢复',style:'发型与穿搭',english:'英语',reading:'阅读',execution:'每日执行与日志',archive:'归档',dailyflow:'流程',flowstats:'流程统计',alpharadar:'Alpha Radar'};
 
 async function api(path, options={}) {
   const res = await fetch(path, {credentials:'same-origin', headers:{'Content-Type':'application/json', ...(options.headers||{})}, ...options});
@@ -280,7 +280,7 @@ function setHeader(page) {
 }
 
 const HUB_OF={
-  mindmap:'newconfig',whiteboard:'newconfig',home:'newconfig',today:'newconfig',xindeng:'newconfig',growthplan:'newconfig',review:'newconfig',
+  uilearning:'newconfig',mindmap:'newconfig',whiteboard:'newconfig',home:'newconfig',today:'newconfig',xindeng:'newconfig',growthplan:'newconfig',review:'newconfig',
   inbox:'newconfig',schedules:'settings',settings:'settings',dailyflow:'newconfig',mistakes:'newconfig',calendar:'newconfig',matrix:'newconfig',stats:'newconfig',important:'newconfig',alltasks:'newconfig',flowstats:'newconfig',
   dashboard:'dashboard',allocation:'dashboard',nasdaq:'dashboard',ashare:'dashboard',execution:'dashboard',alpharadar:'dashboard',
   health:'health',checkin:'health',diet:'health',fitness:'health',skin:'health',sleep:'health',style:'health',
@@ -289,7 +289,7 @@ const HUB_OF={
 const HUB_TABS={
   settings:{label:'设置',items:[['schedules','自动化'],['archive','归档']]},
   dashboard:{label:'资产',items:[['http://39.106.118.186/','市场引擎 ↗'],['dashboard','总览'],['allocation','配置'],['nasdaq','纳指'],['ashare','A股'],['execution','执行'],['alpharadar','实验']]},
-  newconfig:{label:'成长',items:[['dailyflow','流程'],['calendar','周历'],['growthplan','90天计划'],['xindeng','新登'],['agents','平衡'],['newconfig','成长总览'],['mistakes','避坑'],['review','每周复盘'],['whiteboard','白布画板'],['mindmap','思维导图']]},
+  newconfig:{label:'成长',items:[['dailyflow','流程'],['calendar','周历'],['growthplan','90天计划'],['xindeng','新登'],['agents','平衡'],['newconfig','成长总览'],['mistakes','避坑'],['review','每周复盘'],['whiteboard','白布画板'],['mindmap','思维导图'],['uilearning','UI 学习']]},
   health:{label:'健康',items:[['health','总览'],['checkin','打卡'],['diet','饮食'],['fitness','健身'],['skin','皮肤'],['sleep','睡眠'],['style','穿搭']]}
 };
 function renderHubTabs(page){
@@ -371,6 +371,7 @@ function labelControls(root=document){
   });
 }
 function renderPage(page, {autoRefresh=false, transition=true, animate=true}={}) {  if (!state) return;
+  if(window.uiLearningDirty){toast('UI 学习仍有未保存内容，请返回学习页重试或备份后再离开',true);return;}
   if(window.boardEditorDirty){toast('画板正在保存或保存失败，请先在画板内保存或导出备份',true);return;}
   if(page==='settings')page='schedules';
   if(page==='home'||page==='today')page='dailyflow';
@@ -382,7 +383,7 @@ function renderPage(page, {autoRefresh=false, transition=true, animate=true}={})
   const root=$('#viewRoot');
   root.dataset.page=page;
   root.dataset.hub=HUB_OF[page]||page;
-  const map={mindmap:renderMindmap,whiteboard:renderWhiteboard,xindeng:renderXinDeng,growthplan:renderGrowthPlan,review:renderGrowthReview,today:()=>renderTaskWorkspace('home'),schedules:renderSchedules,agents:renderAgents,mistakes:renderMistakes,home:renderHome,inbox:renderInbox,upcoming:renderUpcoming,calendar:renderCalendar,matrix:renderMatrix,stats:renderFocusStats,important:renderImportant,alltasks:renderAllFocusTasks,dashboard:renderDashboard,allocation:renderAllocation,nasdaq:renderNasdaq,ashare:renderAshare,newconfig:()=> (typeof renderNewConfigV2==='function'?renderNewConfigV2():renderNewConfig()),health:renderHealth,checkin:renderHealthCheckin,diet:()=>renderHealthSection('diet'),fitness:()=>renderHealthSection('fitness'),skin:()=>renderHealthSection('skin'),sleep:()=>renderHealthSection('sleep'),style:()=>renderHealthSection('style'),english:()=> (typeof renderEnglishV2==='function'?renderEnglishV2():renderEnglish()),reading:()=> (typeof renderReadingV2==='function'?renderReadingV2():renderReading()),execution:renderExecution,archive:renderArchive,dailyflow:renderDailyFlow,flowstats:renderFlowStats,alpharadar:renderAlphaRadar};
+  const map={uilearning:renderUILearning,mindmap:renderMindmap,whiteboard:renderWhiteboard,xindeng:renderXinDeng,growthplan:renderGrowthPlan,review:renderGrowthReview,today:()=>renderTaskWorkspace('home'),schedules:renderSchedules,agents:renderAgents,mistakes:renderMistakes,home:renderHome,inbox:renderInbox,upcoming:renderUpcoming,calendar:renderCalendar,matrix:renderMatrix,stats:renderFocusStats,important:renderImportant,alltasks:renderAllFocusTasks,dashboard:renderDashboard,allocation:renderAllocation,nasdaq:renderNasdaq,ashare:renderAshare,newconfig:()=> (typeof renderNewConfigV2==='function'?renderNewConfigV2():renderNewConfig()),health:renderHealth,checkin:renderHealthCheckin,diet:()=>renderHealthSection('diet'),fitness:()=>renderHealthSection('fitness'),skin:()=>renderHealthSection('skin'),sleep:()=>renderHealthSection('sleep'),style:()=>renderHealthSection('style'),english:()=> (typeof renderEnglishV2==='function'?renderEnglishV2():renderEnglish()),reading:()=> (typeof renderReadingV2==='function'?renderReadingV2():renderReading()),execution:renderExecution,archive:renderArchive,dailyflow:renderDailyFlow,flowstats:renderFlowStats,alpharadar:renderAlphaRadar};
   const investingPages=['dashboard','allocation','nasdaq','ashare','execution'];
   const body=(map[page]||renderHome)();
   const commit = () => {
@@ -989,10 +990,11 @@ function flowEditorPanel(kind){
 function renderDailyFlow(){
  const kind=ui.flowKind||flowDateKind();
  const runs=state.dailyFlowRuns||[],items=[...(state.dailyFlows.weekday||[]),...(state.dailyFlows.restday||[])];
+ const viewControls=`<div class="flow-check-toolbar"><button type="button" class="btn btn-outline" id="flowViewToggle" aria-pressed="${ui.flowViewMode==='checklist'}">${ui.flowViewMode==='checklist'?'切换到时间轴模式':'切换到 Checklist 模式'}</button></div>`;
  return `${sectionHead('LIFE OS · DAILY RHYTHM','流程','流程编排与流程统计收进同一个工作台，用左右两个页签切换：编排看工作日/休息日时间轴，统计看记录、完成率、分类与趋势。电脑可拖动任务块调整时间；手机滑动浏览，双击任务修改时间。任务允许重叠。','')}
  <div class="flow-page-shell" data-tab-shell data-tab-key="dailyflow-v2" data-default-tab="edit">
   <div class="flow-page-bar"><div class="flow-page-tabs" data-tabs role="tablist"><button class="flow-page-tab active" data-tab="edit" role="tab"><span>流程编排</span><small>${items.length} 个流程块</small></button><button class="flow-page-tab" data-tab="stats" role="tab"><span>流程统计</span><small>${runs.length} 次记录</small></button></div><div class="flow-page-meta"><span class="live-dot"></span>${kind==='weekday'?'当前：工作日':'当前：休息日'} · 本地保存</div></div>
-  <div class="flow-page-panel active" data-tab-panel="edit"><div class="flow-check-toolbar"><button type="button" class="btn btn-outline" id="flowViewToggle" aria-pressed="${ui.flowViewMode==='checklist'}">${ui.flowViewMode==='checklist'?'切换到时间轴模式':'切换到 Checklist 模式'}</button></div>${ui.flowViewMode==='checklist'?renderFlowChecklist(kind):flowEditorPanel(kind)}</div>
+  <div class="flow-page-panel active ${ui.flowViewMode==='checklist'?'flow-is-checklist':''}" data-tab-panel="edit">${ui.flowViewMode==='checklist'?renderFlowChecklist(kind,viewControls):viewControls+flowEditorPanel(kind)}</div>
   <div class="flow-page-panel" data-tab-panel="stats" id="flowStatsPanel">${flowStatsBody()}</div>
   <div id="flowModalMount"></div>
  </div>`;
@@ -2401,7 +2403,7 @@ function bindDelegatedEvents() {
     if(a==='refresh-market') return refreshMarket();
     if(a==='export-json') return exportState();
     if(a==='import-json-open') {$('#importJsonFile')?.click();return;}
-    if(a==='logout') {if(window.boardEditorDirty){toast('请先保存画板或导出备份后退出',true);return;}try{await api('/api/logout',{method:'POST',body:JSON.stringify({})});state=null;showAuth();}catch(err){toast(err.message,true);}return;}
+    if(a==='logout') {if(window.uiLearningDirty){toast('请先保存 UI 学习资料或导出备份后退出',true);return;}if(window.boardEditorDirty){toast('请先保存画板或导出备份后退出',true);return;}try{await api('/api/logout',{method:'POST',body:JSON.stringify({})});state=null;showAuth();}catch(err){toast(err.message,true);}return;}
     if(a==='toggle-password') {const p=$('#authPassword');p.type=p.type==='password'?'text':'password';return;}
     if(a==='open-sidebar') return openSidebar();
     if(a==='close-sidebar') return closeSidebar();
@@ -2598,3 +2600,11 @@ function syncBodyLibrarySelection(){
  const search=document.querySelector('#gymSearch');if(search)search.value=u.q;
  renderGymFilters();loadGym(true);
 }
+
+function renderUILearning(){return `${sectionHead('UI LEARNING','UI 学习','交互配方、案例与学习记录，随账户持续保存。')}<iframe class="ui-learning-frame" title="UI 学习工作台" src="/static/ui-learning/index.html" allow="clipboard-write" loading="eager"></iframe>`;}
+window.addEventListener('message',e=>{
+ const frame=document.querySelector('.ui-learning-frame');
+ if(e.origin!==location.origin || !frame || e.source!==frame.contentWindow)return;
+ if(e.data?.type==='ui-learning-dirty')window.uiLearningDirty=!!e.data.dirty;
+});
+window.addEventListener('beforeunload',e=>{if(window.uiLearningDirty){e.preventDefault();e.returnValue='';}});

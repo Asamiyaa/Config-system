@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>案例编辑 · UI案例拆解学习</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='3' y='3' width='8' height='8' rx='2' fill='%233b6ea5'/%3E%3Crect x='13' y='3' width='8' height='8' rx='2' fill='%236a93c4'/%3E%3Crect x='3' y='13' width='8' height='8' rx='2' fill='%236a93c4'/%3E%3Crect x='13' y='13' width='8' height='8' rx='2' fill='%233b6ea5'/%3E%3C/svg%3E" />
+  <script src="assets/js/tailwind.local.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: { 50: '#f2f6fc', 100: '#e6eff9', 200: '#cfdff2', 400: '#6a93c4', 500: '#3b6ea5', 600: '#325d8c' },
+            ink: { 400: '#93a0ad', 500: '#6b7785', 700: '#46525f', 900: '#1f2733' }
+          },
+          boxShadow: { card: '0 1px 2px rgba(24,39,60,.06)', lift: '0 6px 20px rgba(24,39,60,.08)' }
+        }
+      }
+    };
+  </script>
+  <link rel="stylesheet" href="assets/css/app.css" />
+  <link rel="stylesheet" href="assets/css/library.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="appSidebar"></aside>
+
+    <main class="app-main">
+      <div class="flex items-center justify-between gap-3 flex-wrap mb-4">
+        <input aria-label="案例标题" id="caseTitle" class="input max-w-md text-[15px] font-bold" placeholder="案例标题" />
+        <div id="mainActions" class="main-actions"></div>
+      </div>
+
+      <div class="editor-toolbar">
+        <button id="btnParseHere" class="btn btn-quiet">解析当前截图</button>
+        <button id="btnUndoAI" class="btn btn-ghost" disabled>撤销 AI 修改</button>
+        <a href="settings.html">AI 接入设置</a>
+        <span id="saveStatus" class="save-status" role="status" aria-live="polite">未修改</span>
+      </div>
+      <div class="editor-layout">
+        <!-- ===== 左栏：图片 ===== -->
+        <section class="editor-col">
+          <div class="card card-pad">
+            <div class="section-title mb-3" id="uploadTitle"></div>
+            <div id="uploadZone" class="upload-zone" role="button" tabindex="0" aria-label="上传截图">
+              <div class="flex justify-center mb-2" id="uploadIcon"></div>
+              <div class="font-semibold text-[13.5px]" id="uploadMain"></div>
+              <div class="text-ink-500 text-[12px] mt-1" id="uploadSub"></div>
+            </div>
+            <input id="fileInput" type="file" accept="image/*" multiple class="hidden" />
+            <p class="text-[11.5px] text-ink-400 mt-2" id="pasteHint"></p>
+          </div>
+
+          <div class="card card-pad">
+            <div class="section-title mb-3" id="albumTitle"></div>
+            <div id="album" class="grid grid-cols-3 gap-2"></div>
+          </div>
+
+          <div class="card card-pad">
+            <div class="flex items-center justify-between mb-3">
+              <div class="section-title" id="annotateTitle"></div>
+              <button id="btnAddAnnotation" class="btn btn-quiet btn-sm"></button>
+            </div>
+            <div id="annotateStage" class="annotate-stage">
+              <img id="annotateImg" alt="当前图片" />
+              <div id="annotationLayer" class="annotation-layer"></div>
+            </div>
+            <div id="annotationList" class="mt-3 space-y-2"></div>
+          </div>
+        </section>
+
+        <!-- ===== 右栏：AI 五块 + 人工三块 + 版本 + 标签 ===== -->
+        <section class="editor-col">
+          <!-- AI 解析结果（5 块默认展开；AI 解析在“设置”页触发） -->
+          <div class="card card-pad" id="aiCard">
+            <div class="flex items-center gap-2 mb-3">
+              <span class="ai-badge" id="aiCollapseBadge"></span>
+              <span class="section-title">AI 解析结果</span>
+            </div>
+            <div id="aiFields" class="ai-field-list"></div>
+          </div>
+
+          <!-- 人工三块（位于布局优点之下） -->
+          <div class="card card-pad">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="ai-badge" id="humanBadge"></span>
+            </div>
+            <p class="text-[11.5px] text-ink-400 mb-3" id="humanHint"></p>
+
+            <label class="field-label" for="useCases" id="useCasesLabel"></label>
+            <textarea id="useCases" class="textarea" rows="4"></textarea>
+
+            <div class="my-4 border-t border-[var(--line)]"></div>
+
+            <label class="field-label" for="avoidPitfalls" id="pitfallsLabel"></label>
+            <textarea id="avoidPitfalls" class="textarea" rows="4"></textarea>
+
+            <label class="field-label mt-4" for="forbiddenScenarios" id="forbiddenLabel"></label>
+            <textarea id="forbiddenScenarios" class="textarea" rows="4"></textarea>
+          </div>
+
+          <div class="card card-pad">
+            <div class="section-title mb-3" id="versionTitle"></div>
+            <div id="versionList" class="space-y-2 text-[12.5px] text-ink-500"></div>
+          </div>
+
+          <!-- 标签（紧凑：已选 + 已有标签点选 + 新建） -->
+          <div class="card tag-card" id="tagCard">
+            <div class="section-title mb-2" id="tagCardTitle"></div>
+            <div class="tag-block">
+              <label class="tag-block-label" for="styleTagText" id="styleTagLabel"></label>
+              <div id="styleTagInput" class="tag-input tag-input-sm">
+                <input type="text" id="styleTagText" placeholder="新建标签后回车" />
+              </div>
+              <div id="styleTagOptions" class="tag-options"></div>
+            </div>
+            <div class="tag-block">
+              <label class="tag-block-label" for="businessTagText" id="businessTagLabel"></label>
+              <div id="businessTagInput" class="tag-input tag-input-sm">
+                <input type="text" id="businessTagText" placeholder="新建标签后回车" />
+              </div>
+              <div id="businessTagOptions" class="tag-options"></div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <div class="fab-group">
+      <button id="btnBack" class="btn btn-ghost"></button>
+      <button id="btnSave" class="btn btn-primary"></button>
+    </div>
+  </div>
+
+  <script src="assets/js/store.js"></script>
+  <script src="assets/js/seed.js"></script>
+  <script src="assets/js/common.js"></script>
+  <script src="assets/js/aiParse.js"></script>
+  <script src="assets/js/markdown.js"></script>
+  <script src="assets/js/editor.js"></script>
+</body>
+</html>

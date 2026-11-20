@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>案例画廊 · UI案例拆解学习</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='3' y='3' width='8' height='8' rx='2' fill='%233b6ea5'/%3E%3Crect x='13' y='3' width='8' height='8' rx='2' fill='%236a93c4'/%3E%3Crect x='3' y='13' width='8' height='8' rx='2' fill='%236a93c4'/%3E%3Crect x='13' y='13' width='8' height='8' rx='2' fill='%233b6ea5'/%3E%3C/svg%3E" />
+  <script src="assets/js/tailwind.local.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: { 50: '#f2f6fc', 100: '#e6eff9', 200: '#cfdff2', 400: '#6a93c4', 500: '#3b6ea5', 600: '#325d8c' },
+            ink: { 400: '#93a0ad', 500: '#6b7785', 700: '#46525f', 900: '#1f2733' }
+          },
+          boxShadow: { card: '0 1px 2px rgba(24,39,60,.06)', lift: '0 6px 20px rgba(24,39,60,.08)' }
+        }
+      }
+    };
+  </script>
+  <link rel="stylesheet" href="assets/css/app.css" />
+  <link rel="stylesheet" href="assets/css/library.css" />
+</head>
+<body class="gallery-page">
+  <div class="app-shell">
+    <aside class="sidebar" id="appSidebar"></aside>
+
+    <main class="app-main">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+        <div>
+          <div class="page-kicker">LIBRARY / 我的设计收藏</div><h1 class="text-xl font-bold text-ink-900">从好界面中，找到设计的答案。</h1>
+          <p class="text-ink-500 text-[13px] mt-0.5" id="pageSub"></p>
+        </div>
+        <div class="flex items-center gap-2 flex-wrap">
+          <div id="mainActions" class="main-actions"></div>
+          <button id="btnImport" class="btn btn-ghost"></button>
+          <input id="importFile" type="file" accept="application/json" class="hidden" />
+        </div>
+      </div>
+
+      <section class="library-overview" aria-label="案例库概览">
+        <div><span class="overview-label">收集 · 拆解 · 运用</span><h2>每一个案例，都是下一次设计的起点。</h2><p>把界面截图变成可检索、可比较、可复用的设计经验。</p></div>
+        <div class="library-stats"><div><strong id="totalStat">—</strong><span>收录案例</span></div><div><strong id="favoriteStat">—</strong><span>精选收藏</span></div><div><strong id="groupStat">—</strong><span>主题分组</span></div></div>
+      </section>
+      <div class="gallery-section-heading"><h2>浏览案例</h2><span>观察细节，理解选择背后的理由</span></div>
+      <div class="card card-pad mb-5 gallery-filter">
+        <div class="flex flex-wrap items-center gap-3">
+          <div class="relative flex-1 min-w-[220px]">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-ink-400" id="searchIcon"></span>
+            <input aria-label="搜索案例标题或标签" id="searchInput" class="input pl-9" placeholder="搜索标题、标签…" />
+          </div>
+          <label class="inline-flex items-center gap-2 text-[13px] text-ink-700 cursor-pointer">
+            <input id="onlyFav" type="checkbox" /> <span id="favOnlyText"></span>
+          </label>
+        </div>
+
+        <details class="filter-details"><summary>按样式与业务筛选</summary>
+          <div class="eyebrow mb-2" id="styleTagLabel"></div>
+          <div id="styleTagFilters" class="flex flex-wrap gap-2 mb-3"></div>
+          <div class="eyebrow mb-2" id="businessTagLabel"></div>
+          <div id="businessTagFilters" class="flex flex-wrap gap-2"></div>
+        </details>
+      </div>
+
+      <div class="flex items-center justify-between mb-3">
+        <span role="status" aria-live="polite" id="caseCount" class="text-[12.5px] text-ink-500"></span>
+        <button id="btnClearFilter" class="btn btn-ghost btn-sm"></button>
+      </div>
+
+      <div id="caseGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"></div>
+    </main>
+  </div>
+
+  <script src="assets/js/store.js"></script>
+  <script src="assets/js/seed.js"></script>
+  <script src="assets/js/common.js"></script>
+  <script src="assets/js/gallery.js"></script>
+</body>
+</html>

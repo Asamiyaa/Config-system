@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>设置 · UI案例拆解学习</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='3' y='3' width='8' height='8' rx='2' fill='%233b6ea5'/%3E%3Crect x='13' y='3' width='8' height='8' rx='2' fill='%236a93c4'/%3E%3Crect x='3' y='13' width='8' height='8' rx='2' fill='%236a93c4'/%3E%3Crect x='13' y='13' width='8' height='8' rx='2' fill='%233b6ea5'/%3E%3C/svg%3E" />
+  <script src="assets/js/tailwind.local.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: { 50: '#f2f6fc', 100: '#e6eff9', 200: '#cfdff2', 400: '#6a93c4', 500: '#3b6ea5', 600: '#325d8c' },
+            ink: { 400: '#93a0ad', 500: '#6b7785', 700: '#46525f', 900: '#1f2733' }
+          },
+          boxShadow: { card: '0 1px 2px rgba(24,39,60,.06)', lift: '0 6px 20px rgba(24,39,60,.08)' }
+        }
+      }
+    };
+  </script>
+  <link rel="stylesheet" href="assets/css/app.css" />
+  <link rel="stylesheet" href="assets/css/library.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="appSidebar"></aside>
+
+    <main class="app-main">
+      <div class="flex items-center justify-between gap-3 flex-wrap mb-5 max-w-[960px] mx-auto w-full">
+        <h1 class="text-lg font-bold text-ink-900">设置</h1>
+        <div id="mainActions" class="main-actions"></div>
+      </div>
+      <div class="max-w-[960px] w-full mx-auto space-y-5">
+        <!-- ===== AI 视觉接入配置 ===== -->
+        <section class="card card-pad">
+          <h1 class="text-[15px] font-bold mb-1" id="cfgTitle"></h1>
+          <p class="text-[12px] text-ink-500 mb-4" id="cfgHint"></p>
+          <div class="grid md:grid-cols-2 gap-4">
+            <div>
+              <label class="field-label" id="endpointLabel"></label>
+              <input id="aiEndpoint" class="input" placeholder="https://.../chat/completions" />
+            </div>
+            <div>
+              <label class="field-label" id="modelLabel"></label>
+              <input id="aiModel" class="input" placeholder="model id" />
+            </div>
+            <div class="md:col-span-2">
+              <label class="field-label" id="keyLabel"></label>
+              <input id="aiKey" class="input" type="password" placeholder="API Key（仅保存在本机浏览器）" />
+            </div>
+          </div>
+          <div class="flex items-center justify-between mt-4 flex-wrap gap-3">
+            <label class="inline-flex items-center gap-2 text-[13px] text-ink-700 cursor-pointer">
+              <input id="mockMode" type="checkbox" /> <span id="mockText"></span>
+            </label>
+            <button id="btnSaveConfig" class="btn btn-primary"></button>
+          </div>
+        </section>
+
+        <!-- ===== 对案例执行 AI 解析 ===== -->
+        <section class="card card-pad">
+          <div class="section-title mb-1" id="runTitle"></div>
+          <p class="text-[12px] text-ink-500 mb-4" id="runHint"></p>
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label class="field-label" id="runCaseLabel"></label>
+              <select id="runCase" class="input"></select>
+            </div>
+            <div>
+              <label class="field-label" id="runModeLabel"></label>
+              <select id="runMode" class="input">
+                <option value="replace">替换（覆盖原内容）</option>
+                <option value="append">追加（接在原文后）</option>
+              </select>
+            </div>
+          </div>
+          <button id="btnRunParse" class="btn btn-primary mt-4"></button>
+        </section>
+
+        <!-- ===== 内容保存路径（目录授权直写） ===== -->
+        <section class="card card-pad">
+          <div class="section-title mb-1" id="pathTitle"></div>
+          <p class="text-[12px] text-ink-500 mb-4" id="pathHint"></p>
+
+          <div id="pathSupport" class="text-[12.5px] mb-3"></div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <button id="btnPickDir" class="btn btn-primary"></button>
+            <button id="btnExportAllToDir" class="btn btn-ghost btn-sm"></button>
+            <button id="btnTestWrite" class="btn btn-ghost btn-sm"></button>
+            <button id="btnClearDir" class="btn btn-ghost btn-sm"></button>
+          </div>
+          <div id="pathStatus" class="text-[12.5px] mt-3 text-ink-500"></div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script src="assets/js/store.js"></script>
+  <script src="assets/js/seed.js"></script>
+  <script src="assets/js/common.js"></script>
+  <script src="assets/js/aiParse.js"></script>
+  <script src="assets/js/savePath.js"></script>
+  <script src="assets/js/settings.js"></script>
+</body>
+</html>

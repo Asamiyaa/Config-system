@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="theme-color" content="#f5f4ef"/>
+<title>Continuity Lab — Shared Element</title>
+<style>
+:root{font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#202a28;background:#f5f4ef;--ease:cubic-bezier(.22,1,.36,1);--duration:380ms}*{box-sizing:border-box}body{margin:0;min-width:320px}button,a{font:inherit}button{cursor:pointer}button:focus-visible,a:focus-visible{outline:3px solid #266c60;outline-offset:4px}header{padding:28px max(24px,calc((100vw - 1050px)/2));border-bottom:1px solid #d9ded5;display:flex;justify-content:space-between;align-items:center;font-weight:650;letter-spacing:.1em;font-size:12px}header a{color:#356a62;text-decoration:none}.page{max-width:1050px;margin:0 auto;padding:clamp(44px,7vw,110px) 24px 120px}.eyebrow{color:#497a70;font-size:11px;font-weight:750;letter-spacing:.18em;margin:0 0 25px}h1{font-family:Georgia,"Times New Roman",serif;font-size:clamp(48px,7vw,99px);letter-spacing:-.06em;line-height:1.02;max-width:830px;font-weight:400;margin:0}h1 em{color:#4b8777;font-weight:400}.lead{color:#5e6e68;line-height:1.7;font-size:17px;max-width:650px;margin:30px 0 60px}.study{border-top:1px solid #d5dcd5;display:grid;grid-template-columns:1fr 1.05fr;gap:44px;padding-top:34px}.study-label{font-size:11px;color:#687e73;letter-spacing:.13em;font-weight:bold}.study-notes h2{font-size:24px;letter-spacing:-.035em;font-weight:540;margin:26px 0 16px}.study-notes p{font-size:15px;color:#586f65;line-height:1.75;max-width:340px}.mini-list{display:grid;gap:10px;margin-top:30px;font-size:12px;color:#50635e}.mini-list span{border-top:1px solid #d8dfd7;padding-top:9px}.anchor-slot{position:relative;width:100%;height:250px}.morph-surface{position:absolute;inset:0;width:100%;height:100%;z-index:1;overflow:hidden;border-radius:18px;background:#152a26;color:#f0f2e6;box-shadow:0 14px 35px #142d281c;border:1px solid #204439}.trigger{border:0;background:transparent;color:inherit;display:flex;text-align:left;align-items:stretch;justify-content:space-between;padding:27px;width:100%;height:100%;gap:15px}.trigger:active{transform:scale(.994);transition:transform 120ms var(--ease)}.trigger:focus-visible{outline-offset:-7px}.trigger .tag{font-size:10px;letter-spacing:.14em;color:#c4d7c9}.trigger h2{font-weight:450;font-family:Georgia,serif;letter-spacing:-.04em;font-size:clamp(35px,4vw,55px);line-height:1.05;margin:34px 0 12px}.trigger p{color:#a1bdb2;font-size:12px}.trigger .symbol{align-self:end;font-size:40px;font-weight:200;color:#9ecfb6}.details{position:absolute;inset:0;padding:clamp(30px,5vw,58px);opacity:0;visibility:hidden;pointer-events:none;transform:translateY(8px)}.morph-surface.is-open .details{visibility:visible;pointer-events:auto}.morph-surface.is-open .trigger{visibility:hidden;pointer-events:none}.details-top{display:flex;justify-content:space-between;align-items:center}.details .tag{font-size:11px;letter-spacing:.12em;color:#8fbaa9}.close{width:39px;height:39px;background:#29453c;border:1px solid #47675b;color:#eaf3e8;border-radius:50%;font-size:21px;display:grid;place-items:center}.close:active{transform:scale(.98)}.details h2{font-family:Georgia,serif;font-weight:400;letter-spacing:-.055em;font-size:clamp(42px,6vw,78px);line-height:1.02;margin:43px 0 23px}.details p{color:#b5cbbf;line-height:1.8;font-size:15px;max-width:550px}.details .facts{display:flex;flex-wrap:wrap;gap:14px;margin-top:32px}.facts span{font-size:11px;border:1px solid #456055;padding:10px 13px;border-radius:40px;color:#cce2d5}.scrim{position:fixed;inset:0;background:rgba(14,28,24,.46);opacity:0;visibility:hidden;pointer-events:none;z-index:5;transition:opacity var(--duration) var(--ease),visibility 0s var(--duration)}.scrim.is-open{opacity:1;visibility:visible;pointer-events:auto;transition:opacity var(--duration) var(--ease),visibility 0s}.footer{margin-top:65px;color:#75867b;font-size:12px}body.lock-scroll{overflow:hidden}@media(max-width:740px){.study{grid-template-columns:1fr}.anchor-slot{height:230px}.lead{margin-bottom:45px}.study-notes h2{margin-top:10px}.page{padding-bottom:55px}.details h2{margin-top:22px}.details .facts{margin-top:18px}}@media(prefers-reduced-motion:reduce){:root{--duration:0ms}*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}.details{transform:none!important}}
+</style>
+</head>
+<body>
+<header><div>CONTINUITY / LAB</div><a href="./index.html">← MAIN STUDY</a></header>
+<main class="page">
+<p class="eyebrow">EXPERIMENT 001 / STATE CONTINUITY</p>
+<h1>One surface.<br><em>Two meaningful states.</em></h1>
+<p class="lead">Tap the card. The very same surface grows from its origin, then returns along its original route. Nothing starts moving until you ask it to.</p>
+<section class="study" aria-label="Shared element interaction lab">
+<div class="study-notes">
+<div class="study-label">THE INTERACTION</div>
+<h2>Continuity, not a cut.</h2>
+<p>The card is not replaced by a disconnected popup. It moves to a new size and location. Reverse and interruption share its movement controller and timing.</p>
+<div class="mini-list"><span>01 — User-triggered only</span><span>02 — Paired forward / reverse at 380ms</span><span>03 — Parent before detail</span><span>04 — Keyboard Escape and focus return</span></div>
+</div>
+<div class="anchor-slot" id="anchor">
+<div class="morph-surface" id="surface">
+<button type="button" class="trigger" id="trigger" aria-haspopup="dialog" aria-expanded="false" aria-controls="details"><span><span class="tag">INTERACTIVE SYSTEM / 01</span><h2>Explore<br/>the form.</h2><p>OPEN STUDY · TAP TO EXPAND</p></span><span class="symbol" aria-hidden="true">↗</span></button>
+<div class="details" id="details" role="dialog" aria-modal="true" aria-labelledby="dialog-title" aria-hidden="true"><div class="details-top"><span class="tag">CONTINUITY / IN PRACTICE</span><button type="button" id="close" class="close" aria-label="Close study">×</button></div><h2 id="dialog-title">Every state<br/>has a way back.</h2><p>A single element preserves visual identity as its dimensions and position change. The primary surface leads; its supporting content follows. Dismiss to return to the origin using the very same timeline.</p><div class="facts"><span>FLIP-STYLE GEOMETRY</span><span>PHYSICAL EASING</span><span>SYMMETRIC REVERSE</span></div></div>
+</div>
+</div>
+</section>
+<p class="footer">Try opening and closing repeatedly, pressing Escape, or reversing mid-motion. With reduced motion enabled, the dialog remains functional without travel.</p>
+</main>
+<div class="scrim" id="scrim" aria-hidden="true"></div>
+<script src="./shared-element.js"></script>
+</body>
+</html>

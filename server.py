@@ -97,6 +97,7 @@ def init_db() -> None:
             state_json TEXT NOT NULL,
             updated_at TEXT NOT NULL
         )""")
+        con.execute("CREATE TABLE IF NOT EXISTS ui_learning (user_id INTEGER PRIMARY KEY, document TEXT NOT NULL, version INTEGER NOT NULL, updated_at TEXT NOT NULL)")
         con.execute("CREATE TABLE IF NOT EXISTS boards (id TEXT PRIMARY KEY, user_id INTEGER NOT NULL, title TEXT NOT NULL, scene TEXT NOT NULL, version INTEGER NOT NULL, updated_at TEXT NOT NULL)")
         con.execute("CREATE TABLE IF NOT EXISTS board_revisions (board_id TEXT NOT NULL, version INTEGER NOT NULL, scene TEXT NOT NULL, saved_at TEXT NOT NULL, PRIMARY KEY(board_id,version))")
         if os.getenv("DISABLE_DEMO_ACCOUNT", "0") != "1":
@@ -1292,4 +1293,40 @@ def save_board(board_id: str, payload: BoardPayload, request: Request):
     warning=None
     try: backup_database(DB_PATH)
     except Exception: warning="画板已保存，数据库快照失败，请检查存储空间"
+    return {"ok":True,"version":version,"storageWarning":warning}
+
+
+class LearningPayload(BaseModel):
+    userId: int
+    document: dict[str, Any] = Field(default_factory=dict)
+    version: int = Field(default=0, ge=0)
+
+@app.get("/api/ui-learning")
+def get_ui_learning(request: Request):
+    user = current_user(request)
+    with db() as con:
+        row = con.execute("SELECT document,version FROM ui_learning WHERE user_id=?", (user["id"],)).fetchone()
+    return JSONResponse({"userId":user["id"], "document":json.loads(row["document"]) if row else {}, "version":row["version"] if row else 0},headers={"Cache-Control":"no-store"})
+
+@app.put("/api/ui-learning")
+def put_ui_learning(payload: LearningPayload, request: Request):
+    user = current_user(request)
+    if payload.userId != user["id"]: raise HTTPException(409,"登录账户已改变，请先备份当前资料后重新打开")
+    document = json.dumps(payload.document, ensure_ascii=False, allow_nan=False)
+    if len(document.encode("utf-8"))>20_000_000:
+        raise HTTPException(413,"学习资料超过20MB，请先导出备份并拆分图片")
+    for key in ("customItems","modules","favorites"):
+        if not isinstance(payload.document.get(key,[]),list): raise HTTPException(422,"学习资料格式不正确")
+    for key in ("progress","images"):
+        if not isinstance(payload.document.get(key,{}),dict): raise HTTPException(422,"学习资料格式不正确")
+    with db() as con:
+        con.execute("BEGIN IMMEDIATE")
+        row = con.execute("SELECT version FROM ui_learning WHERE user_id=?",(user["id"],)).fetchone()
+        if (row["version"] if row else 0)!=payload.version:
+            raise HTTPException(409,"另一个窗口已更新学习资料，请先备份当前资料，再重新打开并导入合并")
+        version=payload.version+1
+        con.execute("INSERT INTO ui_learning VALUES(?,?,?,?) ON CONFLICT(user_id) DO UPDATE SET document=excluded.document,version=excluded.version,updated_at=excluded.updated_at",(user["id"],document,version,datetime.now(timezone.utc).isoformat()))
+    warning=None
+    try: backup_database(DB_PATH)
+    except Exception: warning="已保存到账户，数据库备份失败，请检查磁盘空间"
     return {"ok":True,"version":version,"storageWarning":warning}

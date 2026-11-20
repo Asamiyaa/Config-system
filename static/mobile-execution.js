@@ -4,10 +4,11 @@
  function composer(){
   if(document.querySelector('#quickTodo'))return;
   const dialog=document.createElement('dialog');dialog.id='quickTodo';
-  dialog.innerHTML='<form><h2>快捷待办</h2><label>事项<input name="title" required maxlength="180" autofocus></label><label>日期<input name="date" type="date"></label><label>时间<input name="time" type="time"></label><p>选择日期后显示在周历中。</p><button type="button" data-voice>语音输入</button><p data-feedback role="status"></p><button type="submit">保存待办</button><button type="button" data-close>取消</button></form>';
+  dialog.innerHTML='<form><h2>快捷待办</h2><label>事项<input name="title" required maxlength="180" autofocus></label><div class="todo-schedule"><label>日期<input name="date" type="date"></label><label>时间<input name="time" type="time"></label></div><p>选择日期后显示在周历中。</p><button type="button" data-voice>语音输入</button><p data-feedback role="status"></p><div class="todo-actions"><button type="button" data-close>取消</button><button type="submit">保存待办</button></div></form>';
+  const opener=document.activeElement;
   document.body.append(dialog);dialog.showModal();
   let recognition;
-  const close=()=>{recognition?.abort();dialog.remove();};
+  const close=()=>{recognition?.abort();dialog.remove();if(opener?.isConnected)opener.focus({preventScroll:true});};
   dialog.querySelector('[data-close]').onclick=close;dialog.addEventListener('cancel',close);
   dialog.querySelector('[data-voice]').onclick=()=>{
    if(window.AndroidApp?.startVoiceInput){AndroidApp.startVoiceInput();return;}

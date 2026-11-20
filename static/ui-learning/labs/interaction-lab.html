@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Motion Lab — 滚动导航与按压反馈</title><link rel="stylesheet" href="./interaction-lab.css"><script defer src="./interaction-lab.js"></script></head>
+<body>
+<a class="skip" href="#main">跳转正文</a>
+<header class="site-nav" id="nav" data-scenario="scroll-nav">
+ <div class="nav-inner"><a class="brand" href="./index.html" aria-label="返回 Form Motion 首页"><span class="brand-symbol" id="brand">F/M</span><span class="brand-label">MOTION / LAB</span></a><nav aria-label="页面导航"><a href="#experiment">实验</a><a href="#method">原理</a><a href="./shared-element.html">共享元素</a></nav><div class="nav-state" aria-live="off">SCROLL <output id="nav-metric">0%</output></div></div>
+</header>
+<main id="main">
+<section class="hero">
+ <div class="eyebrow">INTERACTION STUDY / 02—03</div><h1>动得精准。<br><em>静得从容。</em></h1><p class="lead">向下滚动，导航高度从 80px 连续变为 56px；按住按钮，观察 80ms 按压和 120ms 释放反馈。交互完全由你触发。</p><a class="text-link" href="#experiment">进入交互实验 <span aria-hidden="true">↘</span></a>
+ <div class="scroll-rule" aria-hidden="true"><span>SCROLL TO EXPLORE</span><span>↓</span></div>
+</section>
+<section class="experiment" id="experiment" data-scenario="press-feedback">
+ <div class="label-row"><span>02 / THE FEEDBACK</span><span>TRIGGERED, NEVER IDLE</span></div>
+ <div class="split"><div><div class="eyebrow">THE PRESS CONTRACT</div><h2>一按即有感。<br><em>一松即复原。</em></h2><p>按下比例 0.96；释放回到 1。可切换默认轻回弹和强回弹演示，强回弹不是生产环境的默认值。</p><div class="timeline"><span>PRESS / 80ms</span><div class="line"><i></i></div><span>RELEASE / 120ms</span></div></div>
+ <div class="control-panel"><span class="panel-label">LIVE CONTROL</span><button class="press-button" id="press" type="button"><span>按住我试试</span><span aria-hidden="true">↗</span></button><label class="check-row"><input type="checkbox" id="intense"> 显示 5% 强回弹（仅演示）</label><div class="readout" aria-live="polite" id="feedback">就绪 · 没有后台动画</div><p class="hint">支持鼠标、触摸、Enter/Space；取消或移出后仍会恢复。</p></div></div>
+</section>
+<section class="method" id="method"><div class="eyebrow">03 / METHOD</div><h2>状态连续，<br>物理有度。</h2><div class="steps"><p><strong>01 / 用户驱动</strong><br>滚动进度本身决定导航尺寸；不监听过线后突然变成另一档。</p><p><strong>02 / 不抢内容</strong><br>导航变窄不挤压正文。滚动时仅合并一次写操作。</p><p><strong>03 / 无障碍</strong><br>键盘和减弱动态效果仍可完成同一操作。</p></div><p class="footnote">数值可用开发者工具验证：滚动 0 / 25 / 50 / 75 / 100px 对应导航 80 / 74 / 68 / 62 / 56px。</p></section>
+</main><footer><a href="./index.html">← 返回作品主页</a><span>CREATIVE FRONTEND STARTER / INTERACTION LAB</span></footer>
+</body></html>

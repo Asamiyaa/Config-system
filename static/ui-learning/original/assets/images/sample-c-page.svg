@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 360" width="240" height="360" role="img" aria-label="C端电商商品详情页线框示意">
+  <rect width="240" height="360" fill="#eef1f4"/>
+  <!-- 顶部导航 -->
+  <rect x="0" y="0" width="240" height="34" fill="#ffffff"/>
+  <circle cx="18" cy="17" r="6" fill="#c2ccd6"/>
+  <rect x="106" y="13" width="28" height="8" rx="4" fill="#c2ccd6"/>
+  <circle cx="222" cy="17" r="6" fill="#c2ccd6"/>
+  <!-- 商品主图 -->
+  <rect x="0" y="34" width="240" height="150" fill="#dde5ee"/>
+  <circle cx="120" cy="109" r="26" fill="#c4d1de"/>
+  <rect x="104" y="100" width="32" height="18" rx="4" fill="#eef1f4"/>
+  <!-- 价格与标题 -->
+  <rect x="16" y="198" width="70" height="20" rx="4" fill="#3b6ea5"/>
+  <rect x="16" y="228" width="208" height="10" rx="5" fill="#c2ccd6"/>
+  <rect x="16" y="246" width="150" height="10" rx="5" fill="#c2ccd6"/>
+  <!-- 规格选择 -->
+  <rect x="16" y="268" width="52" height="26" rx="8" fill="#ffffff" stroke="#c2ccd6"/>
+  <rect x="76" y="268" width="52" height="26" rx="8" fill="#ffffff" stroke="#c2ccd6"/>
+  <rect x="136" y="268" width="52" height="26" rx="8" fill="#3b6ea5"/>
+  <!-- 图文详情线 -->
+  <rect x="16" y="308" width="208" height="8" rx="4" fill="#c9d2db"/>
+  <rect x="16" y="324" width="208" height="8" rx="4" fill="#c9d2db"/>
+  <!-- 底部固定操作条 -->
+  <rect x="0" y="340" width="240" height="20" fill="#ffffff"/>
+  <rect x="130" y="343" width="46" height="14" rx="7" fill="#c2ccd6"/>
+  <rect x="182" y="343" width="42" height="14" rx="7" fill="#3b6ea5"/>
+</svg>
