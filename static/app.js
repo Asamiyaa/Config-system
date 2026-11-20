@@ -375,6 +375,8 @@ function renderPage(page, {autoRefresh=false, transition=true, animate=true}={})
   if(page==='settings')page='schedules';
   if(page==='home'||page==='today')page='dailyflow';
   const renderStarted=performance.now();
+  const renderRevision=window.pageRenderRevision=(window.pageRenderRevision||0)+1;
+  window.activePageTransition?.skipTransition();
   currentPage=page;
   setHeader(page);
   const root=$('#viewRoot');
@@ -384,6 +386,7 @@ function renderPage(page, {autoRefresh=false, transition=true, animate=true}={})
   const investingPages=['dashboard','allocation','nasdaq','ashare','execution'];
   const body=(map[page]||renderHome)();
   const commit = () => {
+    if(renderRevision!==window.pageRenderRevision) return;
     root.innerHTML=body;
     if (['dashboard','allocation','nasdaq','ashare','alpharadar'].includes(page)) {
       const refreshed=state.meta?.lastRefresh;
@@ -420,7 +423,9 @@ function renderPage(page, {autoRefresh=false, transition=true, animate=true}={})
   if (document.startViewTransition && !reduceMotion && transition) {
     root.classList.remove('page-enter');
     try {
+      window.activePageTransition?.skipTransition();
       const vt=document.startViewTransition(commit);
+      window.activePageTransition=vt;
       vt.finished?.catch(()=>{});
       vt.ready?.catch(()=>{});
       vt.updateCallbackDone?.catch(()=>{});
@@ -1941,11 +1946,17 @@ function hydrateGymLibrary(force=false){
   if(GYM.loadedOnce && !force && !GYM.loading){ renderGymGrid(); return; }
   loadGym(true);
 }
+let gymDetailRequest=0, gymDetailOpener=null;
 async function openGymDetail(id){
+  const request=++gymDetailRequest, requestedPage=currentPage;
+  const opener=document.activeElement?.closest('[data-action="gym-detail"]') || document.querySelector(`[data-action="gym-detail"][data-id="${CSS.escape(String(id))}"]`);
+  if(opener) opener.setAttribute('aria-busy','true');
   try{
     let d=GYM.detail.get(String(id));
     if(!d){ d=await gymRequest('/api/gym/exercises/'+encodeURIComponent(id)); GYM.detail.set(String(id),d); }
+    if(request!==gymDetailRequest || currentPage!==requestedPage) return;
     const fav=gymFavSet().has(d.id);
+    gymDetailOpener=opener;
     let wrap=$('#gymModal');
     if(!wrap){ wrap=document.createElement('div'); wrap.id='gymModal'; document.body.appendChild(wrap); }
     wrap.innerHTML=`<div class="gym-modal-backdrop" data-action="gym-close-modal"></div>
@@ -1965,9 +1976,12 @@ async function openGymDetail(id){
           </div>
         </div>
       </section>`;
-  }catch(err){ toast('动作详情读取失败：'+err.message,true); }
+    window.experienceMotion?.openDetail(wrap,opener);
+    wrap.querySelector('.gym-modal-x')?.focus({preventScroll:true});
+  }catch(err){ if(request===gymDetailRequest) toast('动作详情读取失败：'+err.message,true); }
+  finally {opener?.removeAttribute('aria-busy');}
 }
-function closeGymModal(){ $('#gymModal')?.remove(); }
+function closeGymModal(){ ++gymDetailRequest; $('#gymModal')?.remove(); if(gymDetailOpener?.isConnected) gymDetailOpener.focus({preventScroll:true}); gymDetailOpener=null; }
 function toggleGymFavorite(id){
   if(!state.gym) state.gym={favorites:[]};
   state.gym.favorites=Array.isArray(state.gym.favorites)?state.gym.favorites:[];

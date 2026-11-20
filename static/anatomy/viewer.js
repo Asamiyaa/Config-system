@@ -1,6 +1,6 @@
 (() => {
  const host=document.querySelector('#view'),status=document.querySelector('#status'),select=document.querySelector('#mode'),scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(40,1,.1,10000);
- let renderer;try{renderer=new THREE.WebGLRenderer({antialias:true});}catch(e){status.textContent='当前浏览器无法启用 WebGL，请开启硬件加速。';return;}
+ let renderer;try{renderer=new THREE.WebGLRenderer({antialias:true});}catch(e){status.textContent='当前设备无法显示 3D，身体区域索引和动作库仍可正常使用。';document.querySelector('#selection').textContent='请使用画面外的身体区域索引定位肌群并查看动作步骤。';document.querySelectorAll('header button,header select').forEach(el=>el.disabled=true);return;}
  renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));host.append(renderer.domElement);scene.add(new THREE.HemisphereLight(0xffffff,0x334039,.8));const light=new THREE.DirectionalLight(0xffffff,.5);light.position.set(0,1,2);scene.add(light);
  const controls=new THREE.OrbitControls(camera,renderer.domElement);let group=new THREE.Group(),manifest,selected,center=new THREE.Vector3(),distance=300,token=0;scene.add(group);
  const cache=new Map(),jobs=new Map(),worker=new Worker('mesh-worker.js');let serial=0;

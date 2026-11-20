@@ -28,7 +28,7 @@
     });
     if (previousPage !== root.dataset.page) {
       previousPage = root.dataset.page;
-      if (!reduced.matches && !document.startViewTransition) root.animate([{opacity:.4,transform:'translateY(12px)'},{opacity:1,transform:'translateY(0)'}],{duration:320,easing:'cubic-bezier(.2,.7,.2,1)'});
+      // Hierarchical entrance is owned by motion.css.
     }
   }
   new MutationObserver(sync).observe(root,{attributes:true,attributeFilter:['data-page','data-hub']});
