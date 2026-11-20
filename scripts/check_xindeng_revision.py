@@ -22,7 +22,7 @@ with sync_playwright() as pw:
  page.goto(BASE)
  page.wait_for_function("document.querySelector('#viewRoot').dataset.page==='dailyflow'")
  page.wait_for_timeout(500)
- assert page.locator('#mainNav .nav-label').all_text_contents()==['成长','健康','资产','设置']
+ assert page.locator('#mainNav .nav-label').all_text_contents()==['成长','健康','资产','UI 学习','设置']
  tabs=page.locator('.hub-tabs .hub-tab')
  assert tabs.all_text_contents()==['流程','周历','90天计划','新登','平衡','成长总览','避坑','每周复盘','白布画板','思维导图']
  for key in ['mindmap','whiteboard','xindeng','agents','calendar','newconfig','growthplan','mistakes','review','dailyflow']:

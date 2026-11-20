@@ -18,7 +18,7 @@ with sync_playwright() as pw:
  p.locator('.mobile-page-picker').click();p.locator('.execution-page-grid button').filter(has_text='周历').click();p.wait_for_timeout(200);assert p.locator('#viewRoot').get_attribute('data-page')=='calendar'
  p.evaluate("renderPage('dailyflow',{transition:false})");p.wait_for_timeout(200)
  p.screenshot(path='artifacts/mobile-execution-home.png',full_page=False)
- assert p.locator('.spatial-dock button').count()==5
+ assert p.locator('.spatial-dock button').count()==6
  p.locator('.quick-todo').click();p.locator('#quickTodo [name=title]').fill('饭后散步');p.locator('#quickTodo [name=date]').fill('2026-12-01');p.locator('#quickTodo [name=time]').fill('18:30');p.locator('#quickTodo [type=submit]').click();p.wait_for_timeout(500)
  assert seed['focusTasks'][-1]['time']=='18:30' and seed['focusTasks'][-1]['startDate']=='2026-12-01'
  p.evaluate("state.dailyFlows.weekday=[{id:'skin-test',title:'护肤',start:600,end:610,destination:'skin'}];ui.flowKind='weekday';ui.flowViewMode='checklist';renderPage('dailyflow',{transition:false})")
