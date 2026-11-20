@@ -4,7 +4,7 @@
 
 ## 内容与功能
 
-来源为两套用户提供的 UI 学习项目。主工作台保留 codex-ai-learn-studio-v3.0 的知识库，并新增原版案例工作台入口；新 aiLearn 源文件完整独立保留在 static/ui-learning/aiLearn/，不覆盖已集成工作台或原始 aiLearn 文件夹。未运行安装器、未覆盖项目 AGENTS/Skills 或既有业务架构。
+来源为两套用户提供的 UI 学习项目。主工作台保留 codex-ai-learn-studio-v3.0 的知识库，并在 UI 学习主页面新增醒目的 aiLearn 案例工作台入口；新 aiLearn 源文件完整独立保留在 static/ui-learning/aiLearn/，不覆盖已集成工作台或原始 aiLearn 文件夹。未运行安装器、未覆盖项目 AGENTS/Skills 或既有业务架构。
 
 保留108条内置知识、10类交互示意、模块/子模块、自建知识、图片、搜索筛选、收藏、学习状态、Prompt复制、单项Skill/Markdown导出、JSON导入导出及独立交互实验室；新增 aiLearn 原版案例画廊、分组管理、案例详情/标注、案例编辑、双案对比、AI 提示词模板、设置与 AI 图片解析配置。108条知识不等于108个完整动态Demo。原版 aiLearn 也保留其本地存储，不与新登账户资料合并，避免覆盖既有 aiLearn 浏览器数据。其 AI 解析功能继续使用该工作台原有设置；只有配置了可用的 AI 服务凭据才会进行真实解析。
 

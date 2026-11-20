@@ -2601,7 +2601,7 @@ function syncBodyLibrarySelection(){
  renderGymFilters();loadGym(true);
 }
 
-function renderUILearning(){return `${sectionHead('UI LEARNING','UI 学习','交互配方、案例与学习记录，随账户持续保存。')}<iframe class="ui-learning-frame" title="UI 学习工作台" src="/static/ui-learning/index.html" allow="clipboard-write" loading="eager"></iframe>`;}
+function renderUILearning(){return `${sectionHead('UI LEARNING','UI 学习','交互配方、案例与学习记录，随账户持续保存。')}<section class="ailearn-entry" aria-labelledby="ailearnEntryTitle"><div class="ailearn-entry-mark" aria-hidden="true">A</div><div class="ailearn-entry-copy"><span>AI LEARN · CASE STUDY</span><h2 id="ailearnEntryTitle">aiLearn 案例工作台</h2><p>浏览案例画廊、拆解界面、对比设计，并用 AI 辅助解析截图。</p></div><a class="ailearn-entry-link" href="/static/ui-learning/aiLearn/index.html" target="_blank" rel="noopener">打开案例工作台 <span aria-hidden="true">↗</span></a></section><iframe class="ui-learning-frame" title="UI 学习工作台" src="/static/ui-learning/index.html" allow="clipboard-write" loading="eager"></iframe>`;}
 window.addEventListener('message',e=>{
  const frame=document.querySelector('.ui-learning-frame');
  if(e.origin!==location.origin || !frame || e.source!==frame.contentWindow)return;

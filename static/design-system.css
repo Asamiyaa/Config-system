@@ -87,3 +87,13 @@ body.spatial-ui #viewRoot .flow-checklist>.flow-check-toolbar button{border:0!im
 
 .ui-learning-frame{display:block;width:100%;height:calc(100dvh - 255px);min-height:560px;border:1px solid var(--border);border-radius:12px;background:var(--surface)}
 @media(max-width:860px){.ui-learning-frame{height:calc(100dvh - 180px);min-height:480px;border-radius:12px}body.spatial-ui .main-panel:has(#viewRoot[data-page=uilearning]) .app-footer{display:none}}
+
+.ailearn-entry{display:grid;grid-template-columns:44px minmax(0,1fr) auto;align-items:center;gap:14px;margin:0 0 14px;padding:14px 18px;border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:12px;background:var(--surface)}
+.ailearn-entry-mark{width:40px;height:40px;display:grid;place-items:center;border-radius:10px;background:var(--raised);color:var(--accent);font-size:19px;font-weight:750}
+.ailearn-entry-copy>span{font-size:10px;letter-spacing:.1em;color:var(--muted)}
+.ailearn-entry-copy h2{margin:2px 0;font-size:16px;line-height:1.5;color:var(--text)}
+.ailearn-entry-copy p{margin:0;font-size:13px;color:var(--muted)}
+.ailearn-entry-link{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:9px 14px;border-radius:9px;background:var(--primary);color:var(--primary-ink);font-size:13px;font-weight:650;text-decoration:none}
+.ailearn-entry-link:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.ailearn-entry-link:hover{filter:brightness(1.05)}
+@media(max-width:860px){.ailearn-entry{grid-template-columns:38px minmax(0,1fr);gap:10px;padding:12px}.ailearn-entry-mark{width:36px;height:36px}.ailearn-entry-copy p{font-size:12px}.ailearn-entry-link{grid-column:2;justify-self:start;min-height:40px;padding:8px 12px}}
