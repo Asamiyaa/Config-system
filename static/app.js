@@ -30,7 +30,7 @@ const WORKBOOKS = [
 ];
 function shiftDateKey(key, days) { if(!key) return ''; const d=new Date(`${key}T12:00:00`); d.setDate(d.getDate()+days); return todayKey(d); }
 function dayDiff(start,end) { if(!start||!end) return 0; return Math.round((new Date(`${end}T12:00:00`)-new Date(`${start}T12:00:00`))/86400000); }
-const PAGE_NAMES = {cycle:"结构与周期",uilearning:"UI 学习",scaffold:"脚手架",infogap:"信息差变现",schedules:'自动化',agents:'平衡',settings:'设置',mistakes:'避坑',social:'人性与社会',dunning:'达克曲线',home:'工作台',inbox:'今日任务',upcoming:'未来 7 天',calendar:'周历 / 日程',matrix:'任务四象限',stats:'执行统计',important:'重要事项',alltasks:'全部任务',dashboard:'资产总览',allocation:'全球资产配置',nasdaq:'纳斯达克 AI 策略',ashare:'A股 ETF 轮动',xindeng:'新登',newconfig:'成长总览',health:'健康',checkin:'打卡与统计',diet:'饮食饮水',fitness:'健身管理',skin:'皮肤护理',sleep:'睡眠与恢复',style:'发型与穿搭',english:'英语',reading:'阅读',execution:'每日执行与日志',archive:'归档',dailyflow:'流程',flowstats:'流程统计',alpharadar:'Alpha Radar'};
+const PAGE_NAMES = {cycle:"结构与周期",uilearning:"UI 学习",scaffold:"脚手架",infogap:"信息差变现",schedules:'自动化',agents:'平衡',settings:'设置',mistakes:'避坑',social:'人性与社会',dunning:'达克曲线',learningprinciples:'学习的第一性原理',home:'工作台',inbox:'今日任务',upcoming:'未来 7 天',calendar:'周历 / 日程',matrix:'任务四象限',stats:'执行统计',important:'重要事项',alltasks:'全部任务',dashboard:'资产总览',allocation:'全球资产配置',nasdaq:'纳斯达克 AI 策略',ashare:'A股 ETF 轮动',xindeng:'新登',newconfig:'成长总览',health:'健康',checkin:'打卡与统计',diet:'饮食饮水',fitness:'健身管理',skin:'皮肤护理',sleep:'睡眠与恢复',style:'发型与穿搭',english:'英语',reading:'阅读',execution:'每日执行与日志',archive:'归档',dailyflow:'流程',flowstats:'流程统计',alpharadar:'Alpha Radar'};
 
 async function api(path, options={}) {
   const res = await fetch(path, {credentials:'same-origin', headers:{'Content-Type':'application/json', ...(options.headers||{})}, ...options});
@@ -280,7 +280,7 @@ function setHeader(page) {
 }
 
 const HUB_OF={
-  uilearning:'uilearning',scaffold:'scaffold',infogap:'infogap',cycle:'cycle',xindeng:'cycle',mistakes:'cycle',social:'cycle',dunning:'cycle',mindmap:'cycle',whiteboard:'cycle',home:'newconfig',today:'newconfig',growthplan:'newconfig',review:'newconfig',
+  uilearning:'uilearning',scaffold:'scaffold',infogap:'infogap',cycle:'cycle',xindeng:'cycle',mistakes:'cycle',social:'cycle',dunning:'cycle',learningprinciples:'cycle',mindmap:'cycle',whiteboard:'cycle',home:'newconfig',today:'newconfig',growthplan:'newconfig',review:'newconfig',
   inbox:'newconfig',schedules:'settings',settings:'settings',dailyflow:'newconfig',calendar:'newconfig',matrix:'newconfig',stats:'newconfig',important:'newconfig',alltasks:'newconfig',flowstats:'newconfig',
   dashboard:'dashboard',allocation:'dashboard',nasdaq:'dashboard',ashare:'dashboard',execution:'dashboard',alpharadar:'dashboard',
   health:'health',checkin:'health',diet:'health',fitness:'health',skin:'health',sleep:'health',style:'health',
@@ -289,7 +289,7 @@ const HUB_OF={
 const HUB_TABS={
   settings:{label:'设置',items:[['schedules','自动化'],['archive','归档']]},
   dashboard:{label:'资产',items:[['http://39.106.118.186/','市场引擎 ↗'],['dashboard','总览'],['allocation','配置'],['nasdaq','纳指'],['ashare','A股'],['execution','执行'],['alpharadar','实验']]},
-  cycle:{label:'结构与周期',items:[['xindeng','新登'],['mistakes','避坑'],['social','人性与社会'],['dunning','达克曲线'],['whiteboard','白布画板'],['mindmap','思维导图']]},
+  cycle:{label:'结构与周期',items:[['xindeng','新登'],['mistakes','避坑'],['social','人性与社会'],['dunning','达克曲线'],['learningprinciples','学习的第一性原理'],['whiteboard','白布画板'],['mindmap','思维导图']]},
   newconfig:{label:'成长',items:[['dailyflow','流程'],['calendar','周历'],['growthplan','90天计划'],['agents','平衡'],['newconfig','成长总览'],['review','每周复盘']]},
   health:{label:'健康',items:[['health','总览'],['checkin','打卡'],['diet','饮食'],['fitness','健身'],['skin','皮肤'],['sleep','睡眠'],['style','穿搭']]}
 };
@@ -384,7 +384,7 @@ function renderPage(page, {autoRefresh=false, transition=true, animate=true}={})
   const root=$('#viewRoot');
   root.dataset.page=page;
   root.dataset.hub=HUB_OF[page]||page;
-  const map={uilearning:renderUILearning,scaffold:renderScaffold,infogap:renderInfoGap,cycle:renderXinDeng,mindmap:renderMindmap,whiteboard:renderWhiteboard,xindeng:renderXinDeng,growthplan:renderGrowthPlan,review:renderGrowthReview,today:()=>renderTaskWorkspace('home'),schedules:renderSchedules,agents:renderAgents,mistakes:renderMistakes,social:renderSocialInsight,dunning:renderDunningCurve,home:renderHome,inbox:renderInbox,upcoming:renderUpcoming,calendar:renderCalendar,matrix:renderMatrix,stats:renderFocusStats,important:renderImportant,alltasks:renderAllFocusTasks,dashboard:renderDashboard,allocation:renderAllocation,nasdaq:renderNasdaq,ashare:renderAshare,newconfig:()=> (typeof renderNewConfigV2==='function'?renderNewConfigV2():renderNewConfig()),health:renderHealth,checkin:renderHealthCheckin,diet:()=>renderHealthSection('diet'),fitness:()=>renderHealthSection('fitness'),skin:()=>renderHealthSection('skin'),sleep:()=>renderHealthSection('sleep'),style:()=>renderHealthSection('style'),english:()=> (typeof renderEnglishV2==='function'?renderEnglishV2():renderEnglish()),reading:()=> (typeof renderReadingV2==='function'?renderReadingV2():renderReading()),execution:renderExecution,archive:renderArchive,dailyflow:renderDailyFlow,flowstats:renderFlowStats,alpharadar:renderAlphaRadar};
+  const map={uilearning:renderUILearning,scaffold:renderScaffold,infogap:renderInfoGap,cycle:renderXinDeng,mindmap:renderMindmap,whiteboard:renderWhiteboard,xindeng:renderXinDeng,growthplan:renderGrowthPlan,review:renderGrowthReview,today:()=>renderTaskWorkspace('home'),schedules:renderSchedules,agents:renderAgents,mistakes:renderMistakes,social:renderSocialInsight,dunning:renderDunningCurve,learningprinciples:renderLearningPrinciples,home:renderHome,inbox:renderInbox,upcoming:renderUpcoming,calendar:renderCalendar,matrix:renderMatrix,stats:renderFocusStats,important:renderImportant,alltasks:renderAllFocusTasks,dashboard:renderDashboard,allocation:renderAllocation,nasdaq:renderNasdaq,ashare:renderAshare,newconfig:()=> (typeof renderNewConfigV2==='function'?renderNewConfigV2():renderNewConfig()),health:renderHealth,checkin:renderHealthCheckin,diet:()=>renderHealthSection('diet'),fitness:()=>renderHealthSection('fitness'),skin:()=>renderHealthSection('skin'),sleep:()=>renderHealthSection('sleep'),style:()=>renderHealthSection('style'),english:()=> (typeof renderEnglishV2==='function'?renderEnglishV2():renderEnglish()),reading:()=> (typeof renderReadingV2==='function'?renderReadingV2():renderReading()),execution:renderExecution,archive:renderArchive,dailyflow:renderDailyFlow,flowstats:renderFlowStats,alpharadar:renderAlphaRadar};
   const investingPages=['dashboard','allocation','nasdaq','ashare','execution'];
   const body=(map[page]||renderHome)();
   const commit = () => {
@@ -933,6 +933,24 @@ function renderDunningCurve(){
  <aside class="dunning-aside"><div class="dunning-aside-sticky"><span class="eyebrow">CALIBRATION PATH</span><h2>认知校准路径</h2><p>不把确定感当能力本身；用框架和反馈检查判断。</p><ol>${stages.map(s=>`<li class="${selected===s.id?'is-current':''}"><span>${s.n}</span><div><strong>${s.name}</strong><small>${s.transition}</small></div></li>`).join('')}</ol><div class="dunning-aside-rule"><strong>校准时可以问自己</strong><p>我看到了多少事实？哪些变量还没纳入？什么新证据会让我修改判断？</p></div><small class="dunning-aside-caption">这张曲线是理解自我校准的示意，不代表每个人都会按固定阶段线性前进。</small></div></aside></div>`;
 }
 
+
+function renderLearningPrinciples(){
+ const steps=[
+  {name:'读书',yes:'改变认知',no:'增加知识',accent:'amber'},
+  {name:'改变认知',yes:'理解规律',no:'记忆答案',accent:'green'},
+  {name:'理解规律',yes:'思考本质',no:'积累信息',accent:'green'},
+  {name:'思考本质',yes:'建立框架',no:'堆砌观点',accent:'green'},
+  {name:'建立框架',yes:'连接实践',no:'停留理论',accent:'green'},
+  {name:'连接实践',yes:'解决问题',no:'展示学识',accent:'amber'}
+ ];
+ ui.learningPrincipleStage=Number.isInteger(ui.learningPrincipleStage)?ui.learningPrincipleStage:0;
+ const selected=Math.max(0,Math.min(steps.length-1,ui.learningPrincipleStage));
+ return `${sectionHead('READING · FIRST PRINCIPLES · PRACTICE','学习的第一性原理','把读书变成认知、理解、框架与实践的连续转化。')}
+ <div class="learning-principles-layout"><main class="learning-principles-main"><section class="learning-principles-hero"><div><span class="eyebrow">READ TO UNDERSTAND · APPLY TO SOLVE</span><h2>读书的终点不是知道更多</h2><p>而是用更高维度去理解问题。</p></div><div class="learning-principles-mark" aria-hidden="true"><span>知</span><i>→</i><span>行</span></div></section>
+ <section class="learning-principles-flow" aria-label="读书与学习的六步转化路径">${steps.map((s,i)=>`<div class="learning-principles-step-wrap"><button type="button" class="learning-principles-step lp-${s.accent} ${selected===i?'is-selected':''}" data-action="learning-principle-step" data-step="${i}" aria-pressed="${selected===i}"><span class="learning-step-index">${String(i+1).padStart(2,'0')}</span><span class="learning-step-name">${s.name}</span><span class="learning-branch learning-branch-yes"><b>是</b><i aria-hidden="true">→</i><strong>${s.yes}</strong></span><span class="learning-branch learning-branch-no"><b>不是</b><i aria-hidden="true">↘</i><strong>${s.no}</strong></span></button>${i<steps.length-1?'<div class="learning-step-connector" aria-hidden="true"><span>↓</span></div>':''}</div>`).join('')}</section>
+ <section class="learning-principles-check"><div class="learning-principles-check-head"><span class="eyebrow">A BETTER READING OUTCOME</span><span>当前聚焦 · ${String(selected+1).padStart(2,'0')} / 06</span></div><h2>${steps[selected].name}：从“${steps[selected].yes}”继续</h2><p>检查这一步是否带来下一层理解；若只停留在“${steps[selected].no}”，就回到内容、证据与实际问题重新校准。</p><div class="learning-outcome-chain">${['改变认知','理解规律','思考本质','建立框架','连接实践','解决问题'].map((x,i)=>`<span class="${i<=selected?'is-reached':''}">${x}</span>${i<5?'<i aria-hidden="true">→</i>':''}`).join('')}</div></section></main>
+ <aside class="learning-principles-aside"><div class="learning-aside-sticky"><span class="eyebrow">READING TO PRACTICE</span><h2>从知识走向解决问题</h2><p>每一步都检验读书有没有推动理解继续向前。</p><ol>${steps.map((s,i)=>`<li class="${selected===i?'is-current':''}"><span>${String(i+1).padStart(2,'0')}</span><div><strong>${s.name}</strong><small>是 · ${s.yes}　/　不是 · ${s.no}</small></div></li>`).join('')}</ol><div class="learning-aside-end"><span>终点</span><strong>解决问题</strong><small>不是展示学识</small></div></div></aside></div>`;
+}
 
 let scheduleJobsCache = [];
 let vaultStatus = null;
@@ -2390,6 +2408,7 @@ function bindDelegatedEvents() {
     if(a==='voice-task-close'){if(voiceTaskRecognition){voiceTaskRecognition.cancelled=true;voiceTaskRecognition.abort();}voiceTaskRecognition=null;$('#voiceTaskModalMount')?.remove();return;}
     if(a==='voice-task-start'){startVoiceTaskCapture(action);return;}
     if(a==='dunning-stage'){ui.dunningStage=action.dataset.stage||'surface';renderPage('dunning');return;}
+    if(a==='learning-principle-step'){ui.learningPrincipleStage=Number(action.dataset.step)||0;renderPage('learningprinciples');return;}
     if(a==='gym-zone'){gymUI().bodyPart=action.dataset.zone||'';renderGymFilters();loadGym(true);return;}
     if(a==='gym-fav-filter'){const u=gymUI();u.favorites=!u.favorites;renderGymFilters();loadGym(true);return;}
     if(a==='gym-fav'){toggleGymFavorite(action.dataset.id);return;}

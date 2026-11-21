@@ -21,6 +21,7 @@
     { page: 'mistakes', label: '避坑', hint: '错过与过错' },
     { page: 'social', label: '人性与社会', hint: '结构与周期 五层洞察 规则 利益 人性' },
     { page: 'dunning', label: '达克曲线', hint: '结构与周期 达克效应 认知校准' },
+    { page: 'learningprinciples', label: '学习的第一性原理', hint: '结构与周期 读书 理解规律 建立框架 实践' },
     { page: 'whiteboard', label: '白布画板', hint: '结构与周期 绘制 打开画板' },
     { page: 'mindmap', label: '思维导图', hint: '结构与周期 绘制 分支' },
     { page: 'dashboard', label: '资产总览', hint: '风控' },
