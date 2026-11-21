@@ -15,7 +15,7 @@ let currentPage = 'dailyflow';
 let authMode = 'login';
 let saveTimer = null;
 let marketBusy = false;
-let ui = { allocationMode:'global', expandedETF:null, showSourceDetails:false, cycleTab:'research', focusQuery:'', homeRange:'7', calendarWeekOffset:0, showCalendarComposer:false, calendarSelectedDate:'', workbookSheetIndex:0, workbookData:null, calendarDrag:null, calendarResize:null, bodyZone:'', bodyMuscle:'', bodyMode:'muscle', bodySearch:'', bodyView:{x:0,y:0,rx:0,ry:0,scale:1}, bodyDragMoved:false, checkinDate:'', guidedSummaryId:null };
+let ui = { allocationMode:'global', expandedETF:null, showSourceDetails:false, cycleTab:'research', focusQuery:'', homeRange:'7', calendarWeekOffset:0, showCalendarComposer:false, calendarSelectedDate:'', workbookSheetIndex:0, workbookData:null, calendarDrag:null, calendarResize:null, bodyZone:'', bodyMuscle:'', bodyMode:'muscle', bodySearch:'', bodyView:{x:0,y:0,rx:0,ry:0,scale:1}, bodyDragMoved:false, checkinDate:'', guidedSummaryId:null, mustReadOpenId:null };
 let guidedTimerInterval=null;
 let focusClock = { remaining:1500, endsAt:null, interval:null, running:false };
 
@@ -30,7 +30,7 @@ const WORKBOOKS = [
 ];
 function shiftDateKey(key, days) { if(!key) return ''; const d=new Date(`${key}T12:00:00`); d.setDate(d.getDate()+days); return todayKey(d); }
 function dayDiff(start,end) { if(!start||!end) return 0; return Math.round((new Date(`${end}T12:00:00`)-new Date(`${start}T12:00:00`))/86400000); }
-const PAGE_NAMES = {uilearning:"UI 学习",scaffold:"脚手架",infogap:"信息差变现",schedules:'自动化',agents:'平衡',settings:'设置',mistakes:'避坑',home:'工作台',inbox:'今日任务',upcoming:'未来 7 天',calendar:'周历 / 日程',matrix:'任务四象限',stats:'执行统计',important:'重要事项',alltasks:'全部任务',dashboard:'资产总览',allocation:'全球资产配置',nasdaq:'纳斯达克 AI 策略',ashare:'A股 ETF 轮动',xindeng:'新登',newconfig:'成长总览',health:'健康',checkin:'打卡与统计',diet:'饮食饮水',fitness:'健身管理',skin:'皮肤护理',sleep:'睡眠与恢复',style:'发型与穿搭',english:'英语',reading:'阅读',execution:'每日执行与日志',archive:'归档',dailyflow:'流程',flowstats:'流程统计',alpharadar:'Alpha Radar'};
+const PAGE_NAMES = {cycle:"结构与周期",uilearning:"UI 学习",scaffold:"脚手架",infogap:"信息差变现",schedules:'自动化',agents:'平衡',settings:'设置',mistakes:'避坑',home:'工作台',inbox:'今日任务',upcoming:'未来 7 天',calendar:'周历 / 日程',matrix:'任务四象限',stats:'执行统计',important:'重要事项',alltasks:'全部任务',dashboard:'资产总览',allocation:'全球资产配置',nasdaq:'纳斯达克 AI 策略',ashare:'A股 ETF 轮动',xindeng:'新登',newconfig:'成长总览',health:'健康',checkin:'打卡与统计',diet:'饮食饮水',fitness:'健身管理',skin:'皮肤护理',sleep:'睡眠与恢复',style:'发型与穿搭',english:'英语',reading:'阅读',execution:'每日执行与日志',archive:'归档',dailyflow:'流程',flowstats:'流程统计',alpharadar:'Alpha Radar'};
 
 async function api(path, options={}) {
   const res = await fetch(path, {credentials:'same-origin', headers:{'Content-Type':'application/json', ...(options.headers||{})}, ...options});
@@ -280,8 +280,8 @@ function setHeader(page) {
 }
 
 const HUB_OF={
-  uilearning:'uilearning',scaffold:'scaffold',infogap:'infogap',mindmap:'newconfig',whiteboard:'newconfig',home:'newconfig',today:'newconfig',xindeng:'newconfig',growthplan:'newconfig',review:'newconfig',
-  inbox:'newconfig',schedules:'settings',settings:'settings',dailyflow:'newconfig',mistakes:'newconfig',calendar:'newconfig',matrix:'newconfig',stats:'newconfig',important:'newconfig',alltasks:'newconfig',flowstats:'newconfig',
+  uilearning:'uilearning',scaffold:'scaffold',infogap:'infogap',cycle:'cycle',xindeng:'cycle',mistakes:'cycle',mindmap:'newconfig',whiteboard:'newconfig',home:'newconfig',today:'newconfig',growthplan:'newconfig',review:'newconfig',
+  inbox:'newconfig',schedules:'settings',settings:'settings',dailyflow:'newconfig',calendar:'newconfig',matrix:'newconfig',stats:'newconfig',important:'newconfig',alltasks:'newconfig',flowstats:'newconfig',
   dashboard:'dashboard',allocation:'dashboard',nasdaq:'dashboard',ashare:'dashboard',execution:'dashboard',alpharadar:'dashboard',
   health:'health',checkin:'health',diet:'health',fitness:'health',skin:'health',sleep:'health',style:'health',
   agents:'newconfig',newconfig:'newconfig',english:'newconfig',reading:'newconfig',archive:'settings'
@@ -289,7 +289,8 @@ const HUB_OF={
 const HUB_TABS={
   settings:{label:'设置',items:[['schedules','自动化'],['archive','归档']]},
   dashboard:{label:'资产',items:[['http://39.106.118.186/','市场引擎 ↗'],['dashboard','总览'],['allocation','配置'],['nasdaq','纳指'],['ashare','A股'],['execution','执行'],['alpharadar','实验']]},
-  newconfig:{label:'成长',items:[['dailyflow','流程'],['calendar','周历'],['growthplan','90天计划'],['xindeng','新登'],['agents','平衡'],['newconfig','成长总览'],['mistakes','避坑'],['review','每周复盘'],['whiteboard','白布画板'],['mindmap','思维导图']]},
+  cycle:{label:'结构与周期',items:[['xindeng','新登'],['mistakes','避坑']]},
+  newconfig:{label:'成长',items:[['dailyflow','流程'],['calendar','周历'],['growthplan','90天计划'],['agents','平衡'],['newconfig','成长总览'],['review','每周复盘'],['whiteboard','白布画板'],['mindmap','思维导图']]},
   health:{label:'健康',items:[['health','总览'],['checkin','打卡'],['diet','饮食'],['fitness','健身'],['skin','皮肤'],['sleep','睡眠'],['style','穿搭']]}
 };
 function renderHubTabs(page){
@@ -383,7 +384,7 @@ function renderPage(page, {autoRefresh=false, transition=true, animate=true}={})
   const root=$('#viewRoot');
   root.dataset.page=page;
   root.dataset.hub=HUB_OF[page]||page;
-  const map={uilearning:renderUILearning,scaffold:renderScaffold,infogap:renderInfoGap,mindmap:renderMindmap,whiteboard:renderWhiteboard,xindeng:renderXinDeng,growthplan:renderGrowthPlan,review:renderGrowthReview,today:()=>renderTaskWorkspace('home'),schedules:renderSchedules,agents:renderAgents,mistakes:renderMistakes,home:renderHome,inbox:renderInbox,upcoming:renderUpcoming,calendar:renderCalendar,matrix:renderMatrix,stats:renderFocusStats,important:renderImportant,alltasks:renderAllFocusTasks,dashboard:renderDashboard,allocation:renderAllocation,nasdaq:renderNasdaq,ashare:renderAshare,newconfig:()=> (typeof renderNewConfigV2==='function'?renderNewConfigV2():renderNewConfig()),health:renderHealth,checkin:renderHealthCheckin,diet:()=>renderHealthSection('diet'),fitness:()=>renderHealthSection('fitness'),skin:()=>renderHealthSection('skin'),sleep:()=>renderHealthSection('sleep'),style:()=>renderHealthSection('style'),english:()=> (typeof renderEnglishV2==='function'?renderEnglishV2():renderEnglish()),reading:()=> (typeof renderReadingV2==='function'?renderReadingV2():renderReading()),execution:renderExecution,archive:renderArchive,dailyflow:renderDailyFlow,flowstats:renderFlowStats,alpharadar:renderAlphaRadar};
+  const map={uilearning:renderUILearning,scaffold:renderScaffold,infogap:renderInfoGap,cycle:renderXinDeng,mindmap:renderMindmap,whiteboard:renderWhiteboard,xindeng:renderXinDeng,growthplan:renderGrowthPlan,review:renderGrowthReview,today:()=>renderTaskWorkspace('home'),schedules:renderSchedules,agents:renderAgents,mistakes:renderMistakes,home:renderHome,inbox:renderInbox,upcoming:renderUpcoming,calendar:renderCalendar,matrix:renderMatrix,stats:renderFocusStats,important:renderImportant,alltasks:renderAllFocusTasks,dashboard:renderDashboard,allocation:renderAllocation,nasdaq:renderNasdaq,ashare:renderAshare,newconfig:()=> (typeof renderNewConfigV2==='function'?renderNewConfigV2():renderNewConfig()),health:renderHealth,checkin:renderHealthCheckin,diet:()=>renderHealthSection('diet'),fitness:()=>renderHealthSection('fitness'),skin:()=>renderHealthSection('skin'),sleep:()=>renderHealthSection('sleep'),style:()=>renderHealthSection('style'),english:()=> (typeof renderEnglishV2==='function'?renderEnglishV2():renderEnglish()),reading:()=> (typeof renderReadingV2==='function'?renderReadingV2():renderReading()),execution:renderExecution,archive:renderArchive,dailyflow:renderDailyFlow,flowstats:renderFlowStats,alpharadar:renderAlphaRadar};
   const investingPages=['dashboard','allocation','nasdaq','ashare','execution'];
   const body=(map[page]||renderHome)();
   const commit = () => {
@@ -840,9 +841,17 @@ function renderAgents(){
 }
 
 
+function renderMustReadMarkdown(source=''){
+ const text=String(source||'').trim();if(!text)return '<p class="mustread-md-empty">展开后可写复盘经过、触发因素和下次判断规则。</p>';
+ const inline=value=>esc(value).replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>').replace(/\*([^*]+)\*/g,'<em>$1</em>');
+ return text.split(/\n\s*\n/).map(block=>{const lines=block.split('\n');if(/^```/.test(lines[0]))return `<pre><code>${esc(lines.slice(1,-1).join('\n'))}</code></pre>`;if(/^#{1,3}\s/.test(lines[0]))return lines.map(line=>{const m=line.match(/^(#{1,3})\s+(.*)$/);return m?`<h${m[1].length}>${inline(m[2])}</h${m[1].length}>`:''}).join('');if(lines.every(line=>/^\s*[-*]\s+/.test(line)))return `<ul>${lines.map(line=>`<li>${inline(line.replace(/^\s*[-*]\s+/,''))}</li>`).join('')}</ul>`;if(lines.every(line=>/^\s*>/.test(line)))return `<blockquote>${lines.map(line=>inline(line.replace(/^\s*>\s?/,''))).join('<br>')}</blockquote>`;return `<p>${lines.map(inline).join('<br>')}</p>`}).join('');
+}
 function renderMistakes(){
- return `${sectionHead('REVIEW / LESSONS','避坑','独立记录曾经犯过的错误、错过的机会与复盘资料。每天回看关键条目，减少重复犯错。','')}
- <section class="card daily-mustread-card"><div class="card-head"><div><h3>每日必读 · 错误与错过清单</h3><p>把曾经犯过的错误、错过的机会和复盘资料保存为标题 + URL，每天回看，避免重复付学费。</p></div><span class="tag neutral">${(state.dailyMustReads||[]).length} 条</span></div><form id="mustReadForm" class="mustread-form"><input name="title" required placeholder="标题：例如忽视止损条件 / 错过的机会复盘"><input name="url" type="url" required placeholder="https://... 链接地址"><input name="note" placeholder="一句话提醒（可选）"><button class="btn btn-primary" type="button" data-action="add-mustread">＋ 添加必读</button></form><div class="mustread-list">${(state.dailyMustReads||[]).map((x,i)=>`<article class="mustread-item"><span class="mustread-check">◎</span><div><a href="${esc(x.url)}" target="_blank" rel="noopener noreferrer">${esc(x.title)}</a><p>${esc(x.note||'每日复盘时打开，检查是否再次出现同类风险。')}</p><small>加入于 ${esc(x.created||'')}</small></div><button class="btn btn-small btn-ghost" data-action="delete-mustread" data-index="${i}">删除</button></article>`).join('')||'<div class="empty-state">还没有必读条目。建议先添加最重要的 3 条历史错误或错过复盘。</div>'}</div></section>`;
+ const items=state.dailyMustReads||[];
+ return `${sectionHead('REVIEW / LESSONS','避坑','记录错误、错过与复盘资料。点击清单展开 Markdown 详情，可附加图片。','')}
+ <section class="card daily-mustread-card"><div class="card-head"><div><h3>错误与错过清单</h3><p>先记录标题和提醒；复盘过程、规则与图片收进条目详情。</p></div><span class="tag neutral">${items.length} 条</span></div>
+ <form id="mustReadForm" class="mustread-form"><input name="title" required maxlength="180" placeholder="标题：例如忽视止损条件 / 错过的机会复盘"><input name="note" maxlength="300" placeholder="一句话提醒（可选）"><button class="btn btn-primary" type="button" data-action="add-mustread">＋ 添加清单</button></form>
+ <div class="mustread-list">${items.map((x,i)=>{const open=String(ui.mustReadOpenId)===String(x.id),images=Array.isArray(x.images)?x.images:[];return `<article class="mustread-item ${open?'is-open':''}" data-mustread-id="${esc(x.id)}"><div class="mustread-row"><button type="button" class="mustread-summary" data-mustread-action="toggle" data-index="${i}" aria-controls="mustread-detail-${esc(x.id)}" aria-expanded="${open}"><span class="mustread-check">${open?'−':'＋'}</span><span class="mustread-summary-copy"><strong>${esc(x.title||'未命名复盘')}</strong><small>${esc(x.note||'点击展开，补充复盘内容与规则。')}</small><small class="mustread-meta">加入于 ${esc(x.created||'')} · ${images.length} 张图片 · Markdown</small></span></button><button class="btn btn-small btn-ghost" data-action="delete-mustread" data-index="${i}">删除</button></div>${open?`<div class="mustread-detail" id="mustread-detail-${esc(x.id)}"><label class="mustread-note-edit">一句话提醒<input data-mustread-note value="${esc(x.note||'')}" maxlength="300" placeholder="留下一条容易执行的提醒"></label><label class="mustread-md-label">复盘文档 <span>Markdown</span><textarea data-mustread-markdown data-index="${i}" rows="10" placeholder="## 发生了什么？&#10;&#10;## 当时忽略了什么信号？&#10;&#10;## 下次的判断规则是什么？">${esc(x.markdown||'')}</textarea></label><div class="mustread-preview-label">文档预览</div><div class="mustread-markdown-preview">${renderMustReadMarkdown(x.markdown||'')}</div><div class="mustread-attachments"><div><strong>图片附件</strong><small>最多 4 张，每张不超过 900 KB</small></div><label class="mustread-upload">＋ 添加图片<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple data-mustread-images data-index="${i}"></label></div><div class="mustread-image-grid">${images.map((image,j)=>/^data:image\/(png|jpeg|webp|gif);base64,/i.test(image.dataUrl||'')?`<figure><img src="${esc(image.dataUrl)}" alt="${esc(image.name||'复盘图片')}" loading="lazy"><figcaption>${esc(image.name||'复盘图片')}<button type="button" data-mustread-action="remove-image" data-index="${i}" data-image-index="${j}" aria-label="删除图片">×</button></figcaption></figure>`:'').join('')}</div><div class="mustread-detail-actions"><button type="button" class="btn btn-primary" data-mustread-action="save" data-index="${i}">保存复盘内容</button><span>保存到当前账户</span></div></div>`:''}</article>`}).join('')||'<div class="empty-state">还没有复盘条目。先添加一条标题，再展开填写详情。</div>'}</div></section>`;
 }
 
 
@@ -2337,7 +2346,7 @@ function bindDelegatedEvents() {
     if(a==='close-interaction-modal'){ $('#interactionModal')?.remove(); return; }
     if(a==='toggle-flow-nav'){const box=$('#flowSubnav'),open=box?.classList.contains('hidden');if(box)box.classList.toggle('hidden',!open);action.setAttribute('aria-expanded',String(!!open));const k=action.querySelector('kbd');if(k)k.textContent=open?'−':'＋';try{localStorage.setItem('wealth-os-flow-open',open?'1':'0')}catch(_){}return;}
     if(a==='toggle-investing') { const box=$('#investingSubnav'), open=box?.classList.contains('hidden'); if(box)box.classList.toggle('hidden',!open); action.setAttribute('aria-expanded',String(!!open)); const k=action.querySelector('kbd');if(k)k.textContent=open?'−':'＋'; try{localStorage.setItem('wealth-os-investing-open',open?'1':'0')}catch(_){} return; }
-    if(a==='add-mustread') { const f=$('#mustReadForm'); if(!f?.reportValidity())return; const fd=new FormData(f); state.dailyMustReads.unshift({id:Date.now(),title:String(fd.get('title')||'').trim(),url:String(fd.get('url')||'').trim(),note:String(fd.get('note')||'').trim(),created:todayKey()}); saveAndRender('每日必读已添加');return; }
+    if(a==='add-mustread') { const f=$('#mustReadForm'); if(!f?.reportValidity())return; const fd=new FormData(f),item={id:Date.now(),title:String(fd.get('title')||'').trim(),note:String(fd.get('note')||'').trim(),markdown:'',images:[],created:todayKey()}; state.dailyMustReads.unshift(item);ui.mustReadOpenId=item.id;saveAndRender('清单已添加');return; }
     if(a==='delete-mustread') { const i=n(action.dataset.index,-1); if(i>=0){state.dailyMustReads.splice(i,1);saveAndRender('已删除必读条目')}return; }
     if(a==='agent-open') { renderPage(action.dataset.page||'home',{autoRefresh:true});return; }
     if(a==='alpha-focus-form'){document.getElementById('alphaSignalFormCard')?.scrollIntoView({behavior:'smooth',block:'start'});setTimeout(()=>document.querySelector('#alphaSignalForm input[name=title]')?.focus(),80);return;}
@@ -2601,9 +2610,48 @@ function syncBodyLibrarySelection(){
  renderGymFilters();loadGym(true);
 }
 
-function renderScaffold(){return `${sectionHead('CODEX STARTER','脚手架','把设计约束、交互方案和项目级 Codex Skills 带进一个新项目。')}<iframe class="scaffold-frame" title="Codex 项目脚手架" src="/static/scaffold/index.html" loading="eager"></iframe>`;}
-function renderInfoGap(){return `${sectionHead('OPPORTUNITY OS','信息差变现','发现机会、记录证据、验证真实需求，并跟踪从假设到成交的过程。')}<iframe class="opportunity-frame" title="信息差变现工作台" src="/opportunity-os/" loading="eager"></iframe>`;}
-function renderUILearning(){return `${sectionHead('UI LEARNING','UI 学习','交互配方、案例与学习记录，随账户持续保存。')}<section class="ailearn-entry" aria-labelledby="ailearnEntryTitle"><div class="ailearn-entry-mark" aria-hidden="true">A</div><div class="ailearn-entry-copy"><span>AI LEARN · CASE STUDY</span><h2 id="ailearnEntryTitle">aiLearn 案例工作台</h2><p>浏览案例画廊、拆解界面、对比设计，并用 AI 辅助解析截图。</p></div><a class="ailearn-entry-link" href="/static/ui-learning/aiLearn/index.html" target="_blank" rel="noopener">打开案例工作台 <span aria-hidden="true">↗</span></a></section><iframe class="ui-learning-frame" title="UI 学习工作台" src="/static/ui-learning/index.html" allow="clipboard-write" loading="eager"></iframe>`;}
+document.addEventListener('click',async event=>{
+ const button=event.target.closest('[data-mustread-action]');if(!button)return;
+ const index=n(button.dataset.index,-1),item=state?.dailyMustReads?.[index];if(!item)return;
+ if(button.dataset.mustreadAction==='toggle'){
+  ui.mustReadOpenId=String(ui.mustReadOpenId)===String(item.id)?null:item.id;
+  renderPage('mistakes',{transition:false,animate:false});return;
+ }
+ if(button.dataset.mustreadAction==='save'){
+  const detail=button.closest('.mustread-detail');item.note=detail?.querySelector('[data-mustread-note]')?.value.trim()||'';item.markdown=detail?.querySelector('[data-mustread-markdown]')?.value||'';item.updated=todayKey();
+  const ok=await persist({quiet:true});renderPage('mistakes',{transition:false,animate:false});toast(ok?'复盘内容已保存':'保存失败，内容暂留在当前页面',!ok);return;
+ }
+ if(button.dataset.mustreadAction==='remove-image'){
+  const images=Array.isArray(item.images)?item.images:[];images.splice(n(button.dataset.imageIndex,-1),1);item.images=images;
+  const ok=await persist({quiet:true});renderPage('mistakes',{transition:false,animate:false});toast(ok?'图片已移除':'图片已移除，保存失败',!ok);
+ }
+});
+
+document.addEventListener('input',event=>{
+ const textarea=event.target.closest('[data-mustread-markdown]');if(!textarea)return;
+ const preview=textarea.closest('.mustread-detail')?.querySelector('.mustread-markdown-preview');if(preview)preview.innerHTML=renderMustReadMarkdown(textarea.value);
+});
+
+document.addEventListener('change',async event=>{
+ const input=event.target.closest('[data-mustread-images]');if(!input)return;
+ const item=state?.dailyMustReads?.[n(input.dataset.index,-1)];if(!item)return;
+ const images=Array.isArray(item.images)?item.images:(item.images=[]);const files=[...(input.files||[])];
+ if(images.length+files.length>4){toast('每条清单最多附加 4 张图片',true);input.value='';return;}
+ const readFile=file=>new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result||''));reader.onerror=()=>reject(new Error('图片读取失败'));reader.readAsDataURL(file);});
+ let added=0;
+ for(const file of files){
+  if(!/^image\/(png|jpeg|webp|gif)$/i.test(file.type)){toast(`${file.name} 格式不支持，请选择 PNG、JPG、WebP 或 GIF`,true);continue;}
+  if(file.size>900*1024){toast(`${file.name} 超过 900 KB，请先压缩图片`,true);continue;}
+  try{const dataUrl=await readFile(file);if(JSON.stringify(state).length+dataUrl.length>4_500_000){toast('个人数据空间接近上限，请先压缩或删除图片',true);break;}images.push({name:file.name.slice(0,120),dataUrl});added++;}
+  catch(error){toast(error.message,true);}
+ }
+ input.value='';if(!added)return;
+ const ok=await persist({quiet:true});renderPage('mistakes',{transition:false,animate:false});toast(ok?`已保存 ${added} 张图片`:'图片已加入当前记录，但保存失败',!ok);
+});
+
+function renderScaffold(){return `<iframe class="scaffold-frame" title="Codex 项目脚手架" src="/static/scaffold/index.html" loading="eager"></iframe>`;}
+function renderInfoGap(){return `<iframe class="opportunity-frame" title="信息差变现工作台" src="/opportunity-os/" loading="eager"></iframe>`;}
+function renderUILearning(){return `<section class="ailearn-entry" aria-labelledby="ailearnEntryTitle"><div class="ailearn-entry-mark" aria-hidden="true">A</div><div class="ailearn-entry-copy"><span>AI LEARN · CASE STUDY</span><h2 id="ailearnEntryTitle">aiLearn 案例工作台</h2><p>浏览案例画廊、拆解界面、对比设计，并用 AI 辅助解析截图。</p></div><a class="ailearn-entry-link" href="/static/ui-learning/aiLearn/index.html" target="_blank" rel="noopener">打开案例工作台 <span aria-hidden="true">↗</span></a></section><iframe class="ui-learning-frame" title="UI 学习工作台" src="/static/ui-learning/index.html" allow="clipboard-write" loading="eager"></iframe>`;}
 window.addEventListener('message',e=>{
  const frame=document.querySelector('.ui-learning-frame');
  if(e.origin!==location.origin || !frame || e.source!==frame.contentWindow)return;
