@@ -30,7 +30,7 @@ const WORKBOOKS = [
 ];
 function shiftDateKey(key, days) { if(!key) return ''; const d=new Date(`${key}T12:00:00`); d.setDate(d.getDate()+days); return todayKey(d); }
 function dayDiff(start,end) { if(!start||!end) return 0; return Math.round((new Date(`${end}T12:00:00`)-new Date(`${start}T12:00:00`))/86400000); }
-const PAGE_NAMES = {cycle:"结构与周期",uilearning:"UI 学习",scaffold:"脚手架",infogap:"信息差变现",schedules:'自动化',agents:'平衡',settings:'设置',mistakes:'避坑',home:'工作台',inbox:'今日任务',upcoming:'未来 7 天',calendar:'周历 / 日程',matrix:'任务四象限',stats:'执行统计',important:'重要事项',alltasks:'全部任务',dashboard:'资产总览',allocation:'全球资产配置',nasdaq:'纳斯达克 AI 策略',ashare:'A股 ETF 轮动',xindeng:'新登',newconfig:'成长总览',health:'健康',checkin:'打卡与统计',diet:'饮食饮水',fitness:'健身管理',skin:'皮肤护理',sleep:'睡眠与恢复',style:'发型与穿搭',english:'英语',reading:'阅读',execution:'每日执行与日志',archive:'归档',dailyflow:'流程',flowstats:'流程统计',alpharadar:'Alpha Radar'};
+const PAGE_NAMES = {cycle:"结构与周期",uilearning:"UI 学习",scaffold:"脚手架",infogap:"信息差变现",schedules:'自动化',agents:'平衡',settings:'设置',mistakes:'避坑',social:'人性与社会',home:'工作台',inbox:'今日任务',upcoming:'未来 7 天',calendar:'周历 / 日程',matrix:'任务四象限',stats:'执行统计',important:'重要事项',alltasks:'全部任务',dashboard:'资产总览',allocation:'全球资产配置',nasdaq:'纳斯达克 AI 策略',ashare:'A股 ETF 轮动',xindeng:'新登',newconfig:'成长总览',health:'健康',checkin:'打卡与统计',diet:'饮食饮水',fitness:'健身管理',skin:'皮肤护理',sleep:'睡眠与恢复',style:'发型与穿搭',english:'英语',reading:'阅读',execution:'每日执行与日志',archive:'归档',dailyflow:'流程',flowstats:'流程统计',alpharadar:'Alpha Radar'};
 
 async function api(path, options={}) {
   const res = await fetch(path, {credentials:'same-origin', headers:{'Content-Type':'application/json', ...(options.headers||{})}, ...options});
@@ -280,7 +280,7 @@ function setHeader(page) {
 }
 
 const HUB_OF={
-  uilearning:'uilearning',scaffold:'scaffold',infogap:'infogap',cycle:'cycle',xindeng:'cycle',mistakes:'cycle',mindmap:'newconfig',whiteboard:'newconfig',home:'newconfig',today:'newconfig',growthplan:'newconfig',review:'newconfig',
+  uilearning:'uilearning',scaffold:'scaffold',infogap:'infogap',cycle:'cycle',xindeng:'cycle',mistakes:'cycle',social:'cycle',mindmap:'cycle',whiteboard:'cycle',home:'newconfig',today:'newconfig',growthplan:'newconfig',review:'newconfig',
   inbox:'newconfig',schedules:'settings',settings:'settings',dailyflow:'newconfig',calendar:'newconfig',matrix:'newconfig',stats:'newconfig',important:'newconfig',alltasks:'newconfig',flowstats:'newconfig',
   dashboard:'dashboard',allocation:'dashboard',nasdaq:'dashboard',ashare:'dashboard',execution:'dashboard',alpharadar:'dashboard',
   health:'health',checkin:'health',diet:'health',fitness:'health',skin:'health',sleep:'health',style:'health',
@@ -289,8 +289,8 @@ const HUB_OF={
 const HUB_TABS={
   settings:{label:'设置',items:[['schedules','自动化'],['archive','归档']]},
   dashboard:{label:'资产',items:[['http://39.106.118.186/','市场引擎 ↗'],['dashboard','总览'],['allocation','配置'],['nasdaq','纳指'],['ashare','A股'],['execution','执行'],['alpharadar','实验']]},
-  cycle:{label:'结构与周期',items:[['xindeng','新登'],['mistakes','避坑']]},
-  newconfig:{label:'成长',items:[['dailyflow','流程'],['calendar','周历'],['growthplan','90天计划'],['agents','平衡'],['newconfig','成长总览'],['review','每周复盘'],['whiteboard','白布画板'],['mindmap','思维导图']]},
+  cycle:{label:'结构与周期',items:[['xindeng','新登'],['mistakes','避坑'],['social','人性与社会'],['whiteboard','白布画板'],['mindmap','思维导图']]},
+  newconfig:{label:'成长',items:[['dailyflow','流程'],['calendar','周历'],['growthplan','90天计划'],['agents','平衡'],['newconfig','成长总览'],['review','每周复盘']]},
   health:{label:'健康',items:[['health','总览'],['checkin','打卡'],['diet','饮食'],['fitness','健身'],['skin','皮肤'],['sleep','睡眠'],['style','穿搭']]}
 };
 function renderHubTabs(page){
@@ -384,7 +384,7 @@ function renderPage(page, {autoRefresh=false, transition=true, animate=true}={})
   const root=$('#viewRoot');
   root.dataset.page=page;
   root.dataset.hub=HUB_OF[page]||page;
-  const map={uilearning:renderUILearning,scaffold:renderScaffold,infogap:renderInfoGap,cycle:renderXinDeng,mindmap:renderMindmap,whiteboard:renderWhiteboard,xindeng:renderXinDeng,growthplan:renderGrowthPlan,review:renderGrowthReview,today:()=>renderTaskWorkspace('home'),schedules:renderSchedules,agents:renderAgents,mistakes:renderMistakes,home:renderHome,inbox:renderInbox,upcoming:renderUpcoming,calendar:renderCalendar,matrix:renderMatrix,stats:renderFocusStats,important:renderImportant,alltasks:renderAllFocusTasks,dashboard:renderDashboard,allocation:renderAllocation,nasdaq:renderNasdaq,ashare:renderAshare,newconfig:()=> (typeof renderNewConfigV2==='function'?renderNewConfigV2():renderNewConfig()),health:renderHealth,checkin:renderHealthCheckin,diet:()=>renderHealthSection('diet'),fitness:()=>renderHealthSection('fitness'),skin:()=>renderHealthSection('skin'),sleep:()=>renderHealthSection('sleep'),style:()=>renderHealthSection('style'),english:()=> (typeof renderEnglishV2==='function'?renderEnglishV2():renderEnglish()),reading:()=> (typeof renderReadingV2==='function'?renderReadingV2():renderReading()),execution:renderExecution,archive:renderArchive,dailyflow:renderDailyFlow,flowstats:renderFlowStats,alpharadar:renderAlphaRadar};
+  const map={uilearning:renderUILearning,scaffold:renderScaffold,infogap:renderInfoGap,cycle:renderXinDeng,mindmap:renderMindmap,whiteboard:renderWhiteboard,xindeng:renderXinDeng,growthplan:renderGrowthPlan,review:renderGrowthReview,today:()=>renderTaskWorkspace('home'),schedules:renderSchedules,agents:renderAgents,mistakes:renderMistakes,social:renderSocialInsight,home:renderHome,inbox:renderInbox,upcoming:renderUpcoming,calendar:renderCalendar,matrix:renderMatrix,stats:renderFocusStats,important:renderImportant,alltasks:renderAllFocusTasks,dashboard:renderDashboard,allocation:renderAllocation,nasdaq:renderNasdaq,ashare:renderAshare,newconfig:()=> (typeof renderNewConfigV2==='function'?renderNewConfigV2():renderNewConfig()),health:renderHealth,checkin:renderHealthCheckin,diet:()=>renderHealthSection('diet'),fitness:()=>renderHealthSection('fitness'),skin:()=>renderHealthSection('skin'),sleep:()=>renderHealthSection('sleep'),style:()=>renderHealthSection('style'),english:()=> (typeof renderEnglishV2==='function'?renderEnglishV2():renderEnglish()),reading:()=> (typeof renderReadingV2==='function'?renderReadingV2():renderReading()),execution:renderExecution,archive:renderArchive,dailyflow:renderDailyFlow,flowstats:renderFlowStats,alpharadar:renderAlphaRadar};
   const investingPages=['dashboard','allocation','nasdaq','ashare','execution'];
   const body=(map[page]||renderHome)();
   const commit = () => {
@@ -581,6 +581,34 @@ function starterFocusTasks() {
   ];
 }
 function focusTasks() { if(!Array.isArray(state.focusTasks)) state.focusTasks=[]; state.focusTasks.forEach((t,i)=>{if(t.startDate===undefined)t.startDate=t.dueDate||'';if(t.sortOrder===undefined)t.sortOrder=t.startDate?dayDiff('2000-01-01',t.startDate)*1000+i:999999000+i;}); return state.focusTasks; }
+let voiceTaskRecognition=null;
+function openVoiceTaskModal(){
+  let mount=$('#voiceTaskModalMount');
+  if(!mount){mount=document.createElement('div');mount.id='voiceTaskModalMount';document.body.appendChild(mount);}
+  mount.innerHTML=`<div class="focus-modal-wrap"><div class="focus-modal-backdrop" data-action="voice-task-close"></div><section class="focus-modal voice-task-modal" role="dialog" aria-modal="true" aria-labelledby="voiceTaskTitle"><div class="focus-modal-head"><div><div class="eyebrow">QUICK CAPTURE · TODAY</div><h2 id="voiceTaskTitle">语音记到今天</h2></div><button class="task-delete" type="button" data-action="voice-task-close" aria-label="关闭">×</button></div><p class="voice-task-hint">说完后自动保存到今天的周历；也可以直接输入，再手动保存。</p><form id="voiceTaskForm" class="focus-task-form"><label class="field-label" for="voiceTaskText">任务内容<input id="voiceTaskText" type="text" maxlength="180" required placeholder="例如：下午整理项目方案，给团队发出初稿"></label><div class="voice-task-controls"><button class="btn btn-outline" type="button" data-action="voice-task-start">🎙 开始说话</button><span id="voiceTaskStatus" role="status" aria-live="polite">也可以直接输入任务内容</span></div><div class="voice-task-date"><span>保存日期</span><strong>${esc(todayKey())} · 今天</strong></div><div class="button-row"><button class="btn btn-primary" type="submit">保存到今天的周历</button><button class="btn btn-quiet" type="button" data-action="voice-task-close">取消</button></div></form></section></div>`;
+  setTimeout(()=>$('#voiceTaskText')?.focus(),0);
+}
+async function saveVoiceTaskToday(title){
+  title=String(title||'').trim();if(!title){toast('请先说出或输入任务内容',true);return false;}
+  const date=todayKey(),list=focusTasks();list.unshift({id:(window.crypto?.randomUUID?.()||`task-${Date.now()}-${Math.random().toString(36).slice(2,8)}`),title,project:'收集箱',quadrant:'later',priority:'中',startDate:date,dueDate:date,sortOrder:dayDiff('2000-01-01',date)*1000+list.filter(t=>(t.startDate||t.dueDate)===date).length,estimate:25,note:'语音快捷记录',done:false,important:false,createdAt:new Date().toISOString()});
+  const ok=await persist({quiet:true});if(!ok)return false;if(voiceTaskRecognition){voiceTaskRecognition.cancelled=true;voiceTaskRecognition.abort();}voiceTaskRecognition=null;$('#voiceTaskModalMount')?.remove();ui.calendarWeekOffset=0;ui.calendarSelectedDate=date;ui.showCalendarComposer=false;renderPage('calendar');toast('已保存到今天的周历');return true;
+}
+function startVoiceTaskCapture(button){
+  const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+  const status=$('#voiceTaskStatus');
+  if(!SpeechRecognition){if(status)status.textContent='此浏览器不支持语音识别，可直接输入任务内容。';toast('当前浏览器暂不支持语音识别，请直接输入',true);return;}
+  try{
+    if(voiceTaskRecognition){voiceTaskRecognition.cancelled=true;voiceTaskRecognition.abort();}
+    const recognition=new SpeechRecognition();voiceTaskRecognition=recognition;recognition.lang='zh-CN';recognition.continuous=false;recognition.interimResults=true;
+    recognition.cancelled=false;recognition.finalResult=false;
+    const input=$('#voiceTaskText');const prefix=input?.value.trim();
+    if(status)status.textContent='正在听，请开始说话…';if(button){button.textContent='正在聆听…';button.disabled=true;}
+    recognition.onresult=event=>{let spoken='';recognition.finalResult=false;for(let i=0;i<event.results.length;i++){spoken+=event.results[i][0]?.transcript||'';if(event.results[i].isFinal)recognition.finalResult=true;}if(input)input.value=[prefix,spoken.trim()].filter(Boolean).join(prefix?'，':'');if(status)status.textContent=recognition.finalResult?'识别完成，正在保存到今天…':'正在识别…';};
+    recognition.onerror=event=>{if(status)status.textContent=event.error==='not-allowed'?'麦克风权限被拒绝，请允许访问后重试。':`语音识别中断（${event.error}），可以直接输入。`;};
+    recognition.onend=()=>{if(voiceTaskRecognition===recognition){voiceTaskRecognition=null;if(button){button.disabled=false;button.textContent='🎙 再说一条';}}if(recognition.cancelled)return;if(recognition.finalResult&&input?.value.trim()){if(status)status.textContent='识别完成，正在保存…';void saveVoiceTaskToday(input.value);}else if(status)status.textContent=input?.value.trim()?'语音没有识别完整，请检查文字后手动保存。':'没有听到内容，请重试或直接输入。';};
+    recognition.start();
+  }catch(error){if(status)status.textContent='无法启动麦克风，请检查浏览器权限或直接输入。';if(button){button.disabled=false;button.textContent='🎙 再试一次';}voiceTaskRecognition=null;}
+}
 function focusTaskFilter(view) {
   const rows=focusTasks(),today=todayKey(),week=addDaysKey(7);
   if(view==='home') return rows.filter(t=>{const start=t.startDate||t.dueDate||'',end=t.dueDate||start;const active=!start||start<=today&&end>=today;const overdue=!!end&&end<today;return (active||overdue)&&(!t.done||t.dueDate===today);});
@@ -852,6 +880,23 @@ function renderMistakes(){
  <section class="card daily-mustread-card"><div class="card-head"><div><h3>错误与错过清单</h3><p>先记录标题和提醒；复盘过程、规则与图片收进条目详情。</p></div><span class="tag neutral">${items.length} 条</span></div>
  <form id="mustReadForm" class="mustread-form"><input name="title" required maxlength="180" placeholder="标题：例如忽视止损条件 / 错过的机会复盘"><input name="note" maxlength="300" placeholder="一句话提醒（可选）"><button class="btn btn-primary" type="button" data-action="add-mustread">＋ 添加清单</button></form>
  <div class="mustread-list">${items.map((x,i)=>{const open=String(ui.mustReadOpenId)===String(x.id),images=Array.isArray(x.images)?x.images:[];return `<article class="mustread-item ${open?'is-open':''}" data-mustread-id="${esc(x.id)}"><div class="mustread-row"><button type="button" class="mustread-summary" data-mustread-action="toggle" data-index="${i}" aria-controls="mustread-detail-${esc(x.id)}" aria-expanded="${open}"><span class="mustread-check">${open?'−':'＋'}</span><span class="mustread-summary-copy"><strong>${esc(x.title||'未命名复盘')}</strong><small>${esc(x.note||'点击展开，补充复盘内容与规则。')}</small><small class="mustread-meta">加入于 ${esc(x.created||'')} · ${images.length} 张图片 · Markdown</small></span></button><button class="btn btn-small btn-ghost" data-action="delete-mustread" data-index="${i}">删除</button></div>${open?`<div class="mustread-detail" id="mustread-detail-${esc(x.id)}"><label class="mustread-note-edit">一句话提醒<input data-mustread-note value="${esc(x.note||'')}" maxlength="300" placeholder="留下一条容易执行的提醒"></label><label class="mustread-md-label">复盘文档 <span>Markdown</span><textarea data-mustread-markdown data-index="${i}" rows="10" placeholder="## 发生了什么？&#10;&#10;## 当时忽略了什么信号？&#10;&#10;## 下次的判断规则是什么？">${esc(x.markdown||'')}</textarea></label><div class="mustread-preview-label">文档预览</div><div class="mustread-markdown-preview">${renderMustReadMarkdown(x.markdown||'')}</div><div class="mustread-attachments"><div><strong>图片附件</strong><small>最多 4 张，每张不超过 900 KB</small></div><label class="mustread-upload">＋ 添加图片<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple data-mustread-images data-index="${i}"></label></div><div class="mustread-image-grid">${images.map((image,j)=>/^data:image\/(png|jpeg|webp|gif);base64,/i.test(image.dataUrl||'')?`<figure><img src="${esc(image.dataUrl)}" alt="${esc(image.name||'复盘图片')}" loading="lazy"><figcaption>${esc(image.name||'复盘图片')}<button type="button" data-mustread-action="remove-image" data-index="${i}" data-image-index="${j}" aria-label="删除图片">×</button></figcaption></figure>`:'').join('')}</div><div class="mustread-detail-actions"><button type="button" class="btn btn-primary" data-mustread-action="save" data-index="${i}">保存复盘内容</button><span>保存到当前账户</span></div></div>`:''}</article>`}).join('')||'<div class="empty-state">还没有复盘条目。先添加一条标题，再展开填写详情。</div>'}</div></section>`;
+}
+
+function renderSocialInsight(){
+ const levels=[
+  {n:'05',name:'规则',q:'什么机制持续影响结果？',facts:'制度 · 流程 · 激励 · 约束',tool:'追溯机制',detail:'追问哪些制度、流程、激励与约束会持续塑造结果。',why:'规则塑造结果：制度与机制持续作用。'},
+  {n:'04',name:'结构',q:'关系和资源如何组织？',facts:'角色 · 权力 · 信息 · 责任',tool:'看清结构',detail:'厘清参与者的位置、关系、权力分布、信息差异与责任边界。',why:'关系影响行动：位置与资源决定选择。'},
+  {n:'03',name:'利益',q:'各方的得失是什么？',facts:'收益 · 成本 · 机会 · 风险',tool:'分析利益',detail:'比较不同参与者能获得什么、承担什么，以及机会和风险如何分布。',why:'利益存在差异：各方得失并不相同。'},
+  {n:'02',name:'人性',q:'人为什么这样做？',facts:'需求 · 动机 · 情绪 · 处境',tool:'理解动机',detail:'从需求、动机、情绪和现实处境理解行为，不急于给人贴标签。',why:'动机难以判断：同一行为可能有多种原因。'},
+  {n:'01',name:'表象',q:'发生了什么？',facts:'事实 · 行为 · 结果 · 变化',tool:'先确认事实',detail:'先记录可验证的事实、行为、结果与变化，区分事实和解释。',why:'表象容易误导：看到的未必是全部。'}
+ ];
+ return `${sectionHead('HUMANITY · SOCIETY · SYSTEMS','洞察社会运行的五个层次','从表象、人性到利益、结构与规则。由表及里，看见事件背后的复杂运行机制。')}
+ <div class="social-insight-layout"><main class="social-insight-main"><div class="social-insight-kicker"><span>为什么看到了事件，依然看不懂它？</span><b>FIVE LAYERS OF INSIGHT</b></div>
+ <section class="social-layer-stack" aria-label="社会运行的五个分析层次">${levels.map((x,i)=>`<article class="social-layer-card" style="--layer:${i};--inset:${(4-i)*18}px"><span class="social-layer-index">${x.n}</span><div class="social-layer-copy"><div class="social-layer-title"><h2>${x.name}</h2><strong>${x.q}</strong></div><p>${x.detail}</p></div><div class="social-layer-facts">${x.facts.split(' · ').map(t=>`<span>${t}</span>`).join('')}</div></article>`).join('')}</section>
+ <section class="social-why-section"><div class="social-section-heading"><span class="eyebrow">WHY FIVE LAYERS</span><h2>为什么需要五层洞察？</h2><p>只看见事件容易误判；把视角往深处推进，才能理解行为如何形成、又如何影响结果。</p></div><div class="social-why-grid">${levels.slice().reverse().map(x=>`<article><b>${x.n}</b><strong>${x.why.split('：')[0]}</strong><p>${x.why.split('：')[1]}</p></article>`).join('')}</div></section>
+ <section class="social-case-section"><div class="social-section-heading"><span class="eyebrow">REAL CASE · TEAMWORK</span><h2>真实案例：企业协作冲突</h2><p>销售、交付、研发各有诉求，为什么总是难以协同？</p></div><div class="social-case-question">从“谁对谁错”转向“什么因素塑造了当前行为”，再用五层视角逐层核验。</div><ol class="social-case-steps">${levels.slice().reverse().map(x=>`<li><span>${x.n}</span><div><strong>${x.q}</strong><small>${x.facts}</small></div><b>→</b></li>`).join('')}</ol><p class="social-case-footer">用五层分析，找到根本原因。</p></section>
+ <footer class="social-insight-footer"><span>看见行为，更要看见塑造行为的机制。</span><small>— 米思 · 认知迁移</small></footer></main>
+ <aside class="social-insight-aside"><div class="social-aside-sticky"><span class="eyebrow">FIVE-QUESTION TOOL</span><h2>五问分析工具</h2><p>从“发生了什么”开始，一层层走到“什么规则在持续影响结果”。</p><ol>${levels.slice().reverse().map(x=>`<li><span>${x.n}</span><div><strong>${x.q}</strong><small>${x.tool} · ${x.facts.replaceAll(' · ','、')}</small></div></li>`).join('')}</ol><div class="social-aside-rule"><strong>分析顺序</strong><p>先确认事实，再理解动机；比较得失、看清结构，最后追问规则机制。</p></div><div class="social-aside-note">由表及里<br><b>看透复杂世界</b></div></div></aside></div>`;
 }
 
 
@@ -2307,6 +2352,9 @@ function bindDelegatedEvents() {
     if(bodyPart && !e.target.closest('[data-action]') && !ui.bodyDragMoved){const id=bodyPart.dataset.bodyZone||'';ui.bodyZone=ui.bodyZone===id?'':id;ui.bodyMuscle=bodyPart.dataset.bodyMuscle||'';if(ui.bodyZone==='head')ui.bodyMode='head';ui.bodyView={x:0,y:0,rx:0,ry:0,scale:1};syncBodyLibrarySelection();return;}
     const action=e.target.closest('[data-action]'); if(!action)return;
     const a=action.dataset.action;
+    if(a==='voice-task-open'){openVoiceTaskModal();return;}
+    if(a==='voice-task-close'){if(voiceTaskRecognition){voiceTaskRecognition.cancelled=true;voiceTaskRecognition.abort();}voiceTaskRecognition=null;$('#voiceTaskModalMount')?.remove();return;}
+    if(a==='voice-task-start'){startVoiceTaskCapture(action);return;}
     if(a==='gym-zone'){gymUI().bodyPart=action.dataset.zone||'';renderGymFilters();loadGym(true);return;}
     if(a==='gym-fav-filter'){const u=gymUI();u.favorites=!u.favorites;renderGymFilters();loadGym(true);return;}
     if(a==='gym-fav'){toggleGymFavorite(action.dataset.id);return;}
@@ -2459,6 +2507,9 @@ function bindDelegatedEvents() {
     if(e.target.id==='screenTestCount'){ui.screenTestCount=Number(e.target.value);const t=$('#screenTestCountText');if(t)t.textContent=e.target.value;const box=e.target.closest('.card-body');if(box){const sel=$('#screenTestGrade');const r=state.screenRule||{};const grade=sel?.value||'黄色B';const accepted=r.includeHigherGrades?['黄色B','B','B+','A','A+','黄色A','黄色B+'].includes(grade):['黄色B','B'].includes(grade);const pass=accepted&&Number(e.target.value)>=n(r.yellowBMin,2);const decision=box.querySelector('.decision-box');if(decision){decision.querySelector('h3').textContent=pass?'满足初筛条件':'不满足初筛条件';decision.querySelector('p').textContent=`评级 ${grade}；窗口内计数 ${e.target.value}，门槛 ${n(r.yellowBMin,2)} 次。${pass?'进入下一步过滤。':'继续观察或检查信号记录。'}`;decision.querySelector('.decision-footer strong').textContent=pass?'PASS':'NOT PASSED';}}}
   });
   document.addEventListener('submit',async e=>{
+    if(e.target.id==='voiceTaskForm'){
+      e.preventDefault();await saveVoiceTaskToday($('#voiceTaskText')?.value);return;
+    }
     if(e.target.id==='flowEditForm'){e.preventDefault();const f=e.target,fd=new FormData(f),kind=String(fd.get('kind')||f.dataset.kind),oldKind=f.dataset.kind,id=String(f.dataset.id||''),toMin=v=>{const [h,m]=String(v).split(':').map(Number);return h*60+m;};const start=toMin(fd.get('start')),endRaw=toMin(fd.get('end')),end=endRaw<=start?endRaw+1440:endRaw;const obj={id:id||`flow-${Date.now()}-${Math.random().toString(36).slice(2,7)}`,title:String(fd.get('title')||'').trim(),start,end,category:String(fd.get('category')||'日常').trim(),destination:String(fd.get('destination')||''),note:String(fd.get('note')||'').trim(),color:String(fd.get('color')||'#6e9c79'),order:Date.now()};if(!obj.title){toast('请填写流程事项',true);return;}if(id&&oldKind!==kind)state.dailyFlows[oldKind]=state.dailyFlows[oldKind].filter(x=>String(x.id)!==id);const list=state.dailyFlows[kind]||(state.dailyFlows[kind]=[]),idx=list.findIndex(x=>String(x.id)===id);if(idx>=0)list[idx]=obj;else list.push(obj);ui.flowKind=kind;await persist({quiet:true});$('#flowModalMount')?.replaceChildren();try{sessionStorage.setItem('wealthos-tab-dailyflow','edit')}catch(_){}renderPage(currentPage==='xindeng'?'xindeng':'dailyflow');toast('流程块已保存');return;}
     if(e.target.id==='scheduleJobForm'){
       e.preventDefault();const fd=new FormData(e.target);const job={id:String(fd.get('id')||`job-${Date.now()}`),name:String(fd.get('name')||'').trim(),taskType:String(fd.get('taskType')||'refresh_archive'),frequency:String(fd.get('frequency')||'daily'),time:String(fd.get('time')||'07:30'),description:String(fd.get('description')||''),enabled:fd.has('enabled')};if(!job.name){toast('请输入任务名称',true);return;}const jobs=scheduleJobsCache.filter(x=>x.id!==job.id);jobs.push(job);try{await api('/api/scheduler/jobs',{method:'PUT',body:JSON.stringify({jobs})});await loadSchedules();renderPage('schedules');toast('定时任务已保存')}catch(err){toast(err.message,true)}return;
