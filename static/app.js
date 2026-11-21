@@ -30,7 +30,7 @@ const WORKBOOKS = [
 ];
 function shiftDateKey(key, days) { if(!key) return ''; const d=new Date(`${key}T12:00:00`); d.setDate(d.getDate()+days); return todayKey(d); }
 function dayDiff(start,end) { if(!start||!end) return 0; return Math.round((new Date(`${end}T12:00:00`)-new Date(`${start}T12:00:00`))/86400000); }
-const PAGE_NAMES = {cycle:"结构与周期",uilearning:"UI 学习",scaffold:"脚手架",infogap:"信息差变现",schedules:'自动化',agents:'平衡',settings:'设置',mistakes:'避坑',social:'人性与社会',home:'工作台',inbox:'今日任务',upcoming:'未来 7 天',calendar:'周历 / 日程',matrix:'任务四象限',stats:'执行统计',important:'重要事项',alltasks:'全部任务',dashboard:'资产总览',allocation:'全球资产配置',nasdaq:'纳斯达克 AI 策略',ashare:'A股 ETF 轮动',xindeng:'新登',newconfig:'成长总览',health:'健康',checkin:'打卡与统计',diet:'饮食饮水',fitness:'健身管理',skin:'皮肤护理',sleep:'睡眠与恢复',style:'发型与穿搭',english:'英语',reading:'阅读',execution:'每日执行与日志',archive:'归档',dailyflow:'流程',flowstats:'流程统计',alpharadar:'Alpha Radar'};
+const PAGE_NAMES = {cycle:"结构与周期",uilearning:"UI 学习",scaffold:"脚手架",infogap:"信息差变现",schedules:'自动化',agents:'平衡',settings:'设置',mistakes:'避坑',social:'人性与社会',dunning:'达克曲线',home:'工作台',inbox:'今日任务',upcoming:'未来 7 天',calendar:'周历 / 日程',matrix:'任务四象限',stats:'执行统计',important:'重要事项',alltasks:'全部任务',dashboard:'资产总览',allocation:'全球资产配置',nasdaq:'纳斯达克 AI 策略',ashare:'A股 ETF 轮动',xindeng:'新登',newconfig:'成长总览',health:'健康',checkin:'打卡与统计',diet:'饮食饮水',fitness:'健身管理',skin:'皮肤护理',sleep:'睡眠与恢复',style:'发型与穿搭',english:'英语',reading:'阅读',execution:'每日执行与日志',archive:'归档',dailyflow:'流程',flowstats:'流程统计',alpharadar:'Alpha Radar'};
 
 async function api(path, options={}) {
   const res = await fetch(path, {credentials:'same-origin', headers:{'Content-Type':'application/json', ...(options.headers||{})}, ...options});
@@ -280,7 +280,7 @@ function setHeader(page) {
 }
 
 const HUB_OF={
-  uilearning:'uilearning',scaffold:'scaffold',infogap:'infogap',cycle:'cycle',xindeng:'cycle',mistakes:'cycle',social:'cycle',mindmap:'cycle',whiteboard:'cycle',home:'newconfig',today:'newconfig',growthplan:'newconfig',review:'newconfig',
+  uilearning:'uilearning',scaffold:'scaffold',infogap:'infogap',cycle:'cycle',xindeng:'cycle',mistakes:'cycle',social:'cycle',dunning:'cycle',mindmap:'cycle',whiteboard:'cycle',home:'newconfig',today:'newconfig',growthplan:'newconfig',review:'newconfig',
   inbox:'newconfig',schedules:'settings',settings:'settings',dailyflow:'newconfig',calendar:'newconfig',matrix:'newconfig',stats:'newconfig',important:'newconfig',alltasks:'newconfig',flowstats:'newconfig',
   dashboard:'dashboard',allocation:'dashboard',nasdaq:'dashboard',ashare:'dashboard',execution:'dashboard',alpharadar:'dashboard',
   health:'health',checkin:'health',diet:'health',fitness:'health',skin:'health',sleep:'health',style:'health',
@@ -289,7 +289,7 @@ const HUB_OF={
 const HUB_TABS={
   settings:{label:'设置',items:[['schedules','自动化'],['archive','归档']]},
   dashboard:{label:'资产',items:[['http://39.106.118.186/','市场引擎 ↗'],['dashboard','总览'],['allocation','配置'],['nasdaq','纳指'],['ashare','A股'],['execution','执行'],['alpharadar','实验']]},
-  cycle:{label:'结构与周期',items:[['xindeng','新登'],['mistakes','避坑'],['social','人性与社会'],['whiteboard','白布画板'],['mindmap','思维导图']]},
+  cycle:{label:'结构与周期',items:[['xindeng','新登'],['mistakes','避坑'],['social','人性与社会'],['dunning','达克曲线'],['whiteboard','白布画板'],['mindmap','思维导图']]},
   newconfig:{label:'成长',items:[['dailyflow','流程'],['calendar','周历'],['growthplan','90天计划'],['agents','平衡'],['newconfig','成长总览'],['review','每周复盘']]},
   health:{label:'健康',items:[['health','总览'],['checkin','打卡'],['diet','饮食'],['fitness','健身'],['skin','皮肤'],['sleep','睡眠'],['style','穿搭']]}
 };
@@ -384,7 +384,7 @@ function renderPage(page, {autoRefresh=false, transition=true, animate=true}={})
   const root=$('#viewRoot');
   root.dataset.page=page;
   root.dataset.hub=HUB_OF[page]||page;
-  const map={uilearning:renderUILearning,scaffold:renderScaffold,infogap:renderInfoGap,cycle:renderXinDeng,mindmap:renderMindmap,whiteboard:renderWhiteboard,xindeng:renderXinDeng,growthplan:renderGrowthPlan,review:renderGrowthReview,today:()=>renderTaskWorkspace('home'),schedules:renderSchedules,agents:renderAgents,mistakes:renderMistakes,social:renderSocialInsight,home:renderHome,inbox:renderInbox,upcoming:renderUpcoming,calendar:renderCalendar,matrix:renderMatrix,stats:renderFocusStats,important:renderImportant,alltasks:renderAllFocusTasks,dashboard:renderDashboard,allocation:renderAllocation,nasdaq:renderNasdaq,ashare:renderAshare,newconfig:()=> (typeof renderNewConfigV2==='function'?renderNewConfigV2():renderNewConfig()),health:renderHealth,checkin:renderHealthCheckin,diet:()=>renderHealthSection('diet'),fitness:()=>renderHealthSection('fitness'),skin:()=>renderHealthSection('skin'),sleep:()=>renderHealthSection('sleep'),style:()=>renderHealthSection('style'),english:()=> (typeof renderEnglishV2==='function'?renderEnglishV2():renderEnglish()),reading:()=> (typeof renderReadingV2==='function'?renderReadingV2():renderReading()),execution:renderExecution,archive:renderArchive,dailyflow:renderDailyFlow,flowstats:renderFlowStats,alpharadar:renderAlphaRadar};
+  const map={uilearning:renderUILearning,scaffold:renderScaffold,infogap:renderInfoGap,cycle:renderXinDeng,mindmap:renderMindmap,whiteboard:renderWhiteboard,xindeng:renderXinDeng,growthplan:renderGrowthPlan,review:renderGrowthReview,today:()=>renderTaskWorkspace('home'),schedules:renderSchedules,agents:renderAgents,mistakes:renderMistakes,social:renderSocialInsight,dunning:renderDunningCurve,home:renderHome,inbox:renderInbox,upcoming:renderUpcoming,calendar:renderCalendar,matrix:renderMatrix,stats:renderFocusStats,important:renderImportant,alltasks:renderAllFocusTasks,dashboard:renderDashboard,allocation:renderAllocation,nasdaq:renderNasdaq,ashare:renderAshare,newconfig:()=> (typeof renderNewConfigV2==='function'?renderNewConfigV2():renderNewConfig()),health:renderHealth,checkin:renderHealthCheckin,diet:()=>renderHealthSection('diet'),fitness:()=>renderHealthSection('fitness'),skin:()=>renderHealthSection('skin'),sleep:()=>renderHealthSection('sleep'),style:()=>renderHealthSection('style'),english:()=> (typeof renderEnglishV2==='function'?renderEnglishV2():renderEnglish()),reading:()=> (typeof renderReadingV2==='function'?renderReadingV2():renderReading()),execution:renderExecution,archive:renderArchive,dailyflow:renderDailyFlow,flowstats:renderFlowStats,alpharadar:renderAlphaRadar};
   const investingPages=['dashboard','allocation','nasdaq','ashare','execution'];
   const body=(map[page]||renderHome)();
   const commit = () => {
@@ -897,6 +897,40 @@ function renderSocialInsight(){
  <section class="social-case-section"><div class="social-section-heading"><span class="eyebrow">REAL CASE · TEAMWORK</span><h2>真实案例：企业协作冲突</h2><p>销售、交付、研发各有诉求，为什么总是难以协同？</p></div><div class="social-case-question">从“谁对谁错”转向“什么因素塑造了当前行为”，再用五层视角逐层核验。</div><ol class="social-case-steps">${levels.slice().reverse().map(x=>`<li><span>${x.n}</span><div><strong>${x.q}</strong><small>${x.facts}</small></div><b>→</b></li>`).join('')}</ol><p class="social-case-footer">用五层分析，找到根本原因。</p></section>
  <footer class="social-insight-footer"><span>看见行为，更要看见塑造行为的机制。</span><small>— 米思 · 认知迁移</small></footer></main>
  <aside class="social-insight-aside"><div class="social-aside-sticky"><span class="eyebrow">FIVE-QUESTION TOOL</span><h2>五问分析工具</h2><p>从“发生了什么”开始，一层层走到“什么规则在持续影响结果”。</p><ol>${levels.slice().reverse().map(x=>`<li><span>${x.n}</span><div><strong>${x.q}</strong><small>${x.tool} · ${x.facts.replaceAll(' · ','、')}</small></div></li>`).join('')}</ol><div class="social-aside-rule"><strong>分析顺序</strong><p>先确认事实，再理解动机；比较得失、看清结构，最后追问规则机制。</p></div><div class="social-aside-note">由表及里<br><b>看透复杂世界</b></div></div></aside></div>`;
+}
+
+function renderDunningCurve(){
+ const stages=[
+  {id:'surface',n:'01',name:'表象区',phase:'直觉（凭印象）· 快速定论',transition:'先有判断，后找理由',level:'初段：凭熟悉感快速定性',symptom:'容易把片段信息当成完整理解',color:'surface'},
+  {id:'doubt',n:'02',name:'怀疑区',phase:'拆解（看见复杂）· 开始怀疑',transition:'开始拆开，发现不稳',level:'过渡：看到变量开始增多',symptom:'旧结论开始松动，确定感明显下降',color:'doubt'},
+  {id:'model',n:'03',name:'建模区',phase:'结构（搭建框架）· 关系变清',transition:'逐步成形，搭起框架',level:'进阶：能用结构整理问题',symptom:'开始比较关系、条件与判断边界',color:'model'},
+  {id:'mature',n:'04',name:'成熟区',phase:'校准（理解边界）· 判断更稳',transition:'判断更稳，也留余地',level:'成熟：结论伴随修正能力',symptom:'既能形成观点，也能根据反馈调整',color:'mature'}
+ ];
+ ui.dunningStage ||= 'surface';const selected=ui.dunningStage;
+ const reminders=[
+  {title:'直觉不等于理解',body:'刚接触一个问题时，最容易因为信息少、阻力小，而产生“我懂了”的错觉。看懂表面，不等于看清结构；能复述一句话，也不等于能稳定判断。'},
+  {title:'框架帮助校准',body:'真正拉开差距的，不是知道更多术语，而是能否把问题放进变量、关系、条件、边界这些结构里看。框架越清楚，越不容易把片面经验当成完整结论。'},
+  {title:'反馈修正判断',body:'成熟思考不是一路笃定，而是在比较、反例、反馈和新信息面前，持续修正自己的结论。能校准的人并不总是最肯定自己，但往往更接近真实。'}
+ ];
+ return `${sectionHead('COGNITION · CALIBRATION · LEARNING','突破认知局限：达克效应','达克效应（认知曲线图）｜持续学习与校准，让印象判断逐步走向稳定判断。')}
+ <div class="dunning-layout"><main class="dunning-main"><section class="dunning-chart-panel"><div class="dunning-chart-heading"><div><span class="eyebrow">THE DUNNING–KRUGER EFFECT</span><h2>认知信心与校准过程</h2></div><span class="dunning-chart-note">不断校准 → 稳定判断</span></div>
+ <div class="dunning-chart-scroll"><svg class="dunning-chart" viewBox="0 0 1000 430" role="img" aria-label="达克效应认知曲线：从表象区的印象高点，经历怀疑低谷与建模之坡，进入成熟区的稳定判断"><defs><linearGradient id="dk-curve-line" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#ad625e"/><stop offset="38%" stop-color="#46577f"/><stop offset="68%" stop-color="#607fae"/><stop offset="100%" stop-color="#536454"/></linearGradient></defs>
+ <g class="dk-grid-lines"><path d="M84 115H950M84 205H950M84 295H950"/><path d="M300 55V350M520 55V350M750 55V350"/></g>
+ <path class="dk-area dk-area-surface ${selected==='surface'?'is-selected':''}" d="M84 350V318C113 188 158 83 218 83C252 83 277 124 306 176V350Z"/>
+ <path class="dk-area dk-area-doubt ${selected==='doubt'?'is-selected':''}" d="M306 176C333 220 359 282 402 315C438 343 475 333 520 286V350H306Z"/>
+ <path class="dk-area dk-area-model ${selected==='model'?'is-selected':''}" d="M520 286C567 225 603 175 667 143C703 125 731 112 756 105V350H520Z"/>
+ <path class="dk-area dk-area-mature ${selected==='mature'?'is-selected':''}" d="M756 105C805 91 862 85 950 83V350H756Z"/>
+ <path class="dk-curve-line" d="M84 318C113 188 158 83 218 83C252 83 277 124 306 176C333 220 359 282 402 315C438 343 475 333 520 286C567 225 603 175 667 143C703 125 731 112 756 105C805 91 862 85 950 83"/>
+ <path class="dk-axis" d="M84 350V54M84 350H955"/><path class="dk-axis-arrow" d="m948 343 8 7-8 7M77 61l7-8 7 8"/>
+ <text class="dk-axis-label" x="24" y="204" transform="rotate(-90 24 204)">判断确定感</text><text class="dk-axis-end" x="43" y="66">高</text><text class="dk-axis-end" x="43" y="351">低</text>
+ <text class="dk-chart-callout" x="171" y="62">印象高点</text><text class="dk-chart-callout" x="384" y="292">怀疑低谷</text><text class="dk-chart-callout" x="592" y="124">建模之坡</text><text class="dk-chart-callout" x="824" y="63">稳定判断</text>
+ <text class="dk-chart-region" x="153" y="390">表象区</text><text class="dk-chart-region" x="351" y="390">怀疑区</text><text class="dk-chart-region" x="584" y="390">建模区</text><text class="dk-chart-region" x="817" y="390">成熟区</text>
+ <text class="dk-chart-sub" x="501" y="419" text-anchor="middle">持续学习与校准</text><circle class="dk-curve-point dk-point-surface ${selected==='surface'?'is-selected':''}" cx="218" cy="83" r="7"/><circle class="dk-curve-point dk-point-doubt ${selected==='doubt'?'is-selected':''}" cx="402" cy="315" r="7"/><circle class="dk-curve-point dk-point-model ${selected==='model'?'is-selected':''}" cx="667" cy="143" r="7"/><circle class="dk-curve-point dk-point-mature ${selected==='mature'?'is-selected':''}" cx="950" cy="83" r="7"/>
+ </svg></div><div class="dunning-chart-legend"><span><i class="dk-legend-impression"></i>先有判断，后找理由</span><span><i class="dk-legend-calibration"></i>比较、反馈、持续修正</span></div></section>
+ <section class="dunning-stage-section"><div class="dunning-section-title"><div><span class="eyebrow">FOUR PHASES</span><h2>从印象高点到稳定判断</h2><p>选择一个阶段，查看它的典型表现。</p></div></div><div class="dunning-stage-grid">${stages.map(s=>`<button type="button" class="dunning-stage-card dk-${s.color} ${selected===s.id?'is-selected':''}" data-action="dunning-stage" data-stage="${s.id}" aria-pressed="${selected===s.id}"><span class="dunning-stage-number">${s.n}</span><strong>${s.name}</strong><b>${s.phase}</b><span class="dunning-stage-transition">${s.transition}</span><small>${s.level}</small><small>表现：${s.symptom}</small></button>`).join('')}</div><div class="dunning-stage-selected" aria-live="polite"><span>当前选择 · ${stages.find(s=>s.id===selected)?.n}</span><strong>${stages.find(s=>s.id===selected)?.name}</strong><p>${stages.find(s=>s.id===selected)?.phase}</p></div></section>
+ <section class="dunning-origin"><span class="eyebrow">ABOUT THE EFFECT</span><p>达克效应源于心理学家大卫·邓宁和贾斯汀·克鲁格的研究，其中的认知偏差指出：能力不足的人往往会高估自己，而真正有能力的人反而容易低估自己。换言之，即“无知者无畏”；有知识的人则更谦逊谨慎。因此，认识这一效应并提升自我认知能力至关重要。</p><small>来源署名：公众号 · 半扰烟莎</small></section>
+ <section class="dunning-reminders"><div class="dunning-section-title"><div><span class="eyebrow">THINKING WITH CALIBRATION</span><h2>达克效应对思考的提醒</h2></div></div><div class="dunning-reminder-grid">${reminders.map((r,i)=>`<article class="dunning-reminder-card"><span>0${i+1}</span><h3>${r.title}</h3><p>${r.body}</p></article>`).join('')}</div></section></main>
+ <aside class="dunning-aside"><div class="dunning-aside-sticky"><span class="eyebrow">CALIBRATION PATH</span><h2>认知校准路径</h2><p>不把确定感当能力本身；用框架和反馈检查判断。</p><ol>${stages.map(s=>`<li class="${selected===s.id?'is-current':''}"><span>${s.n}</span><div><strong>${s.name}</strong><small>${s.transition}</small></div></li>`).join('')}</ol><div class="dunning-aside-rule"><strong>校准时可以问自己</strong><p>我看到了多少事实？哪些变量还没纳入？什么新证据会让我修改判断？</p></div><small class="dunning-aside-caption">这张曲线是理解自我校准的示意，不代表每个人都会按固定阶段线性前进。</small></div></aside></div>`;
 }
 
 
@@ -2355,6 +2389,7 @@ function bindDelegatedEvents() {
     if(a==='voice-task-open'){openVoiceTaskModal();return;}
     if(a==='voice-task-close'){if(voiceTaskRecognition){voiceTaskRecognition.cancelled=true;voiceTaskRecognition.abort();}voiceTaskRecognition=null;$('#voiceTaskModalMount')?.remove();return;}
     if(a==='voice-task-start'){startVoiceTaskCapture(action);return;}
+    if(a==='dunning-stage'){ui.dunningStage=action.dataset.stage||'surface';renderPage('dunning');return;}
     if(a==='gym-zone'){gymUI().bodyPart=action.dataset.zone||'';renderGymFilters();loadGym(true);return;}
     if(a==='gym-fav-filter'){const u=gymUI();u.favorites=!u.favorites;renderGymFilters();loadGym(true);return;}
     if(a==='gym-fav'){toggleGymFavorite(action.dataset.id);return;}
