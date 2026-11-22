@@ -193,3 +193,16 @@ body:has(#viewRoot[data-page="uilearning"]) .workspace-bar,body:has(#viewRoot[da
 .auth-form .auth-remember-note{margin:-12px 0 0 25px;color:var(--muted2);font-size:10px;line-height:1.6}
 body.spatial-ui .auth-form .auth-remember{display:flex!important;gap:9px!important;align-items:center!important;min-height:20px}
 body.spatial-ui .auth-form .auth-remember input{height:16px!important;width:16px!important;min-height:16px!important}
+
+/* Prompt library inside the scaffold workspace. */
+.prompt-compose-card,.prompt-library-list{margin-top:22px}
+.prompt-compose-form{display:grid;gap:16px;max-width:920px}
+.prompt-compose-form textarea{min-height:190px;resize:vertical;font:inherit;line-height:1.65}
+.prompt-library-list{display:grid;gap:12px}
+.prompt-library-list>.section-heading{margin:4px 0 2px}
+.prompt-entry-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.prompt-entry-head h3{margin:0 0 8px;font-size:16px}
+.prompt-entry-tags{display:flex;align-items:center;flex-wrap:wrap;gap:7px}
+.prompt-entry-tags small{color:var(--muted);font-size:11px}
+.prompt-entry-content{margin:16px 0 0;padding:14px 16px;max-height:360px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;border:1px solid var(--border);border-radius:10px;background:var(--ground);font:12px/1.7 ui-monospace,SFMono-Regular,Consolas,monospace;color:var(--text)}
+@media(max-width:640px){.prompt-entry-head{flex-direction:column}.prompt-entry-head .button-row{margin:0}.prompt-entry .card-body{padding:16px}}

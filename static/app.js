@@ -30,7 +30,7 @@ const WORKBOOKS = [
 ];
 function shiftDateKey(key, days) { if(!key) return ''; const d=new Date(`${key}T12:00:00`); d.setDate(d.getDate()+days); return todayKey(d); }
 function dayDiff(start,end) { if(!start||!end) return 0; return Math.round((new Date(`${end}T12:00:00`)-new Date(`${start}T12:00:00`))/86400000); }
-const PAGE_NAMES = {silicon:'硅基时代',cycle:"结构与周期",uilearning:"UI 学习",scaffold:"脚手架",infogap:"信息差变现",schedules:'自动化',agents:'平衡',settings:'设置',mistakes:'避坑',social:'人性与社会',dunning:'达克曲线',learningprinciples:'学习的第一性原理',home:'工作台',inbox:'今日任务',upcoming:'未来 7 天',calendar:'周历 / 日程',matrix:'任务四象限',stats:'执行统计',important:'重要事项',alltasks:'全部任务',dashboard:'资产总览',allocation:'全球资产配置',nasdaq:'纳斯达克 AI 策略',ashare:'A股 ETF 轮动',xindeng:'新登',newconfig:'成长总览',health:'健康',checkin:'打卡与统计',diet:'饮食饮水',fitness:'健身管理',skin:'皮肤护理',sleep:'睡眠与恢复',style:'发型与穿搭',english:'英语',reading:'阅读',execution:'每日执行与日志',archive:'归档',dailyflow:'流程',flowstats:'流程统计',alpharadar:'Alpha Radar'};
+const PAGE_NAMES = {silicon:'硅基时代',cycle:"结构与周期",uilearning:"UI 学习",scaffold:"脚手架",prompt:'Prompt',infogap:"信息差变现",schedules:'自动化',agents:'平衡',settings:'设置',mistakes:'避坑',social:'人性与社会',dunning:'达克曲线',learningprinciples:'学习的第一性原理',home:'工作台',inbox:'今日任务',upcoming:'未来 7 天',calendar:'周历 / 日程',matrix:'任务四象限',stats:'执行统计',important:'重要事项',alltasks:'全部任务',dashboard:'资产总览',allocation:'全球资产配置',nasdaq:'纳斯达克 AI 策略',ashare:'A股 ETF 轮动',xindeng:'新登',newconfig:'成长总览',health:'健康',checkin:'打卡与统计',diet:'饮食饮水',fitness:'健身管理',skin:'皮肤护理',sleep:'睡眠与恢复',style:'发型与穿搭',english:'英语',reading:'阅读',execution:'每日执行与日志',archive:'归档',dailyflow:'流程',flowstats:'流程统计',alpharadar:'Alpha Radar'};
 
 async function api(path, options={}) {
   const res = await fetch(path, {credentials:'same-origin', headers:{'Content-Type':'application/json', ...(options.headers||{})}, ...options});
@@ -200,6 +200,7 @@ function ensureStateDefaults() {
   if (!state.readingNotes) state.readingNotes=[];
   if (!state.readingSessions) state.readingSessions=[];
   if (!state.notebookEntries) state.notebookEntries=[];
+  if (!Array.isArray(state.promptLibrary)) state.promptLibrary=[];
   if (!Array.isArray(state.dailyMustReads)) state.dailyMustReads=[];
   if (!Array.isArray(state.alphaRadarSignals)) state.alphaRadarSignals=[];
   if (!state.alphaRadarConfig || typeof state.alphaRadarConfig!=='object') state.alphaRadarConfig={topN:5,minScore:45};
@@ -309,7 +310,7 @@ function setHeader(page) {
 }
 
 const HUB_OF={
-  silicon:'silicon',uilearning:'uilearning',scaffold:'scaffold',infogap:'infogap',cycle:'cycle',xindeng:'cycle',mistakes:'cycle',social:'cycle',dunning:'cycle',learningprinciples:'cycle',mindmap:'cycle',whiteboard:'cycle',home:'newconfig',today:'newconfig',growthplan:'newconfig',review:'newconfig',
+  silicon:'silicon',uilearning:'uilearning',scaffold:'scaffold',prompt:'scaffold',infogap:'infogap',cycle:'cycle',xindeng:'cycle',mistakes:'cycle',social:'cycle',dunning:'cycle',learningprinciples:'cycle',mindmap:'cycle',whiteboard:'cycle',home:'newconfig',today:'newconfig',growthplan:'newconfig',review:'newconfig',
   inbox:'newconfig',schedules:'settings',settings:'settings',dailyflow:'newconfig',calendar:'newconfig',matrix:'newconfig',stats:'newconfig',important:'newconfig',alltasks:'newconfig',flowstats:'newconfig',
   dashboard:'dashboard',allocation:'dashboard',nasdaq:'dashboard',ashare:'dashboard',execution:'dashboard',alpharadar:'dashboard',
   health:'health',checkin:'health',diet:'health',fitness:'health',skin:'health',sleep:'health',style:'health',
@@ -317,6 +318,7 @@ const HUB_OF={
 };
 const HUB_TABS={
   settings:{label:'设置',items:[['schedules','自动化'],['archive','归档']]},
+  scaffold:{label:'脚手架',items:[['scaffold','项目脚手架'],['prompt','Prompt']]},
   dashboard:{label:'资产',items:[['http://39.106.118.186/','市场引擎 ↗'],['dashboard','总览'],['allocation','配置'],['nasdaq','纳指'],['ashare','A股'],['execution','执行'],['alpharadar','实验']]},
   cycle:{label:'结构与周期',items:[['xindeng','新登'],['mistakes','避坑'],['social','人性与社会'],['dunning','达克曲线'],['learningprinciples','学习的第一性原理'],['whiteboard','白布画板'],['mindmap','思维导图']]},
   newconfig:{label:'成长',items:[['dailyflow','流程'],['calendar','周历'],['growthplan','90天计划'],['agents','平衡'],['newconfig','成长总览'],['review','每周复盘']]},
@@ -421,7 +423,7 @@ function renderPage(page, {autoRefresh=false, transition=true, animate=true}={})
   const root=$('#viewRoot');
   root.dataset.page=page;
   root.dataset.hub=HUB_OF[page]||page;
-  const map={silicon:renderSiliconEra,uilearning:renderUILearning,scaffold:renderScaffold,infogap:renderInfoGap,cycle:renderXinDeng,mindmap:renderMindmap,whiteboard:renderWhiteboard,xindeng:renderXinDeng,growthplan:renderGrowthPlan,review:renderGrowthReview,today:()=>renderTaskWorkspace('home'),schedules:renderSchedules,agents:renderAgents,mistakes:renderMistakes,social:renderSocialInsight,dunning:renderDunningCurve,learningprinciples:renderLearningPrinciples,home:renderHome,inbox:renderInbox,upcoming:renderUpcoming,calendar:renderCalendar,matrix:renderMatrix,stats:renderFocusStats,important:renderImportant,alltasks:renderAllFocusTasks,dashboard:renderDashboard,allocation:renderAllocation,nasdaq:renderNasdaq,ashare:renderAshare,newconfig:()=> (typeof renderNewConfigV2==='function'?renderNewConfigV2():renderNewConfig()),health:renderHealth,checkin:renderHealthCheckin,diet:()=>renderHealthSection('diet'),fitness:()=>renderHealthSection('fitness'),skin:()=>renderHealthSection('skin'),sleep:()=>renderHealthSection('sleep'),style:()=>renderHealthSection('style'),english:()=> (typeof renderEnglishV2==='function'?renderEnglishV2():renderEnglish()),reading:()=> (typeof renderReadingV2==='function'?renderReadingV2():renderReading()),execution:renderExecution,archive:renderArchive,dailyflow:renderDailyFlow,flowstats:renderFlowStats,alpharadar:renderAlphaRadar};
+  const map={silicon:renderSiliconEra,uilearning:renderUILearning,scaffold:renderScaffold,prompt:renderPromptLibrary,infogap:renderInfoGap,cycle:renderXinDeng,mindmap:renderMindmap,whiteboard:renderWhiteboard,xindeng:renderXinDeng,growthplan:renderGrowthPlan,review:renderGrowthReview,today:()=>renderTaskWorkspace('home'),schedules:renderSchedules,agents:renderAgents,mistakes:renderMistakes,social:renderSocialInsight,dunning:renderDunningCurve,learningprinciples:renderLearningPrinciples,home:renderHome,inbox:renderInbox,upcoming:renderUpcoming,calendar:renderCalendar,matrix:renderMatrix,stats:renderFocusStats,important:renderImportant,alltasks:renderAllFocusTasks,dashboard:renderDashboard,allocation:renderAllocation,nasdaq:renderNasdaq,ashare:renderAshare,newconfig:()=> (typeof renderNewConfigV2==='function'?renderNewConfigV2():renderNewConfig()),health:renderHealth,checkin:renderHealthCheckin,diet:()=>renderHealthSection('diet'),fitness:()=>renderHealthSection('fitness'),skin:()=>renderHealthSection('skin'),sleep:()=>renderHealthSection('sleep'),style:()=>renderHealthSection('style'),english:()=> (typeof renderEnglishV2==='function'?renderEnglishV2():renderEnglish()),reading:()=> (typeof renderReadingV2==='function'?renderReadingV2():renderReading()),execution:renderExecution,archive:renderArchive,dailyflow:renderDailyFlow,flowstats:renderFlowStats,alpharadar:renderAlphaRadar};
   const investingPages=['dashboard','allocation','nasdaq','ashare','execution'];
   const body=(map[page]||renderHome)();
   const commit = () => {
@@ -2444,6 +2446,8 @@ function bindDelegatedEvents() {
     if(a==='voice-task-open'){openVoiceTaskModal();startVoiceTaskCapture($('#voiceTaskStart'));return;}
     if(a==='voice-task-close'){if(voiceTaskRecognition){voiceTaskRecognition.cancelled=true;voiceTaskRecognition.abort();}voiceTaskRecognition=null;$('#voiceTaskModalMount')?.remove();return;}
     if(a==='voice-task-start'){startVoiceTaskCapture(action);return;}
+    if(a==='delete-prompt-entry'){const i=n(action.dataset.index,-1);if(i>=0&&confirm('删除这条 Prompt？')){state.promptLibrary.splice(i,1);saveAndRender('Prompt 已删除');}return;}
+    if(a==='copy-prompt-entry'){const item=state.promptLibrary[n(action.dataset.index,-1)];if(item){try{await navigator.clipboard.writeText(item.content||'');toast('指令内容已复制');}catch(_){toast('复制失败，请检查浏览器剪贴板权限',true);}}return;}
     if(a==='dunning-stage'){ui.dunningStage=action.dataset.stage||'surface';renderPage('dunning');return;}
     if(a==='learning-principle-step'){ui.learningPrincipleStage=Number(action.dataset.step)||0;renderPage('learningprinciples');return;}
     if(a==='gym-zone'){gymUI().bodyPart=action.dataset.zone||'';renderGymFilters();loadGym(true);return;}
@@ -2600,6 +2604,11 @@ function bindDelegatedEvents() {
   document.addEventListener('submit',async e=>{
     if(e.target.id==='voiceTaskForm'){
       e.preventDefault();await saveVoiceTaskToday($('#voiceTaskText')?.value);return;
+    }
+    if(e.target.id==='promptLibraryForm'){
+      e.preventDefault();const fd=new FormData(e.target),item={id:`prompt-${Date.now()}`,title:String(fd.get('title')||'').trim(),scenario:String(fd.get('scenario')||'其他'),type:String(fd.get('type')||'其他'),content:String(fd.get('content')||'').trim(),createdAt:new Date().toLocaleString('zh-CN')};
+      if(!item.title||!item.content){toast('请填写指令名称和内容',true);return;}state.promptLibrary.unshift(item);
+      if(await persist({quiet:true})){renderPage('prompt');toast('Prompt 已保存到账户工作区');}else toast('保存失败，请检查网络后重试',true);return;
     }
     if(e.target.id==='flowEditForm'){e.preventDefault();const f=e.target,fd=new FormData(f),kind=String(fd.get('kind')||f.dataset.kind),oldKind=f.dataset.kind,id=String(f.dataset.id||''),toMin=v=>{const [h,m]=String(v).split(':').map(Number);return h*60+m;};const start=toMin(fd.get('start')),endRaw=toMin(fd.get('end')),end=endRaw<=start?endRaw+1440:endRaw;const obj={id:id||`flow-${Date.now()}-${Math.random().toString(36).slice(2,7)}`,title:String(fd.get('title')||'').trim(),start,end,category:String(fd.get('category')||'日常').trim(),destination:String(fd.get('destination')||''),note:String(fd.get('note')||'').trim(),color:String(fd.get('color')||'#6e9c79'),order:Date.now()};if(!obj.title){toast('请填写流程事项',true);return;}if(id&&oldKind!==kind)state.dailyFlows[oldKind]=state.dailyFlows[oldKind].filter(x=>String(x.id)!==id);const list=state.dailyFlows[kind]||(state.dailyFlows[kind]=[]),idx=list.findIndex(x=>String(x.id)===id);if(idx>=0)list[idx]=obj;else list.push(obj);ui.flowKind=kind;await persist({quiet:true});$('#flowModalMount')?.replaceChildren();try{sessionStorage.setItem('wealthos-tab-dailyflow','edit')}catch(_){}renderPage(currentPage==='xindeng'?'xindeng':'dailyflow');toast('流程块已保存');return;}
     if(e.target.id==='scheduleJobForm'){
@@ -2792,6 +2801,22 @@ document.addEventListener('change',async event=>{
 });
 
 function renderScaffold(){return `<iframe class="scaffold-frame" title="Codex 项目脚手架" src="/static/scaffold/index.html" loading="eager"></iframe>`;}
+function renderPromptLibrary(){
+  const rows=state.promptLibrary||[];
+  return `${sectionHead('PROMPT LIBRARY · PERSONAL WORKSPACE','Prompt','按场景和类型归档常用指令，保存后会同步到当前账户。')}
+    <section class="card prompt-compose-card"><div class="card-head"><div><span class="eyebrow">NEW PROMPT</span><h2>录入指令</h2></div></div><div class="card-body">
+      <form id="promptLibraryForm" class="prompt-compose-form">
+        <label class="field-label">指令名称<input name="title" maxlength="100" required placeholder="例如：产品需求评审助手"></label>
+        <div class="composer-two"><label class="field-label">使用场景<select name="scenario"><option>产品设计</option><option>软件开发</option><option>学习研究</option><option>内容创作</option><option>工作流程</option><option>个人效率</option><option>其他</option></select></label>
+        <label class="field-label">指令类型<select name="type"><option>System Prompt</option><option>User Prompt</option><option>Agent 指令</option><option>代码生成</option><option>图像生成</option><option>其他</option></select></label></div>
+        <label class="field-label">具体指令<textarea name="content" rows="8" maxlength="20000" required placeholder="写下完整指令内容……"></textarea></label>
+        <button class="btn btn-primary" type="submit">保存到 Prompt 库</button>
+      </form>
+    </div></section>
+    <section class="prompt-library-list"><div class="section-heading"><div><span class="eyebrow">SAVED PROMPTS</span><h2>我的指令 <span class="tag neutral">${rows.length}</span></h2></div></div>
+      ${rows.length?rows.map((item,index)=>`<article class="card prompt-entry"><div class="card-body"><div class="prompt-entry-head"><div><h3>${esc(item.title||'未命名指令')}</h3><div class="prompt-entry-tags"><span class="tag neutral">${esc(item.scenario||'其他')}</span><span class="tag neutral">${esc(item.type||'其他')}</span><small>${esc(item.updatedAt||item.createdAt||'')}</small></div></div><div class="button-row"><button class="btn btn-small btn-outline" type="button" data-action="copy-prompt-entry" data-index="${index}">复制</button><button class="btn btn-small btn-quiet" type="button" data-action="delete-prompt-entry" data-index="${index}">删除</button></div></div><pre class="prompt-entry-content">${esc(item.content||'')}</pre></div></article>`).join(''):'<div class="empty-state card">还没有保存的指令。选择场景和类型后，录入第一条 Prompt。</div>'}
+    </section>`;
+}
 function renderInfoGap(){return `<iframe class="opportunity-frame" title="信息差变现工作台" src="/opportunity-os/" loading="eager"></iframe>`;}
 function renderUILearning(){return `<section class="ailearn-entry" aria-labelledby="ailearnEntryTitle"><div class="ailearn-entry-mark" aria-hidden="true">A</div><div class="ailearn-entry-copy"><span>AI LEARN · CASE STUDY</span><h2 id="ailearnEntryTitle">aiLearn 案例工作台</h2><p>浏览案例画廊、拆解界面、对比设计，并用 AI 辅助解析截图。</p></div><a class="ailearn-entry-link" href="/static/ui-learning/aiLearn/index.html" target="_blank" rel="noopener">打开案例工作台 <span aria-hidden="true">↗</span></a></section><iframe class="ui-learning-frame" title="UI 学习工作台" src="/static/ui-learning/index.html" allow="clipboard-write" loading="eager"></iframe>`;}
 window.addEventListener('message',e=>{
