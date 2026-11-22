@@ -2446,7 +2446,9 @@ function bindDelegatedEvents() {
     if(a==='voice-task-open'){openVoiceTaskModal();startVoiceTaskCapture($('#voiceTaskStart'));return;}
     if(a==='voice-task-close'){if(voiceTaskRecognition){voiceTaskRecognition.cancelled=true;voiceTaskRecognition.abort();}voiceTaskRecognition=null;$('#voiceTaskModalMount')?.remove();return;}
     if(a==='voice-task-start'){startVoiceTaskCapture(action);return;}
-    if(a==='delete-prompt-entry'){const i=n(action.dataset.index,-1);if(i>=0&&confirm('删除这条 Prompt？')){state.promptLibrary.splice(i,1);saveAndRender('Prompt 已删除');}return;}
+    if(a==='edit-prompt-entry'){const item=state.promptLibrary[n(action.dataset.index,-1)];if(item){ui.promptEditId=item.id;renderPage('prompt');setTimeout(()=>{const form=$('#promptLibraryForm');form?.scrollIntoView({behavior:'smooth',block:'center'});form?.elements.title?.focus({preventScroll:true});},80);}return;}
+    if(a==='cancel-prompt-edit'){ui.promptEditId=null;renderPage('prompt');return;}
+    if(a==='delete-prompt-entry'){const i=n(action.dataset.index,-1);if(i>=0&&confirm('删除这条 Prompt？')){if(String(state.promptLibrary[i]?.id)===String(ui.promptEditId))ui.promptEditId=null;state.promptLibrary.splice(i,1);saveAndRender('Prompt 已删除');}return;}
     if(a==='copy-prompt-entry'){const item=state.promptLibrary[n(action.dataset.index,-1)];if(item){try{await navigator.clipboard.writeText(item.content||'');toast('指令内容已复制');}catch(_){toast('复制失败，请检查浏览器剪贴板权限',true);}}return;}
     if(a==='dunning-stage'){ui.dunningStage=action.dataset.stage||'surface';renderPage('dunning');return;}
     if(a==='learning-principle-step'){ui.learningPrincipleStage=Number(action.dataset.step)||0;renderPage('learningprinciples');return;}
@@ -2606,9 +2608,11 @@ function bindDelegatedEvents() {
       e.preventDefault();await saveVoiceTaskToday($('#voiceTaskText')?.value);return;
     }
     if(e.target.id==='promptLibraryForm'){
-      e.preventDefault();const fd=new FormData(e.target),item={id:`prompt-${Date.now()}`,title:String(fd.get('title')||'').trim(),scenario:String(fd.get('scenario')||'其他'),type:String(fd.get('type')||'其他'),content:String(fd.get('content')||'').trim(),createdAt:new Date().toLocaleString('zh-CN')};
-      if(!item.title||!item.content){toast('请填写指令名称和内容',true);return;}state.promptLibrary.unshift(item);
-      if(await persist({quiet:true})){renderPage('prompt');toast('Prompt 已保存到账户工作区');}else toast('保存失败，请检查网络后重试',true);return;
+      e.preventDefault();const fd=new FormData(e.target),values={title:String(fd.get('title')||'').trim(),scenario:String(fd.get('scenario')||'其他'),type:String(fd.get('type')||'其他'),content:String(fd.get('content')||'').trim()},editingId=ui.promptEditId;
+      if(!values.title||!values.content){toast('请填写指令名称和内容',true);return;}
+      if(editingId){const item=state.promptLibrary.find(x=>String(x.id)===String(editingId));if(!item){ui.promptEditId=null;toast('这条 Prompt 已不存在，请重新选择',true);renderPage('prompt');return;}Object.assign(item,values,{updatedAt:new Date().toLocaleString('zh-CN')});}
+      else state.promptLibrary.unshift({id:`prompt-${Date.now()}`,...values,createdAt:new Date().toLocaleString('zh-CN')});
+      if(await persist({quiet:true})){ui.promptEditId=null;renderPage('prompt');toast(editingId?'Prompt 修改已保存':'Prompt 已保存到账户工作区');}else toast('保存失败，请检查网络后重试',true);return;
     }
     if(e.target.id==='flowEditForm'){e.preventDefault();const f=e.target,fd=new FormData(f),kind=String(fd.get('kind')||f.dataset.kind),oldKind=f.dataset.kind,id=String(f.dataset.id||''),toMin=v=>{const [h,m]=String(v).split(':').map(Number);return h*60+m;};const start=toMin(fd.get('start')),endRaw=toMin(fd.get('end')),end=endRaw<=start?endRaw+1440:endRaw;const obj={id:id||`flow-${Date.now()}-${Math.random().toString(36).slice(2,7)}`,title:String(fd.get('title')||'').trim(),start,end,category:String(fd.get('category')||'日常').trim(),destination:String(fd.get('destination')||''),note:String(fd.get('note')||'').trim(),color:String(fd.get('color')||'#6e9c79'),order:Date.now()};if(!obj.title){toast('请填写流程事项',true);return;}if(id&&oldKind!==kind)state.dailyFlows[oldKind]=state.dailyFlows[oldKind].filter(x=>String(x.id)!==id);const list=state.dailyFlows[kind]||(state.dailyFlows[kind]=[]),idx=list.findIndex(x=>String(x.id)===id);if(idx>=0)list[idx]=obj;else list.push(obj);ui.flowKind=kind;await persist({quiet:true});$('#flowModalMount')?.replaceChildren();try{sessionStorage.setItem('wealthos-tab-dailyflow','edit')}catch(_){}renderPage(currentPage==='xindeng'?'xindeng':'dailyflow');toast('流程块已保存');return;}
     if(e.target.id==='scheduleJobForm'){
@@ -2803,18 +2807,21 @@ document.addEventListener('change',async event=>{
 function renderScaffold(){return `<iframe class="scaffold-frame" title="Codex 项目脚手架" src="/static/scaffold/index.html" loading="eager"></iframe>`;}
 function renderPromptLibrary(){
   const rows=state.promptLibrary||[];
+  const editing=rows.find(item=>String(item.id)===String(ui.promptEditId));
+  const scenarios=['产品设计','软件开发','学习研究','内容创作','工作流程','个人效率','其他'],types=['System Prompt','User Prompt','Agent 指令','代码生成','图像生成','其他'];
+  const options=(items,value)=>items.map(item=>`<option ${item===value?'selected':''}>${esc(item)}</option>`).join('');
   return `${sectionHead('PROMPT LIBRARY · PERSONAL WORKSPACE','Prompt','按场景和类型归档常用指令，保存后会同步到当前账户。')}
-    <section class="card prompt-compose-card"><div class="card-head"><div><span class="eyebrow">NEW PROMPT</span><h2>录入指令</h2></div></div><div class="card-body">
+    <section class="card prompt-compose-card"><div class="card-head"><div><span class="eyebrow">${editing?'EDIT PROMPT':'NEW PROMPT'}</span><h2>${editing?'编辑指令':'录入指令'}</h2></div></div><div class="card-body">
       <form id="promptLibraryForm" class="prompt-compose-form">
-        <label class="field-label">指令名称<input name="title" maxlength="100" required placeholder="例如：产品需求评审助手"></label>
-        <div class="composer-two"><label class="field-label">使用场景<select name="scenario"><option>产品设计</option><option>软件开发</option><option>学习研究</option><option>内容创作</option><option>工作流程</option><option>个人效率</option><option>其他</option></select></label>
-        <label class="field-label">指令类型<select name="type"><option>System Prompt</option><option>User Prompt</option><option>Agent 指令</option><option>代码生成</option><option>图像生成</option><option>其他</option></select></label></div>
-        <label class="field-label">具体指令<textarea name="content" rows="8" maxlength="20000" required placeholder="写下完整指令内容……"></textarea></label>
-        <button class="btn btn-primary" type="submit">保存到 Prompt 库</button>
+        <label class="field-label">指令名称<input name="title" maxlength="100" required placeholder="例如：产品需求评审助手" value="${esc(editing?.title||'')}"></label>
+        <div class="composer-two"><label class="field-label">使用场景<select name="scenario">${options(scenarios,editing?.scenario||scenarios[0])}</select></label>
+        <label class="field-label">指令类型<select name="type">${options(types,editing?.type||types[0])}</select></label></div>
+        <label class="field-label">具体指令<textarea name="content" rows="8" maxlength="20000" required placeholder="写下完整指令内容……">${esc(editing?.content||'')}</textarea></label>
+        <div class="button-row"><button class="btn btn-primary" type="submit">${editing?'保存修改':'保存到 Prompt 库'}</button>${editing?'<button class="btn btn-outline" type="button" data-action="cancel-prompt-edit">取消编辑</button>':''}</div>
       </form>
     </div></section>
     <section class="prompt-library-list"><div class="section-heading"><div><span class="eyebrow">SAVED PROMPTS</span><h2>我的指令 <span class="tag neutral">${rows.length}</span></h2></div></div>
-      ${rows.length?rows.map((item,index)=>`<article class="card prompt-entry"><div class="card-body"><div class="prompt-entry-head"><div><h3>${esc(item.title||'未命名指令')}</h3><div class="prompt-entry-tags"><span class="tag neutral">${esc(item.scenario||'其他')}</span><span class="tag neutral">${esc(item.type||'其他')}</span><small>${esc(item.updatedAt||item.createdAt||'')}</small></div></div><div class="button-row"><button class="btn btn-small btn-outline" type="button" data-action="copy-prompt-entry" data-index="${index}">复制</button><button class="btn btn-small btn-quiet" type="button" data-action="delete-prompt-entry" data-index="${index}">删除</button></div></div><pre class="prompt-entry-content">${esc(item.content||'')}</pre></div></article>`).join(''):'<div class="empty-state card">还没有保存的指令。选择场景和类型后，录入第一条 Prompt。</div>'}
+      ${rows.length?rows.map((item,index)=>`<article class="card prompt-entry"><div class="card-body"><div class="prompt-entry-head"><div><h3>${esc(item.title||'未命名指令')}</h3><div class="prompt-entry-tags"><span class="tag neutral">${esc(item.scenario||'其他')}</span><span class="tag neutral">${esc(item.type||'其他')}</span><small>${esc(item.updatedAt||item.createdAt||'')}</small></div></div><div class="button-row"><button class="btn btn-small btn-outline" type="button" data-action="edit-prompt-entry" data-index="${index}">编辑</button><button class="btn btn-small btn-outline" type="button" data-action="copy-prompt-entry" data-index="${index}">复制</button><button class="btn btn-small btn-quiet" type="button" data-action="delete-prompt-entry" data-index="${index}">删除</button></div></div><pre class="prompt-entry-content">${esc(item.content||'')}</pre></div></article>`).join(''):'<div class="empty-state card">还没有保存的指令。选择场景和类型后，录入第一条 Prompt。</div>'}
     </section>`;
 }
 function renderInfoGap(){return `<iframe class="opportunity-frame" title="信息差变现工作台" src="/opportunity-os/" loading="eager"></iframe>`;}
