@@ -15,7 +15,7 @@ let currentPage = 'xindeng';
 let authMode = 'login';
 let saveTimer = null;
 let marketBusy = false;
-let ui = { allocationMode:'global', expandedETF:null, showSourceDetails:false, cycleTab:'research', focusQuery:'', homeRange:'7', calendarWeekOffset:0, showCalendarComposer:false, calendarSelectedDate:'', workbookSheetIndex:0, workbookData:null, calendarDrag:null, calendarResize:null, bodyZone:'', bodyMuscle:'', bodyMode:'muscle', bodySearch:'', bodyView:{x:0,y:0,rx:0,ry:0,scale:1}, bodyDragMoved:false, checkinDate:'', guidedSummaryId:null, mustReadOpenId:null };
+let ui = { allocationMode:'global', expandedETF:null, showSourceDetails:false, cycleTab:'research', focusQuery:'', homeRange:'7', calendarWeekOffset:0, showCalendarComposer:false, calendarSelectedDate:'', workbookSheetIndex:0, workbookData:null, calendarDrag:null, calendarResize:null, bodyZone:'', bodyMuscle:'', bodyMode:'muscle', bodySearch:'', bodyView:{x:0,y:0,rx:0,ry:0,scale:1}, bodyDragMoved:false, checkinDate:'', guidedSummaryId:null, mustReadOpenId:null, flowWorkspaceView:'today' };
 let guidedTimerInterval=null;
 let focusClock = { remaining:1500, endsAt:null, interval:null, running:false };
 
@@ -375,6 +375,35 @@ function renderHubTabs(page){
   return `<div class="hub-tabs" role="navigation" aria-label="${esc(def.label)}导航">${def.items.map(([key,label])=>key.startsWith('http')?`<a class="hub-tab" href="${esc(key)}" target="_blank" rel="noopener noreferrer">${label}</a>`:`<button class="hub-tab ${key===page?'active':''}" data-action="go-page" data-page="${key}" aria-current="${key===page?'page':'false'}">${label}</button>`).join('')}</div>`;
 }
 
+function compactPageHeader(root){
+  const pageHead=[...root.children].find((el)=>el.classList.contains('page-head'));
+  const welcome=[...root.children].find((el)=>el.classList.contains('home-welcome'));
+  const actions=[...(pageHead?.querySelector('.page-actions')?.children||[]),...(welcome?.querySelector('.home-welcome-actions')?.children||[])];
+  const tabs=[...root.children].find((el)=>el.classList.contains('hub-tabs'));
+  const provenance=[...root.children].find((el)=>el.classList.contains('data-provenance'));
+  pageHead?.remove();
+  welcome?.remove();
+  provenance?.remove();
+  if(!tabs&&!actions.length&&!provenance) return;
+  const row=document.createElement('div');
+  row.className='page-context-row';
+  if(provenance){
+    const status=document.createElement('div');
+    status.className='page-context-status';
+    status.setAttribute('role','note');
+    status.innerHTML=provenance.innerHTML;
+    row.appendChild(status);
+  }
+  if(tabs) row.appendChild(tabs);
+  if(actions.length){
+    const actionSlot=document.createElement('div');
+    actionSlot.className='page-context-actions';
+    actions.forEach((action)=>actionSlot.appendChild(action));
+    row.appendChild(actionSlot);
+  }
+  root.insertBefore(row,root.firstChild);
+}
+
 const PAGE_COVER_MEDIA={
   home:['/static/img/desk.jpg','窗边工作台与植物'],
   today:['/static/img/desk.jpg','窗边工作台'],
@@ -527,11 +556,7 @@ function renderPage(page, {autoRefresh=false, transition=true, animate=true}={})
       if (head) head.insertAdjacentHTML('afterend',hubTabs);
       else root.insertAdjacentHTML('afterbegin',hubTabs);
     }
-    const pageHead=root.querySelector('.page-head');
-    if (pageHead && pageHead.querySelector('h1') && !pageHead.querySelector('.page-cover-media')) {
-      const [src,alt]=PAGE_COVER_MEDIA[page]||['/static/img/architecture.jpg','现代建筑封面'];
-      pageHead.insertAdjacentHTML('beforeend',`<div class="page-cover-media"><img src="${src}" alt="${esc(alt)}" loading="eager" decoding="async"></div>`);
-    }
+    compactPageHeader(root);
     updateFocusCounts();
     labelControls(root);
     closeSidebar();
@@ -729,6 +754,7 @@ function startVoiceTaskCapture(button){
 function focusTaskFilter(view) {
   const rows=focusTasks(),today=todayKey(),week=addDaysKey(7);
   if(view==='home') return rows.filter(t=>{const start=t.startDate||t.dueDate||'',end=t.dueDate||start;const active=!start||start<=today&&end>=today;const overdue=!!end&&end<today;return (active||overdue)&&(!t.done||t.dueDate===today);});
+  if(view==='todayfocus') return rows.filter(t=>{const start=t.startDate||t.dueDate||'',end=t.dueDate||start;return !!start&&(start<=today&&end>=today||end<today)&&(!t.done||t.dueDate===today);});
   if(view==='inbox') return rows.filter(t=>t.project==='收集箱'||!t.dueDate);
   if(view==='todo') return rows.filter(t=>!t.startDate&&!t.dueDate);
   if(view==='upcoming') return rows.filter(t=>!t.done&&t.dueDate>today&&t.dueDate<=week);
@@ -769,13 +795,13 @@ function openFocusTaskEditor(task, options={}) {
   root.innerHTML=`<div class="focus-modal-backdrop" data-action="close-focus-modal"></div><section class="focus-modal" role="dialog" aria-modal="true" aria-labelledby="focusEditTitle"><div class="focus-modal-head"><div><div class="eyebrow">TASK DETAILS</div><h2 id="focusEditTitle">${options.schedule?'排入周历':'编辑任务'}</h2></div><button class="task-delete" data-action="close-focus-modal" aria-label="关闭">×</button></div>${options.schedule?'<p class="micro-copy">设置起止日期并保存后，这条待办会出现在周历中；清空日期可恢复为未排期待办。</p>':''}<form id="focusTaskEditForm" data-id="${esc(task.id)}" class="focus-task-form"><label class="field-label">任务内容<input id="focusEditName" required maxlength="180" value="${esc(task.title)}" /></label><label class="field-label">所属模块<select id="focusEditProject">${['收集箱','全球配置','纳指策略','A股 ETF','新登配置','跨境合规','AI工具','内容/IP','健康/学习','每日复盘'].map(x=>`<option ${task.project===x?'selected':''}>${x}</option>`).join('')}</select></label><div class="composer-two"><label class="field-label">起始日期<input id="focusEditStart" type="date" value="${esc(task.startDate||task.dueDate||defaultDate)}" /></label><label class="field-label">截止日期<input id="focusEditDue" type="date" value="${esc(task.dueDate||task.startDate||defaultDate)}" /></label></div><div class="composer-two"><label class="field-label">优先级<select id="focusEditPriority">${['高','中','低'].map(x=>`<option ${task.priority===x?'selected':''}>${x}</option>`).join('')}</select></label></div><div class="composer-two"><label class="field-label">预计分钟<input id="focusEditEstimate" type="number" min="0" max="1440" value="${Math.max(0,n(task.estimate,25))}" /></label><label class="field-label check-inline"><input id="focusEditImportant" type="checkbox" ${task.important?'checked':''}/> 标记重要</label></div><label class="field-label">备注 / 完成标准<textarea id="focusEditNote" rows="4">${esc(task.note||'')}</textarea></label><div class="button-row"><button class="btn btn-primary" type="submit">保存修改</button><button class="btn btn-quiet" type="button" data-action="close-focus-modal">取消</button></div></form></section>`;
   setTimeout(()=>$('#focusEditName')?.focus(),0);
 }
-function renderTaskWorkspace(view) {
-  const title={home:'今日任务',inbox:'今日任务',todo:'待办',upcoming:'未来 7 天',important:'重要事项',alltasks:'全部任务'}[view]||'任务';
-  const subtitle={home:'把投资研究、系统建设和个人成长拆成今天可以完成的动作。',inbox:'先快速收集，再分配模块、优先级和日期。',todo:'先记下要做的事，再按需安排到周历；清单与日程使用同一份账户数据。',upcoming:'提前看一周任务，避免资产复盘和长期建设互相挤占。',important:'优先处理高优先级、明确风险或合规依赖的事项。',alltasks:'搜索、完成、标记重点或清理所有工作项。'}[view]||'';
+function renderTaskWorkspace(view,{embedded=false}={}) {
+  const title={home:'今日任务',todayfocus:'今日任务',inbox:'收集箱',todo:'待办',upcoming:'未来 7 天',important:'重要事项',alltasks:'全部任务'}[view]||'任务';
+  const subtitle={home:'把投资研究、系统建设和个人成长拆成今天可以完成的动作。',todayfocus:'只看今天要做和已经逾期的事项；未排期的任务留在收集箱。',inbox:'先快速收集，再分配模块、优先级和日期。',todo:'先记下要做的事，再按需安排到周历；清单与日程使用同一份账户数据。',upcoming:'提前看一周任务，避免资产复盘和长期建设互相挤占。',important:'优先处理高优先级、明确风险或合规依赖的事项。',alltasks:'搜索、完成、标记重点或清理所有工作项。'}[view]||'';
   const open=focusTaskFilter(view).filter(t=>!t.done).length;
-  return `${sectionHead('TICKFLOW · TASK MANAGEMENT',title,subtitle,`<button class="btn btn-outline" data-action="go-page" data-page="home">⌂ 今日</button><button class="btn btn-primary" data-action="focus-add-focus">＋ 添加任务</button>`)}
-    <div class="task-toolbar"><div class="task-filter-pills">${[['home','今天'],['inbox','收集箱'],['upcoming','未来7天'],['important','重要'],['alltasks','全部']].map(([key,label])=>`<button class="filter-pill ${view===key?'selected':''}" data-action="go-page" data-page="${key}">${label}<span>${focusTaskCount(key)}</span></button>`).join('')}</div><label class="task-search"><span>⌕</span><input id="focusSearch" type="search" placeholder="搜索任务、模块或备注…" value="${esc(ui.focusQuery||'')}" /><kbd>/</kbd></label></div>
-    <div class="task-content-grid"><section class="card task-list-card">${cardHead(title,`${open} 项待完成 · 完成状态自动保存到账户工作区`,tag(`${open} OPEN`,open?'good':'neutral'))}<div class="card-body task-list-body"><div id="focusTaskList">${renderFocusTaskRows(view)}</div></div></section><aside class="card task-add-card">${cardHead('快速添加',view==='todo'?'先保存为待办，之后可以再排入周历':'设置日期、优先级和所属模块')}<div class="card-body"><form id="focusTaskForm" class="focus-task-form"><label class="field-label">任务内容<input id="focusTaskTitle" maxlength="180" required placeholder="例如：复核 QQQ 的目标仓位" /></label><label class="field-label">所属模块<select id="focusTaskProject">${['收集箱','全球配置','纳指策略','A股 ETF','新登配置','跨境合规','AI工具','内容/IP','健康/学习','每日复盘'].map(x=>`<option ${x===(view==='inbox'||view==='todo'?'收集箱':'每日复盘')?'selected':''}>${x}</option>`).join('')}</select></label><div class="composer-two"><label class="field-label">起始日期<input id="focusTaskStart" type="date" value="${view==='todo'?'':todayKey()}" /></label><label class="field-label">截止日期<input id="focusTaskDue" type="date" value="${view==='todo'?'':todayKey()}" /></label></div><div class="composer-two"><label class="field-label">优先级<select id="focusTaskPriority"><option>高</option><option selected>中</option><option>低</option></select></label></div><div class="composer-two"><label class="field-label">预计分钟<input id="focusTaskEstimate" type="number" min="0" max="1440" value="25" /></label><label class="field-label check-inline"><input id="focusTaskImportant" type="checkbox" /> 标记重要</label></div><label class="field-label">备注 / 完成标准<textarea id="focusTaskNote" rows="3" placeholder="记录触发条件、证据或退出标准…"></textarea></label><button class="btn btn-primary btn-full" type="submit">${view==='todo'?'保存待办':'添加到工作清单'} <span>↗</span></button></form></div></aside></div>`;
+  return `${embedded?'':sectionHead('TICKFLOW · TASK MANAGEMENT',title,subtitle,`<button class="btn btn-outline" data-action="go-page" data-page="home">⌂ 今日</button><button class="btn btn-primary" data-action="focus-add-focus">＋ 添加任务</button>`)}
+    <div class="task-toolbar">${embedded?'':`<div class="task-filter-pills">${[['home','今天'],['inbox','收集箱'],['upcoming','未来7天'],['important','重要'],['alltasks','全部']].map(([key,label])=>`<button class="filter-pill ${view===key?'selected':''}" data-action="go-page" data-page="${key}">${label}<span>${focusTaskCount(key)}</span></button>`).join('')}</div>`}<label class="task-search"><span>⌕</span><input id="focusSearch" type="search" placeholder="搜索任务、模块或备注…" value="${esc(ui.focusQuery||'')}" /><kbd>/</kbd></label></div>
+    <div class="task-content-grid"><section class="card task-list-card">${cardHead(title,`${open} 项待完成 · 完成状态自动保存到账户工作区`,tag(`${open} OPEN`,open?'good':'neutral'))}<div class="card-body task-list-body"><div id="focusTaskList">${renderFocusTaskRows(view)}</div></div></section><aside class="card task-add-card">${cardHead('快速添加',view==='todo'||view==='inbox'?'先收进收集箱，需要时再安排日期':'设置日期、优先级和所属模块')}<div class="card-body"><form id="focusTaskForm" class="focus-task-form"><label class="field-label">任务内容<input id="focusTaskTitle" maxlength="180" required placeholder="例如：复核 QQQ 的目标仓位" /></label><label class="field-label">所属模块<select id="focusTaskProject">${['收集箱','全球配置','纳指策略','A股 ETF','新登配置','跨境合规','AI工具','内容/IP','健康/学习','每日复盘'].map(x=>`<option ${x===(view==='inbox'||view==='todo'?'收集箱':'每日复盘')?'selected':''}>${x}</option>`).join('')}</select></label><div class="composer-two"><label class="field-label">起始日期<input id="focusTaskStart" type="date" value="${view==='todo'||view==='inbox'?'':todayKey()}" /></label><label class="field-label">截止日期<input id="focusTaskDue" type="date" value="${view==='todo'||view==='inbox'?'':todayKey()}" /></label></div><div class="composer-two"><label class="field-label">优先级<select id="focusTaskPriority"><option>高</option><option selected>中</option><option>低</option></select></label></div><div class="composer-two"><label class="field-label">预计分钟<input id="focusTaskEstimate" type="number" min="0" max="1440" value="25" /></label><label class="field-label check-inline"><input id="focusTaskImportant" type="checkbox" /> 标记重要</label></div><label class="field-label">备注 / 完成标准<textarea id="focusTaskNote" rows="3" placeholder="记录触发条件、证据或退出标准…"></textarea></label><button class="btn btn-primary btn-full" type="submit">${view==='todo'?'保存待办':'添加到工作清单'} <span>↗</span></button></form></div></aside></div>`;
 }
 function renderPomodoro() {
   const seconds=focusClock.running&&focusClock.endsAt?Math.max(0,Math.ceil((focusClock.endsAt-Date.now())/1000)):focusClock.remaining;
@@ -1190,7 +1216,7 @@ function renderInbox() { return renderTaskWorkspace('inbox'); }
 function renderUpcoming() { return renderTaskWorkspace('upcoming'); }
 function renderImportant() { return renderTaskWorkspace('important'); }
 function renderAllFocusTasks() { return renderTaskWorkspace('alltasks'); }
-function renderFocusTaskListOnly() { const el=$('#focusTaskList'); if(el) el.innerHTML=renderFocusTaskRows(currentPage); }
+function renderFocusTaskListOnly() { const el=$('#focusTaskList'); if(el) el.innerHTML=renderFocusTaskRows(currentPage==='dailyflow'?(ui.flowWorkspaceView==='today'?'todayfocus':ui.flowWorkspaceView):currentPage); }
 function focusClockTick() {
   if(!focusClock.running||!focusClock.endsAt) return;
   focusClock.remaining=Math.max(0,Math.ceil((focusClock.endsAt-Date.now())/1000));
@@ -1212,7 +1238,7 @@ function flowEditorPanel(kind){
  return `<div class="flow-mode-tabs"><button class="filter-pill ${kind==='weekday'?'selected':''}" data-action="flow-kind" data-kind="weekday">工作日 <span>${state.dailyFlows.weekday.length}</span></button><button class="filter-pill ${kind==='restday'?'selected':''}" data-action="flow-kind" data-kind="restday">休息日 <span>${state.dailyFlows.restday.length}</span></button><span class="micro-copy">${kind==='weekday'?'周一至周五':'周六、周日'} · 自定义任务与时间</span></div>
  <div class="flow-editor-layout"><section class="card flow-timeline-card"><div class="flow-timeline-scroll"><div class="flow-timeline" id="flowTimeline" aria-label="24小时时间轴，双击空白新增，双击任务编辑">${rows}${blocks||'<div class="flow-empty">双击空白时间段新增任务。</div>'}</div></div></section></div>`;
 }
-function renderDailyFlow(){
+function renderDailyFlowTemplates(){
  const kind=ui.flowKind||flowDateKind();
  const runs=state.dailyFlowRuns||[],items=[...(state.dailyFlows.weekday||[]),...(state.dailyFlows.restday||[])];
  const viewControls=`<div class="flow-check-toolbar"><button type="button" class="btn btn-outline" id="flowViewToggle" aria-pressed="${ui.flowViewMode==='checklist'}">${ui.flowViewMode==='checklist'?'切换到时间轴模式':'切换到 Checklist 模式'}</button></div>`;
@@ -1223,6 +1249,23 @@ function renderDailyFlow(){
   <div class="flow-page-panel" data-tab-panel="stats" id="flowStatsPanel">${flowStatsBody()}</div>
   <div id="flowModalMount"></div>
  </div>`;
+}
+function renderDailyFlow(){
+ const view=ui.flowWorkspaceView||'today',today=todayKey(),tasks=focusTasks(),todayOpen=focusTaskFilter('todayfocus').filter(t=>!t.done).length;
+ const inboxCount=focusTaskFilter('inbox').filter(t=>!t.done).length;
+ const weekEnd=addDaysKey(7),weekCount=tasks.filter(t=>!t.done&&(t.startDate||t.dueDate)&&(t.startDate||t.dueDate)<=weekEnd&&(t.dueDate||t.startDate)>=today).length;
+ const doneToday=tasks.filter(t=>t.done&&String(t.completedAt||'').slice(0,10)===today).length;
+ const views=[['today','今天',todayOpen],['inbox','收集箱',inboxCount],['upcoming','未来 7 天',weekCount],['important','重要',focusTaskCount('important')],['alltasks','全部',tasks.length],['matrix','四象限',''],['habits','习惯',''],['templates','流程模板',(state.dailyFlows.weekday||[]).length+(state.dailyFlows.restday||[]).length],['stats','统计',tasks.length]];
+ let content='';
+ if(['today','inbox','upcoming','important','alltasks'].includes(view)) content=renderTaskWorkspace(view==='today'?'todayfocus':view,{embedded:true});
+ else if(view==='matrix') content=renderMatrix();
+ else if(view==='habits') content=renderHabits();
+ else if(view==='templates') content=renderDailyFlowTemplates();
+ else content=renderFocusStats();
+ return `${sectionHead('TICKFLOW · PERSONAL TASK SPACE','任务工作台','把快速收集、今日执行、优先排序和习惯记录放在一个清晰的工作区。现有账户任务与流程模板保持原样，并继续自动保存。',`<button class="btn btn-outline" data-action="go-page" data-page="calendar">打开周历 ↗</button><button class="btn btn-primary" data-action="focus-add-focus">＋ 快速添加</button>`)}
+ <section class="tickflow-overview"><div class="tickflow-overview-main"><span class="eyebrow">MY DAY · ${today}</span><h2>今天，把重要的事推进一点。</h2><p>从收集箱挑选下一步，安排到周历；完成状态与备注会保存在当前账户。</p><div class="tickflow-overview-actions"><button class="btn btn-primary" data-action="flow-workspace-view" data-view="today">查看今日任务</button><button class="btn btn-outline" data-action="flow-workspace-view" data-view="inbox">整理收集箱</button></div></div><div class="tickflow-progress"><span>今日待完成</span><strong>${todayOpen}</strong><small>今日完成 ${doneToday} 项</small><div class="tickflow-progress-track"><i style="--progress:${Math.min(100,doneToday/Math.max(1,todayOpen+doneToday)*100)}%"></i></div></div></section>
+ <div class="tickflow-nav-row"><nav class="tickflow-views" aria-label="任务视图">${views.map(([key,label,count])=>`<button type="button" class="tickflow-view ${view===key?'active':''}" data-action="flow-workspace-view" data-view="${key}"><span>${label}</span>${count!==''?`<small>${count}</small>`:''}</button>`).join('')}</nav><div class="tickflow-nav-tools"></div></div>
+ <div class="tickflow-view-content" data-tickflow-view="${view}">${content}</div>`;
 }
 function refreshFlowTabCounts(){
  const scope=document.querySelector('[data-tab-key="dailyflow-v2"]');if(!scope)return;
@@ -2552,6 +2595,7 @@ function bindDelegatedEvents() {
     if(a==='gym-generate-plan-submit'){submitGymPlan();return;}
     if(a==='gym-picker-add'){addPickedGymExercise(action);return;}
     if(a==='flow-kind'){ui.flowKind=action.dataset.kind;renderPage(currentPage==='xindeng'?'xindeng':'dailyflow');return;}
+    if(a==='flow-workspace-view'){ui.flowWorkspaceView=action.dataset.view||'today';ui.focusQuery='';renderPage('dailyflow',{transition:false});return;}
     if(a==='flow-new'){openFlowEditor(action.dataset.kind||flowDateKind());return;}
     if(a==='flow-edit'){openFlowEditor(action.dataset.kind||'weekday',action.dataset.id);return;}
     if(a==='flow-complete'){const run=(state.dailyFlowRuns||[]).find(x=>String(x.flowId)===String(action.dataset.id)&&x.status==='opened');if(run){run.status='completed';run.note=$('#flowRunNote')?.value||'';run.completedAt=new Date().toISOString();}persist({quiet:true});refreshFlowTabCounts();$('#flowModalMount')?.replaceChildren();toast('流程完成记录已保存');return;}
