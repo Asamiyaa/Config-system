@@ -345,14 +345,14 @@ const HUB_OF={
   inbox:'newconfig',schedules:'settings',settings:'settings',dailyflow:'newconfig',calendar:'newconfig',matrix:'newconfig',stats:'newconfig',important:'newconfig',alltasks:'newconfig',flowstats:'newconfig',
   dashboard:'dashboard',house:'dashboard',allocation:'dashboard',nasdaq:'dashboard',ashare:'dashboard',execution:'dashboard',alpharadar:'dashboard',
   health:'health',healthplan:'health',checkin:'health',diet:'health',fitness:'health',skin:'health',sleep:'health',style:'health',
-  agents:'newconfig',newconfig:'newconfig',english:'newconfig',reading:'newconfig',archive:'settings'
+  agents:'cycle',newconfig:'newconfig',english:'newconfig',reading:'newconfig',archive:'settings'
 };
 const HUB_TABS={
   settings:{label:'设置',items:[['schedules','自动化'],['archive','归档']]},
   scaffold:{label:'脚手架',items:[['scaffold','VibeCoding'],['prompt','Prompt']]},
   dashboard:{label:'资产',items:[['http://39.106.118.186/','市场引擎 ↗'],['dashboard','总览'],['house','房子'],['allocation','配置'],['nasdaq','纳指'],['ashare','A股'],['execution','执行'],['alpharadar','实验']]},
-  cycle:{label:'结构与周期',items:[['xindeng','新登'],['mistakes','避坑'],['social','人性与社会'],['dunning','达克曲线'],['learningprinciples','学习的第一性原理'],['whiteboard','白布画板'],['mindmap','思维导图']]},
-  newconfig:{label:'成长',items:[['dailyflow','流程'],['calendar','周历'],['agents','平衡'],['newconfig','成长总览'],['review','每周复盘'],['english','英语'],['reading','阅读']]},
+  cycle:{label:'结构与周期',items:[['xindeng','新登'],['mistakes','避坑'],['agents','平衡'],['social','人性与社会'],['dunning','达克曲线'],['learningprinciples','学习的第一性原理'],['whiteboard','白布画板'],['mindmap','思维导图']]},
+  newconfig:{label:'成长',items:[['dailyflow','流程'],['calendar','周历'],['newconfig','成长总览'],['review','每周复盘'],['english','英语'],['reading','阅读']]},
   health:{label:'健康',items:[['health','总览'],['healthplan','健康计划'],['checkin','打卡'],['diet','饮食'],['fitness','健身'],['skin','皮肤'],['sleep','睡眠'],['style','穿搭']]}
 };
 function renderHubTabs(page){
