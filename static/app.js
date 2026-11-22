@@ -30,7 +30,7 @@ const WORKBOOKS = [
 ];
 function shiftDateKey(key, days) { if(!key) return ''; const d=new Date(`${key}T12:00:00`); d.setDate(d.getDate()+days); return todayKey(d); }
 function dayDiff(start,end) { if(!start||!end) return 0; return Math.round((new Date(`${end}T12:00:00`)-new Date(`${start}T12:00:00`))/86400000); }
-const PAGE_NAMES = {silicon:'硅基时代',cycle:"结构与周期",uilearning:"UI 学习",scaffold:"脚手架",prompt:'Prompt',infogap:"信息差变现",schedules:'自动化',agents:'平衡',settings:'设置',mistakes:'避坑',social:'人性与社会',dunning:'达克曲线',learningprinciples:'学习的第一性原理',home:'工作台',inbox:'今日任务',upcoming:'未来 7 天',calendar:'周历 / 日程',matrix:'任务四象限',stats:'执行统计',important:'重要事项',alltasks:'全部任务',dashboard:'资产总览',allocation:'全球资产配置',nasdaq:'纳斯达克 AI 策略',ashare:'A股 ETF 轮动',xindeng:'新登',newconfig:'成长总览',health:'健康',checkin:'打卡与统计',diet:'饮食饮水',fitness:'健身管理',skin:'皮肤护理',sleep:'睡眠与恢复',style:'发型与穿搭',english:'英语',reading:'阅读',execution:'每日执行与日志',archive:'归档',dailyflow:'流程',flowstats:'流程统计',alpharadar:'Alpha Radar'};
+const PAGE_NAMES = {silicon:'硅基时代',cycle:"结构与周期",uilearning:"UI 学习",scaffold:"脚手架",prompt:'Prompt',infogap:"信息差变现",schedules:'自动化',agents:'平衡',settings:'设置',mistakes:'避坑',social:'人性与社会',dunning:'达克曲线',learningprinciples:'学习的第一性原理',home:'工作台',inbox:'今日任务',upcoming:'未来 7 天',calendar:'周历 / 日程',matrix:'任务四象限',stats:'执行统计',important:'重要事项',alltasks:'全部任务',dashboard:'资产总览',house:'房子',allocation:'全球资产配置',nasdaq:'纳斯达克 AI 策略',ashare:'A股 ETF 轮动',xindeng:'新登',newconfig:'成长总览',health:'健康',healthplan:'健康计划',checkin:'打卡与统计',diet:'饮食饮水',fitness:'健身管理',skin:'皮肤护理',sleep:'睡眠与恢复',style:'发型与穿搭',english:'英语',reading:'阅读',execution:'每日执行与日志',archive:'归档',dailyflow:'流程',flowstats:'流程统计',alpharadar:'Alpha Radar'};
 
 async function api(path, options={}) {
   const res = await fetch(path, {credentials:'same-origin', headers:{'Content-Type':'application/json', ...(options.headers||{})}, ...options});
@@ -157,8 +157,9 @@ async function boot() {
 async function loadState() {
   const result = await api(stateUrl);
   state = result.state;
-  ensureStateDefaults();
+  const seededHealthFlow=ensureStateDefaults();
   if (!state.agentStatuses) state.agentStatuses={};
+  if(seededHealthFlow) await persist({quiet:true});
 }
 
 function ensureStateDefaults() {
@@ -186,6 +187,33 @@ function ensureStateDefaults() {
   if (!state.dailyFlows || typeof state.dailyFlows !== 'object') state.dailyFlows={weekday:[],restday:[]};
   if (!Array.isArray(state.dailyFlowRuns)) state.dailyFlowRuns=[];
   ['weekday','restday'].forEach(k=>{if(!Array.isArray(state.dailyFlows[k]))state.dailyFlows[k]=[];});
+  let seededHealthFlow=false;
+  if(state.meta.healthFlowSeedVersion!==1){
+    const routine=[
+      ['health-plan-v1-bp','测血压并记录',420,422,'健康','checkin','记录到健康 / 血压日志。'],
+      ['health-plan-v1-water-am','喝温水',422,423,'健康','diet','起床后喝约 300ml 温水。'],
+      ['health-plan-v1-face-am','洗漱、护肤与刷牙',423,436,'健康','skin','清水洗脸 → 精华（按个人耐受）→ 防晒；电动牙刷 + 牙线。'],
+      ['health-plan-v1-breakfast','早餐与养生茶',436,456,'健康','diet','早餐参考饮食清单；到工位后泡祛湿茶 / 养生茶。'],
+      ['health-plan-v1-water-day','白天补水',540,1080,'健康','diet','每小时喝一杯水，目标约 8 杯 / 天；按身体状况调整。'],
+      ['health-plan-v1-breaks','工作间歇与坐姿提醒',540,1080,'健康','checkin','每 45 分钟起身活动 2 分钟、活动腰部；避免久坐和翘二郎腿。'],
+      ['health-plan-v1-snack','水果与坚果加餐',600,615,'健康','diet','上午或下午一份水果 + 一小把坚果。'],
+      ['health-plan-v1-lunch','午餐与饭后散步',720,750,'健康','diet','少油少盐、多蔬菜和蛋白质；饭后散步 10 分钟，不立即坐下。'],
+      ['health-plan-v1-workout','运动',1080,1110,'健康','fitness','30 分钟以上；每周 4 次以上，跑步 / 力量 / 拉伸按恢复安排。'],
+      ['health-plan-v1-shower','洗澡与护肤',1110,1125,'健康','skin','全身清洁、身体保湿与面部护理；维 A 酸等产品遵循说明或医嘱。'],
+      ['health-plan-v1-shave-foot','刮胡子（如需）与泡脚',1125,1145,'健康','skin','先软化再刮；壬二酸仅按产品说明及耐受使用；热水泡脚约 15 分钟。'],
+      ['health-plan-v1-teeth-read','晚间刷牙与阅读 / 冥想',1170,1188,'健康','inbox','电动牙刷 + 牙线；远离屏幕，阅读或冥想 15 分钟。'],
+      ['health-plan-v1-lights-out','熄灯',1310,1320,'健康','sleep','目标 22:00 前熄灯；这是个人健康习惯目标。']
+    ];
+    ['weekday','restday'].forEach(kind=>{
+      const existing=new Set(state.dailyFlows[kind].map(x=>String(x.id)));
+      routine.forEach(([id,title,start,end,category,destination,note],order)=>{
+        if(existing.has(id))return;
+        state.dailyFlows[kind].push({id,title,start,end,category,destination,note,color:'#6e9c79',order:Date.now()+order});
+        seededHealthFlow=true;
+      });
+    });
+    state.meta.healthFlowSeedVersion=1;
+  }
   if (!state.healthChecks || typeof state.healthChecks !== 'object') state.healthChecks={};
   if (!state.trainingSessions) state.trainingSessions=[];
   if (!Array.isArray(state.guidedWorkoutHistory)) state.guidedWorkoutHistory=[];
@@ -200,6 +228,8 @@ function ensureStateDefaults() {
   if (!state.readingNotes) state.readingNotes=[];
   if (!state.readingSessions) state.readingSessions=[];
   if (!state.notebookEntries) state.notebookEntries=[];
+  if (!state.healthPlanChecks || typeof state.healthPlanChecks!=='object') state.healthPlanChecks={};
+  if (!state.healthPlanReviews || typeof state.healthPlanReviews!=='object') state.healthPlanReviews={};
   if (!Array.isArray(state.promptLibrary)) state.promptLibrary=[];
   if (!Array.isArray(state.dailyMustReads)) state.dailyMustReads=[];
   if (!Array.isArray(state.alphaRadarSignals)) state.alphaRadarSignals=[];
@@ -209,6 +239,7 @@ function ensureStateDefaults() {
   if (!state.screenRule) state.screenRule={windowDays:7,yellowBMin:2,includeHigherGrades:true,gradeUniverse:'A+, A, B+, B'};
   state.etfs.forEach(e=>{ if (!e.parts) e.parts={macro:0,policy:0,life:0,technical:0,activity:0,sentiment:0,ladder:0,earnings:0}; if (e.riskPenalty===undefined) e.riskPenalty=Math.max(0, Object.values(e.parts).reduce((a,b)=>a+n(b),0)-n(e.score)); });
   if (typeof ensureHealthOSState === 'function') ensureHealthOSState();
+  return seededHealthFlow;
 }
 
 let saveQueue = Promise.resolve();
@@ -312,17 +343,17 @@ function setHeader(page) {
 const HUB_OF={
   silicon:'silicon',uilearning:'uilearning',scaffold:'scaffold',prompt:'scaffold',infogap:'infogap',cycle:'cycle',xindeng:'cycle',mistakes:'cycle',social:'cycle',dunning:'cycle',learningprinciples:'cycle',mindmap:'cycle',whiteboard:'cycle',home:'newconfig',today:'newconfig',growthplan:'newconfig',review:'newconfig',
   inbox:'newconfig',schedules:'settings',settings:'settings',dailyflow:'newconfig',calendar:'newconfig',matrix:'newconfig',stats:'newconfig',important:'newconfig',alltasks:'newconfig',flowstats:'newconfig',
-  dashboard:'dashboard',allocation:'dashboard',nasdaq:'dashboard',ashare:'dashboard',execution:'dashboard',alpharadar:'dashboard',
-  health:'health',checkin:'health',diet:'health',fitness:'health',skin:'health',sleep:'health',style:'health',
+  dashboard:'dashboard',house:'dashboard',allocation:'dashboard',nasdaq:'dashboard',ashare:'dashboard',execution:'dashboard',alpharadar:'dashboard',
+  health:'health',healthplan:'health',checkin:'health',diet:'health',fitness:'health',skin:'health',sleep:'health',style:'health',
   agents:'newconfig',newconfig:'newconfig',english:'newconfig',reading:'newconfig',archive:'settings'
 };
 const HUB_TABS={
   settings:{label:'设置',items:[['schedules','自动化'],['archive','归档']]},
   scaffold:{label:'脚手架',items:[['scaffold','项目脚手架'],['prompt','Prompt']]},
-  dashboard:{label:'资产',items:[['http://39.106.118.186/','市场引擎 ↗'],['dashboard','总览'],['allocation','配置'],['nasdaq','纳指'],['ashare','A股'],['execution','执行'],['alpharadar','实验']]},
+  dashboard:{label:'资产',items:[['http://39.106.118.186/','市场引擎 ↗'],['dashboard','总览'],['house','房子'],['allocation','配置'],['nasdaq','纳指'],['ashare','A股'],['execution','执行'],['alpharadar','实验']]},
   cycle:{label:'结构与周期',items:[['xindeng','新登'],['mistakes','避坑'],['social','人性与社会'],['dunning','达克曲线'],['learningprinciples','学习的第一性原理'],['whiteboard','白布画板'],['mindmap','思维导图']]},
-  newconfig:{label:'成长',items:[['dailyflow','流程'],['calendar','周历'],['growthplan','90天计划'],['agents','平衡'],['newconfig','成长总览'],['review','每周复盘'],['english','英语'],['reading','阅读']]},
-  health:{label:'健康',items:[['health','总览'],['checkin','打卡'],['diet','饮食'],['fitness','健身'],['skin','皮肤'],['sleep','睡眠'],['style','穿搭']]}
+  newconfig:{label:'成长',items:[['dailyflow','流程'],['calendar','周历'],['agents','平衡'],['newconfig','成长总览'],['review','每周复盘'],['english','英语'],['reading','阅读']]},
+  health:{label:'健康',items:[['health','总览'],['healthplan','健康计划'],['checkin','打卡'],['diet','饮食'],['fitness','健身'],['skin','皮肤'],['sleep','睡眠'],['style','穿搭']]}
 };
 function renderHubTabs(page){
   const hub=HUB_OF[page];
@@ -410,6 +441,42 @@ function renderSiliconEra(){
       <div class="button-row" style="display:flex;flex-wrap:wrap;gap:10px;margin:0"><a class="btn btn-primary" href="${room}" target="_blank" rel="noopener noreferrer">打开 Excalidraw 共享画布 ↗</a><a class="btn btn-outline" href="https://github.com/trending" target="_blank" rel="noopener noreferrer">浏览 GitHub Trending ↗</a></div>
     </div></section>`;
 }
+function renderHousePage(){
+  const watch=['工作与收入改善：工作机会增加、工资出现持续上升','人口与供给：生育率回升、老旧小区拆除与新房库存消化','外部环境：与美欧关系改善、外贸环境更顺畅','宏观周期：各行业产品价格上涨、通胀预期变化','融资环境：房贷利率接近或低于个人设定的 2% 观察线'];
+  const viewings=['多次实地看房，并在不同时段复看周边','核对采光、隔音、燃气热水、供暖、物业与房屋质量','测量到工作、学校、医院、交通与日常商业的实际距离','记录邻里噪音、公共区域整洁度、社区密度和夜间环境','对现房、二手房、四代住宅分别比较，不只看效果图'];
+  return `${sectionHead('HOME · DECISION NOTEBOOK','房子','把买或租、财务承受力、实地看房清单和理想居住方式放在同一处比较。市场条件是个人观察假设，不是价格预测。')}
+    <div class="grid grid-2">
+      <section class="card">${cardHead('先明确买房目的','居住需求与投资判断分开记录')}<div class="card-body"><ul class="health-guidance"><li><b>独立与主体性：</b>希望有稳定、可以落地生活和专注思考的空间。</li><li><b>自住：</b>评估是否会长期使用，空间是否适合日常生活；同时比较租金、维护和搬迁成本。</li><li><b>投资：</b>写清价值来源、持有周期、交易成本与最坏情境，逐项列出优缺点。</li><li><b>租房：</b>保留地点选择与机动性，同时把搬家麻烦、租金变化和房价变化纳入比较。</li></ul></div></section>
+      <section class="card">${cardHead('财务安全边界','按个人现金流做压力测试')}<div class="card-body"><ul class="health-guidance"><li>核算首付、月供、利率变化、税费、维修和物业费，保留家庭、个人与突发事件的冗余。</li><li>记录收入中断时可承受月数，以及何时需要调整计划或出售；不要把“未来上涨”当作还款来源。</li><li>个人笔记中的案例：总价 400–500 万、流动资金约 300 万时，需重新评估现金储备是否足够。</li><li>购房预算、贷款能力和应急金需要按真实账目逐项验证；以上数字仅为个人草稿。</li></ul></div></section>
+    </div>
+    <section class="card" style="margin-top:14px">${cardHead('市场时机观察','以下为个人跟踪信号，应结合实际收入、政策、房源和融资成本复核')}<div class="card-body"><div class="house-signal-list">${watch.map((x,i)=>`<article><span>${String(i+1).padStart(2,'0')}</span><p>${esc(x)}</p></article>`).join('')}</div><p class="micro-copy">笔记中的周期假设：回看 2017 年初与 2016 年的差异，并考虑约 −30% 的压力情境。该情境是个人假设，不代表市场预测。</p></div></section>
+    <div class="grid grid-2" style="margin-top:14px"><section class="card">${cardHead('看房与筛选清单','把“感觉”变成可复查的排序记录')}<div class="card-body"><ul class="health-guidance">${viewings.map(x=>`<li>${esc(x)}</li>`).join('')}<li>评估首付与总价，保留“看 3–4 倍房子”的原始想法；按位置、总价和实际体验排序。</li><li>考察学校、医院、交通、就业、开发商、物业、交付状态和周边人群结构；这些是考察维度，不构成升值保证。</li><li>租房经验：留意热水、燃气、供暖、商业街和主干道噪音、房屋维护与公共区域状况；避免只凭楼盘名称判断。</li><li>门牌号偏好待明确：504、4、14（原笔记未说明这些号码的取舍方向）。</li></ul></div></section>
+      <section class="card">${cardHead('理想中的房子','围绕生活方式列需求，再决定取舍')}<div class="card-body"><ul class="health-guidance"><li>北京为当前考虑地点；结合工作、通勤、生活方式和日常活动范围判断具体区域。</li><li>三室、大客厅、落地窗；主卧和客厅有自然采光，并为孩子留出房间。</li><li>有独立书房：安静、整洁，适合学习、交易、阅读和独处思考。</li><li>厨房有燃气、可做开放式布局并设置透明隔断；预留大冰箱和日常储物空间。</li><li>有舒适洗澡空间；地板简洁耐看，方便扫地机器人处理头发。</li><li>位置不要离生活配套过远；同时检查道路、商业和邻里噪音。</li></ul></div></section></div>
+    <section class="card" style="margin-top:14px">${cardHead('房型与参考资料','把链接当作灵感来源，现场与合同信息仍需独立核验')}<div class="card-body"><p><b>比较方向：</b>现房、二手房、四代住宅。</p><p><b>空间设计：</b>可用 AI 辅助整理装修方案，并结合房屋尺寸、预算、施工与维护条件核对。</p><div class="button-row"><a class="btn btn-outline" href="https://space.bilibili.com/33112253" target="_blank" rel="noopener noreferrer">京楼猫怼怼 ↗</a><a class="btn btn-outline" href="https://www.bilibili.com/video/BV1Nc411y7tr/?vd_source=1138e0bd4d669ff2571d56c9377aa33d" target="_blank" rel="noopener noreferrer">装修设计参考 ↗</a></div><p class="micro-copy">本页是个人购房决策备忘，不代表财务、法律或房地产专业意见。</p></div></section>`;
+}
+function healthPlanItem(period,key,label,detail=''){
+  const checks=state.healthPlanChecks||{},checked=!!checks[period]?.[key];
+  return `<button type="button" class="health-plan-check ${checked?'is-done':''}" data-action="health-plan-toggle" data-period="${esc(period)}" data-check-key="${esc(key)}" aria-pressed="${checked}"><span>${checked?'✓':''}</span><div><b>${esc(label)}</b>${detail?`<small>${esc(detail)}</small>`:''}</div></button>`;
+}
+function renderHealthPlan(){
+  const monday=groupedWeekStarts(1)[0]||todayKey(),month=todayKey().slice(0,7),year=todayKey().slice(0,4),review=(state.healthPlanReviews||{})[monday]||{};
+  const week=[['周一','力量训练','面膜护理','—'],['周二','有氧运动','—','—'],['周三','力量训练','面膜护理','—'],['周四','有氧运动','—','—'],['周五','力量训练','面膜护理','—'],['周六','户外活动 / 球类','深度清洁','测量体重'],['周日','拉伸 / 瑜伽 / 休息','泡澡 / 按摩','每周健康复盘（15min）']];
+  const monthly=[['blood-pressure','血压深度分析','对比上月数据，记录趋势与待核实问题。'],['body-measure','身体测量','记录体重、腰围、体脂率。'],['floss-check','牙线检查','回顾是否每天使用牙线。'],['haircut','理发','保持干净清爽；记录日期与需求。'],['follow-up','复查 / 配药','按医嘱安排，不自行调整处方。']];
+  const annual=[['exam','全面体检','按医生建议核对血压、血脂、血糖、肝肾功能、尿酸等项目。'],['dental','洗牙','安排口腔清洁与检查。'],['vision','视力检查','按需要检查和更换眼镜。'],['year-review','健康年度总结','对比年度记录，写下下一年目标。']];
+  return `${sectionHead('HEALTH PLAN · WEEK / MONTH / YEAR','健康计划','按周安排活动，完成月度与年度复核；自检记录会保存在当前账户。')}
+    <section class="card">${cardHead('每周健康节奏','运动与护理安排，可按个人状态调整')}<div class="table-wrap"><table class="data-table health-plan-table"><thead><tr><th>星期</th><th>运动</th><th>护理</th><th>其他</th></tr></thead><tbody>${week.map(([day,exercise,care,other])=>`<tr><th>${day}</th><td>${esc(exercise)}</td><td>${esc(care)}</td><td>${esc(other)}</td></tr>`).join('')}</tbody></table></div></section>
+    <section class="card" style="margin-top:14px">${cardHead('周日健康自检 · 15 分钟','记录本周情况；每周数据按周一日期保存')}<div class="card-body"><div class="health-plan-review-grid">
+      <label>本周平均血压<input data-health-plan-review="bloodPressure" data-week="${monday}" value="${esc(review.bloodPressure||'')}" placeholder="____ / ____"></label>
+      <label>体重（kg）<input data-health-plan-review="weight" data-week="${monday}" value="${esc(review.weight||'')}" placeholder="____ kg"></label>
+      <label>平均睡眠时长（h）<input data-health-plan-review="sleepHours" data-week="${monday}" value="${esc(review.sleepHours||'')}" placeholder="____ h"></label>
+      <label>运动完成（次 / 4）<input data-health-plan-review="workouts" data-week="${monday}" value="${esc(review.workouts||'')}" placeholder="__/4"></label>
+      <label>日均饮水（杯）<input data-health-plan-review="waterCups" data-week="${monday}" value="${esc(review.waterCups||'')}" placeholder="__ 杯"></label>
+      <label>情绪状态<select data-health-plan-review="mood" data-week="${monday}"><option value="">选择状态</option>${['😊','😐','😞'].map(x=>`<option ${review.mood===x?'selected':''}>${x}</option>`).join('')}</select></label>
+      <label class="wide-field">本周需要关注的健康问题<textarea rows="3" data-health-plan-review="issues" data-week="${monday}" placeholder="记录问题、变化和下周行动">${esc(review.issues||'')}</textarea></label>
+    </div><p class="micro-copy">字段失焦后自动保存到当前账户。</p></div></section>
+    <div class="grid grid-2" style="margin-top:14px"><section class="card">${cardHead(`每月执行 · ${month}`,'勾选状态按月份保存')}<div class="card-body health-plan-checklist">${monthly.map(([key,label,detail])=>healthPlanItem(`monthly:${month}`,key,label,detail)).join('')}</div></section><section class="card">${cardHead(`年度执行 · ${year}`,'勾选状态按年份保存')}<div class="card-body health-plan-checklist">${annual.map(([key,label,detail])=>healthPlanItem(`annual:${year}`,key,label,detail)).join('')}</div></section></div>
+    <div class="grid grid-2" style="margin-top:14px"><section class="card">${cardHead('腰部与脊椎','把久坐提醒和环境调整纳入日常计划')}<div class="card-body health-plan-checklist"><div class="health-plan-note">每 45 分钟站起来活动 2 分钟；坐姿让腰部靠椅背、屏幕与眼睛平齐；留意床垫支撑是否适合自己。</div><div class="health-plan-note">每周 2 次核心力量训练，循序渐进；出现疼痛或麻木等异常时暂停并寻求专业评估。</div><div class="health-plan-note">日常避免长时间维持同一姿势，不翘二郎腿。</div></div></section><section class="card">${cardHead('前列腺与泌尿健康','记录习惯提醒；症状和治疗请咨询医生')}<div class="card-body health-plan-checklist"><div class="health-plan-note">减少久坐，每小时起身活动；按口渴和个人健康状况补水；避免憋尿。</div><div class="health-plan-note">如出现持续不适、排尿变化或其他症状，记录情况并就医，不以本清单替代诊断。</div></div></section></div>`;
+}
 function renderPage(page, {autoRefresh=false, transition=true, animate=true}={}) {  if (!state) return;
   if(window.uiLearningDirty){toast('UI 学习仍有未保存内容，请返回学习页重试或备份后再离开',true);return;}
   if(window.boardEditorDirty){toast('画板正在保存或保存失败，请先在画板内保存或导出备份',true);return;}
@@ -423,7 +490,7 @@ function renderPage(page, {autoRefresh=false, transition=true, animate=true}={})
   const root=$('#viewRoot');
   root.dataset.page=page;
   root.dataset.hub=HUB_OF[page]||page;
-  const map={silicon:renderSiliconEra,uilearning:renderUILearning,scaffold:renderScaffold,prompt:renderPromptLibrary,infogap:renderInfoGap,cycle:renderXinDeng,mindmap:renderMindmap,whiteboard:renderWhiteboard,xindeng:renderXinDeng,growthplan:renderGrowthPlan,review:renderGrowthReview,today:()=>renderTaskWorkspace('home'),schedules:renderSchedules,agents:renderAgents,mistakes:renderMistakes,social:renderSocialInsight,dunning:renderDunningCurve,learningprinciples:renderLearningPrinciples,home:renderHome,inbox:renderInbox,upcoming:renderUpcoming,calendar:renderCalendar,matrix:renderMatrix,stats:renderFocusStats,important:renderImportant,alltasks:renderAllFocusTasks,dashboard:renderDashboard,allocation:renderAllocation,nasdaq:renderNasdaq,ashare:renderAshare,newconfig:()=> (typeof renderNewConfigV2==='function'?renderNewConfigV2():renderNewConfig()),health:renderHealth,checkin:renderHealthCheckin,diet:()=>renderHealthSection('diet'),fitness:()=>renderHealthSection('fitness'),skin:()=>renderHealthSection('skin'),sleep:()=>renderHealthSection('sleep'),style:()=>renderHealthSection('style'),english:()=> (typeof renderEnglishV2==='function'?renderEnglishV2():renderEnglish()),reading:()=> (typeof renderReadingV2==='function'?renderReadingV2():renderReading()),execution:renderExecution,archive:renderArchive,dailyflow:renderDailyFlow,flowstats:renderFlowStats,alpharadar:renderAlphaRadar};
+  const map={silicon:renderSiliconEra,uilearning:renderUILearning,scaffold:renderScaffold,prompt:renderPromptLibrary,infogap:renderInfoGap,cycle:renderXinDeng,mindmap:renderMindmap,whiteboard:renderWhiteboard,xindeng:renderXinDeng,growthplan:renderGrowthPlan,review:renderGrowthReview,today:()=>renderTaskWorkspace('home'),schedules:renderSchedules,agents:renderAgents,mistakes:renderMistakes,social:renderSocialInsight,dunning:renderDunningCurve,learningprinciples:renderLearningPrinciples,house:renderHousePage,home:renderHome,inbox:renderInbox,upcoming:renderUpcoming,calendar:renderCalendar,matrix:renderMatrix,stats:renderFocusStats,important:renderImportant,alltasks:renderAllFocusTasks,dashboard:renderDashboard,allocation:renderAllocation,nasdaq:renderNasdaq,ashare:renderAshare,newconfig:()=> (typeof renderNewConfigV2==='function'?renderNewConfigV2():renderNewConfig()),health:renderHealth,healthplan:renderHealthPlan,checkin:renderHealthCheckin,diet:()=>renderHealthSection('diet'),fitness:()=>renderHealthSection('fitness'),skin:()=>renderHealthSection('skin'),sleep:()=>renderHealthSection('sleep'),style:()=>renderHealthSection('style'),english:()=> (typeof renderEnglishV2==='function'?renderEnglishV2():renderEnglish()),reading:()=> (typeof renderReadingV2==='function'?renderReadingV2():renderReading()),execution:renderExecution,archive:renderArchive,dailyflow:renderDailyFlow,flowstats:renderFlowStats,alpharadar:renderAlphaRadar};
   const investingPages=['dashboard','allocation','nasdaq','ashare','execution'];
   const body=(map[page]||renderHome)();
   const commit = () => {
@@ -1649,7 +1716,7 @@ function renderHealthSection(kind){
   if(kind==='diet') return renderDietOS();
   if(kind==='skin') return renderSkinOS();
   if(kind==='sleep') return renderSleepOS();
-  return `${sectionHead('HEALTH OS · MODULE','发型与穿搭','记录发型参考、头皮状态、衣橱搭配与场景穿搭。',`<button class="btn btn-outline" data-action="capability-page" data-page="health">← 健康总览</button>`)}<div class="health-module-card"><section class="card">${cardHead('发型与穿搭','记录发型参考图、理发日期、长度、头皮状态与沟通要点。')}<ul class="health-guidance"><li>记录穿搭组合、场景、单品、颜色和舒适度，逐步形成个人模板。</li><li>新产品或新风格一次只调整少数变量，便于复盘效果。</li></ul><button class="btn btn-primary" data-action="open-health-log-modal">＋ 新增形象记录</button></section></div>`;
+  return `${sectionHead('HEALTH OS · MODULE','发型与穿搭','记录发型参考、头皮状态、衣橱搭配与场景穿搭。',`<button class="btn btn-outline" data-action="capability-page" data-page="health">← 健康总览</button>`)}<div class="health-module-card"><section class="card">${cardHead('发型与穿搭','记录发型参考图、理发日期、长度、头皮状态与沟通要点。')}<ul class="health-guidance"><li>保持短发、干净清爽；每月理发时记录长度、参考图和沟通要点。</li><li>选择适合自己的洗发水；按头皮状态调整频率，个人原计划为隔天洗一次，避免过度清洁。</li><li>户外活动时留意头皮防晒，可用帽子或适合头皮的防晒方式。</li><li>记录穿搭组合、场景、单品、颜色和舒适度，逐步形成个人模板。</li><li>新产品或新风格一次只调整少数变量，便于复盘效果。</li></ul><p class="micro-copy">如有持续瘙痒、红肿、脱发或其他头皮问题，咨询皮肤科专业人员。</p><button class="btn btn-primary" data-action="open-health-log-modal">＋ 新增形象记录</button></section></div>`;
 }
 
 function renderHealth(){
@@ -2446,6 +2513,7 @@ function bindDelegatedEvents() {
     if(a==='voice-task-open'){openVoiceTaskModal();startVoiceTaskCapture($('#voiceTaskStart'));return;}
     if(a==='voice-task-close'){if(voiceTaskRecognition){voiceTaskRecognition.cancelled=true;voiceTaskRecognition.abort();}voiceTaskRecognition=null;$('#voiceTaskModalMount')?.remove();return;}
     if(a==='voice-task-start'){startVoiceTaskCapture(action);return;}
+    if(a==='health-plan-toggle'){const period=action.dataset.period,key=action.dataset.checkKey;if(period&&key){state.healthPlanChecks=state.healthPlanChecks||{};state.healthPlanChecks[period]=state.healthPlanChecks[period]||{};state.healthPlanChecks[period][key]=!state.healthPlanChecks[period][key];saveAndRender('健康计划已保存');}return;}
     if(a==='edit-prompt-entry'){const item=state.promptLibrary[n(action.dataset.index,-1)];if(item){ui.promptEditId=item.id;renderPage('prompt');setTimeout(()=>{const form=$('#promptLibraryForm');form?.scrollIntoView({behavior:'smooth',block:'center'});form?.elements.title?.focus({preventScroll:true});},80);}return;}
     if(a==='cancel-prompt-edit'){ui.promptEditId=null;renderPage('prompt');return;}
     if(a==='delete-prompt-entry'){const i=n(action.dataset.index,-1);if(i>=0&&confirm('删除这条 Prompt？')){if(String(state.promptLibrary[i]?.id)===String(ui.promptEditId))ui.promptEditId=null;state.promptLibrary.splice(i,1);saveAndRender('Prompt 已删除');}return;}
@@ -2578,6 +2646,7 @@ function bindDelegatedEvents() {
   });
   document.addEventListener('change',async e=>{
     const el=e.target;
+    if(el?.hasAttribute('data-health-plan-review')){const week=el.dataset.week,field=el.dataset.healthPlanReview;if(week&&field){state.healthPlanReviews=state.healthPlanReviews||{};state.healthPlanReviews[week]=state.healthPlanReviews[week]||{};state.healthPlanReviews[week][field]=el.value;persist({quiet:true}).then(ok=>{if(ok)toast('本周健康自检已保存');});}return;}
     if(el.id==='pyramidVersion'){state.meta.pyramidVersion=el.value;saveAndRender('回撤梯队版本已切换');return;}
     if(el.id==='etfSearch'){ui.etfSearch=el.value;renderPage('ashare');return;}
     if(el.id==='etfGroup'){ui.etfGroup=el.value;renderPage('ashare');return;}

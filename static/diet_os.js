@@ -287,6 +287,17 @@ function hosDietSummaryCard() {
 }
 
 /* ---- 页面 ------------------------------------------------------------- */
+function hosDietPersonalFoodReference(){
+  const rows=[
+    ['🥬 蔬菜','芹菜、番茄、苦瓜、金银花、菊花','降压、降火、清热（个人备注）'],
+    ['🍎 水果','番茄、枸杞、红枣','维生素、补血（个人备注）'],
+    ['🥩 蛋白质','鸡肝、鱼肉、鸡胸肉、鸡蛋、豆制品','优质蛋白'],
+    ['🥜 坚果','核桃、杏仁、腰果','不饱和脂肪酸；每天一小把'],
+    ['☕ 茶饮','祛湿茶、金银花茶、枸杞水','祛湿、降火、养肝（个人备注）'],
+    ['💧 饮水','温开水（每天 2L+）','饮水习惯参考']
+  ];
+  return `<section class="card" style="margin-top:14px"><div class="card-head"><div><h3>个人食材参考</h3><p>按分类查看常用食材与个人备注；食物不替代降压或其他治疗。</p></div></div><div class="table-wrap"><table class="data-table"><thead><tr><th>分类</th><th>食材</th><th>作用 / 备注</th></tr></thead><tbody>${rows.map(([cat,food,note])=>`<tr><th>${esc(cat)}</th><td>${esc(food)}</td><td>${esc(note)}</td></tr>`).join('')}</tbody></table></div><p class="micro-copy" style="padding:0 14px 14px">金银花、菊花、枸杞及草本茶可能与个人疾病或药物存在相互作用；如有慢性病、过敏或正在用药，请按医生/药师建议选择。</p></section>`;
+}
 function renderDietOS() {
   return `${sectionHead('NUTRITION OS · FOOD & WATER', '饮食饮水记录', '用常见中式食物参考库记录每餐份量，自动换算热量、蛋白质、碳水、脂肪、纤维、糖和钠；按身体数据设定目标，再用水和餐次记录观察执行。数值为参考，不是医学处方。', `<button class="btn btn-outline" data-action="capability-page" data-page="health">← 健康总览</button><button class="btn btn-primary" data-action="hos-diet-meal" data-meal="lunch">＋ 记录一餐</button>`)}
   <div class="hos-shell" data-tab-shell data-tab-key="diet" data-default-tab="today">
@@ -295,11 +306,13 @@ function renderDietOS() {
       <button class="fit-tab" data-tab="foods" role="tab">食物库</button>
       <button class="fit-tab" data-tab="targets" role="tab">目标</button>
       <button class="fit-tab" data-tab="review" role="tab">复盘</button>
+      <button class="fit-tab" data-tab="reference" role="tab">食材参考</button>
     </div><div class="hos-bar-actions"><span class="hos-badge">${esc(hosDietState().profile.goal)} · ${esc(hosDietState().profile.dietStyle)}</span><button class="btn btn-small btn-outline" data-action="hos-diet-water">＋ 饮水</button></div></div>
     <div class="fit-panel active" data-tab-panel="today">${hosDietTodayPanel()}</div>
     <div class="fit-panel" data-tab-panel="foods">${hosDietFoodsPanel()}</div>
     <div class="fit-panel" data-tab-panel="targets">${hosDietTargetsPanel()}</div>
     <div class="fit-panel" data-tab-panel="review">${hosDietReviewPanel()}</div>
+    <div class="fit-panel" data-tab-panel="reference">${hosDietPersonalFoodReference()}</div>
   </div>`;
 }
 function hosDietDateNav() {

@@ -267,11 +267,13 @@ function renderSkinOS() {
       <button class="fit-tab" data-tab="routine" role="tab">流程</button>
       <button class="fit-tab" data-tab="products" role="tab">产品</button>
       <button class="fit-tab" data-tab="review" role="tab">复盘</button>
+      <button class="fit-tab" data-tab="personal" role="tab">个人清单</button>
     </div><div class="hos-bar-actions"><span class="hos-badge">${esc(s.profile.type)} · 敏感度${esc(s.profile.sensitivity)}</span><button class="btn btn-small btn-outline" data-action="hos-skin-profile">调整流程</button></div></div>
     <div class="fit-panel active" data-tab-panel="today">${hosSkinTodayPanel()}</div>
     <div class="fit-panel" data-tab-panel="routine">${hosSkinRoutinePanel()}</div>
     <div class="fit-panel" data-tab-panel="products">${hosSkinProductsPanel()}</div>
     <div class="fit-panel" data-tab-panel="review">${hosSkinReviewPanel()}</div>
+    <div class="fit-panel" data-tab-panel="personal"><div class="grid grid-2" style="margin-top:14px"><section class="card"><div class="card-head"><div><h3>面部护理</h3><p>按早晚与每周频率查看个人步骤。</p></div></div><div class="card-body"><h4>早间</h4><ul class="health-guidance"><li>□ 清水洗脸</li><li>□ 精华缩毛孔</li><li>□ 防晒（重点步骤）</li></ul><h4>晚间</h4><ul class="health-guidance"><li>□ 洗面奶清洁</li><li>□ 面膜（每周 3 次）</li><li>□ 精华 / 护肤</li><li>□ 眼霜</li></ul><h4>注意事项</h4><ul class="health-guidance"><li>□ 尽量不摸脸</li><li>□ 每周更换枕套</li><li>□ 每天按需防晒</li></ul></div></section><section class="card"><div class="card-head"><div><h3>鸡皮与身体皮肤管理</h3><p>记录产品与使用耐受，避免一次叠加过多活性成分。</p></div></div><div class="card-body"><ul class="health-guidance"><li>□ 洗澡后按医嘱/产品说明使用维 A 酸乳膏（迪维）于目标部位</li><li>□ 水杨酸 + 烟酰胺平衡液：按产品说明使用</li><li>□ 洗澡后及时保湿，观察皮肤反应</li><li>□ 暴露部位按需防晒</li></ul><p class="micro-copy">如出现明显刺激、红肿或持续不适，暂停相关产品并咨询皮肤科医生；维 A 酸不适用于所有人群。</p></div></section></div></div>
   </div>`;
 }
 function hosSkinStepRow(step) {
