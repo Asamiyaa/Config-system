@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="/static/theme.css?v=20261107-flow6" />
   <link rel="stylesheet" href="/static/taste.css?v=20261107-flow6" />
   <link rel="stylesheet" href="/static/xindeng.css?v=20261107f" />
-  <link rel="stylesheet" href="/static/design-system.css?v=20261121-learning-principles" />
+  <link rel="stylesheet" href="/static/design-system.css?v=20261122-remember-cycle" />
   <link rel="stylesheet" href="/static/motion.css" />
 </head>
 <body data-theme="dark">
@@ -50,9 +50,11 @@
     <div class="auth-panel">
       <div class="auth-panel-top"><span class="live-dot"></span><span>PRIVATE WORKSPACE</span><span class="auth-divider"></span><span>本地账户</span></div>
       <div class="auth-heading"><div class="eyebrow" id="authEyebrow">WELCOME BACK</div><h2 id="authTitle">登录新登</h2><p id="authSubtitle">成长、记录与订阅，随账户持续保存。</p></div>
-      <form id="authForm" class="auth-form">
-        <label>用户名<input id="authUsername" autocomplete="username" minlength="3" required placeholder="例如：investor01" value="demo" /></label>
-        <label>密码<div class="password-wrap"><input id="authPassword" type="password" autocomplete="current-password" required placeholder="至少 10 位" value="Demo1234!" /><button class="ghost-icon" type="button" data-action="toggle-password" aria-label="显示密码">◉</button></div></label>
+      <form id="authForm" class="auth-form" autocomplete="on">
+        <label>用户名<input id="authUsername" name="username" autocomplete="username" minlength="3" required placeholder="例如：investor01" value="demo" /></label>
+        <label>密码<div class="password-wrap"><input id="authPassword" name="password" type="password" autocomplete="current-password" required placeholder="至少 10 位" value="Demo1234!" /><button class="ghost-icon" type="button" data-action="toggle-password" aria-label="显示密码">◉</button></div></label>
+        <label class="auth-remember"><input id="rememberLogin" type="checkbox" /><span>记住账号密码</span></label>
+        <p class="auth-remember-note">账号偏好保存在本机；密码交由浏览器密码管理器保存，不写入新登数据。</p>
         <div class="auth-message" id="authMessage" role="status" aria-live="polite"></div>
         <button class="btn btn-primary btn-full" id="authSubmit" type="submit">开启我的下一程 <span>↗</span></button>
       </form>
@@ -114,7 +116,7 @@
   <script src="/static/newconfig_os.js?v=20261107-flow6"></script>
   <script src="/static/english_os.js?v=20261107-flow6"></script>
   <script src="/static/reading_os.js?v=20261107-flow6"></script>
-  <script src="/static/app.js?v=20261121-learning-principles"></script>
+  <script src="/static/app.js?v=20261122-remember-cycle"></script>
   <script src="/static/growth.js?v=20261107-flow6"></script>
   <script src="/static/ui.js?v=20261107-flow6" defer></script>
   <script src="/static/taste.js?v=20261121-learning-principles" defer></script>

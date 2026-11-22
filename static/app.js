@@ -11,7 +11,7 @@ let state = null;
 const savedTheme = (()=>{try{return localStorage.getItem('wealth-os-theme-v3')==='dark'?'dark':'light'}catch(_){return 'light'}})();
 document.documentElement.dataset.theme=savedTheme;document.body.dataset.theme=savedTheme;
 const syncThemeColor=()=>{const m=document.querySelector('meta[name="theme-color"]');if(m)m.content=document.body.dataset.theme==='dark'?'#14211f':'#f4f2eb';};syncThemeColor();
-let currentPage = 'dailyflow';
+let currentPage = 'xindeng';
 let authMode = 'login';
 let saveTimer = null;
 let marketBusy = false;
@@ -60,6 +60,33 @@ function setAuthMessage(msg, error=true) {
   el.style.color = error ? 'var(--bad)' : 'var(--good)';
 }
 
+const REMEMBER_LOGIN_KEY='wealth-os-remember-login';
+const REMEMBER_USERNAME_KEY='wealth-os-remember-username';
+function syncRememberPreference(){
+  const enabled=$('#rememberLogin')?.checked;
+  try{
+    if(enabled){localStorage.setItem(REMEMBER_LOGIN_KEY,'1');const username=$('#authUsername')?.value.trim();if(username)localStorage.setItem(REMEMBER_USERNAME_KEY,username);}
+    else{localStorage.removeItem(REMEMBER_LOGIN_KEY);localStorage.removeItem(REMEMBER_USERNAME_KEY);}
+  }catch(_){}
+  if(!enabled){const silent=navigator.credentials?.preventSilentAccess?.();silent?.catch?.(()=>{});}
+}
+function saveBrowserCredential(username,password){
+  if(!$('#rememberLogin')?.checked)return;
+  try{localStorage.setItem(REMEMBER_LOGIN_KEY,'1');localStorage.setItem(REMEMBER_USERNAME_KEY,username);}catch(_){}
+  if(window.PasswordCredential&&navigator.credentials?.store){
+    try{const credential=new PasswordCredential({id:username,password,name:username});navigator.credentials.store(credential).catch(()=>{});}catch(_){}
+  }
+}
+async function restoreBrowserCredential(){
+  let enabled=false,username='';try{enabled=localStorage.getItem(REMEMBER_LOGIN_KEY)==='1';username=localStorage.getItem(REMEMBER_USERNAME_KEY)||'';}catch(_){}
+  const checkbox=$('#rememberLogin');if(checkbox)checkbox.checked=enabled;
+  if(enabled&&username){$('#authUsername').value=username;$('#authPassword').value='';}
+  if(!enabled||!navigator.credentials?.get||!window.PasswordCredential)return;
+  try{const credential=await navigator.credentials.get({password:true,mediation:'optional'});if(credential?.password&&(!username||credential.id===username)){$('#authUsername').value=credential.id||username;$('#authPassword').value=credential.password;}}catch(_){}
+}
+$('#rememberLogin')?.addEventListener('change',syncRememberPreference);
+$('#authUsername')?.addEventListener('input',()=>{if($('#rememberLogin')?.checked)syncRememberPreference();});
+
 function showAuth() {
   undoEntries.length=0;$('#undoNotice')?.remove();
   $('#authScreen').classList.remove('hidden');
@@ -98,12 +125,14 @@ $('#authForm').addEventListener('submit', async (e)=>{
   const password = $('#authPassword').value;
   try {
     const result = await api(authMode === 'register' ? '/api/register' : '/api/login', {method:'POST', body:JSON.stringify({username,password})});
+    saveBrowserCredential(username,password);
     await loadState();
     showApp(result.username || username);
   } catch(err) { setAuthMessage(err.message); }
 });
 
 async function boot() {
+  await restoreBrowserCredential();
   try {
     const cfg = await api('/api/config');
     if (!cfg.registrationEnabled) {
