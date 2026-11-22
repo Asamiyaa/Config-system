@@ -1,7 +1,7 @@
 /* ============================================================================
    NewConfig OS · 新登：从资产标签变成真实选择权
    将原来的长页面拆成横向 sheet：
-   总览 / 现金流 / 90天 / 设施 / 订阅 / 资产 / 周执行 / 内容IP
+   总览 / 现金流 / 90天 / 设施 / 订阅 / 资产 / 内容IP
    行内编辑全部改为弹层；每条记录都有编辑/删除；总览只保留判断与下一步。
    ========================================================================== */
 
@@ -12,7 +12,6 @@ const NCFG_TABS = [
   { key: 'infra', label: '设施' },
   { key: 'subscriptions', label: '订阅' },
   { key: 'assets', label: '资产' },
-  { key: 'weekly', label: '周执行' },
   { key: 'content', label: '内容IP' }
 ];
 const NCFG_TASK_STATUS = ['未开始', '进行中', '已完成', '阻塞', '暂缓'];
@@ -106,7 +105,6 @@ function renderNewConfigV2() {
     <div class="fit-panel" data-tab-panel="infra">${ncfgInfraPanel()}</div>
     <div class="fit-panel" data-tab-panel="subscriptions">${ncfgSubsPanel()}</div>
     <div class="fit-panel" data-tab-panel="assets">${ncfgAssetsPanel()}</div>
-    <div class="fit-panel" data-tab-panel="weekly">${ncfgWeeklyPanel()}</div>
     <div class="fit-panel" data-tab-panel="content">${ncfgContentPanel()}</div>
   </div>`;
 }
