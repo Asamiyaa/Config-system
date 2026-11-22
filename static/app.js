@@ -15,7 +15,7 @@ let currentPage = 'xindeng';
 let authMode = 'login';
 let saveTimer = null;
 let marketBusy = false;
-let ui = { allocationMode:'global', expandedETF:null, showSourceDetails:false, cycleTab:'research', focusQuery:'', homeRange:'7', calendarWeekOffset:0, showCalendarComposer:false, calendarSelectedDate:'', workbookSheetIndex:0, workbookData:null, calendarDrag:null, calendarResize:null, bodyZone:'', bodyMuscle:'', bodyMode:'muscle', bodySearch:'', bodyView:{x:0,y:0,rx:0,ry:0,scale:1}, bodyDragMoved:false, checkinDate:'', guidedSummaryId:null, mustReadOpenId:null, flowWorkspaceView:'today' };
+let ui = { allocationMode:'global', expandedETF:null, showSourceDetails:false, cycleTab:'research', focusQuery:'', homeRange:'7', calendarWeekOffset:0, showCalendarComposer:false, calendarSelectedDate:'', workbookSheetIndex:0, workbookData:null, calendarDrag:null, calendarResize:null, bodyZone:'', bodyMuscle:'', bodyMode:'muscle', bodySearch:'', bodyView:{x:0,y:0,rx:0,ry:0,scale:1}, bodyDragMoved:false, checkinDate:'', guidedSummaryId:null, mustReadOpenId:null, flowWorkspaceView:'templates' };
 let guidedTimerInterval=null;
 let focusClock = { remaining:1500, endsAt:null, interval:null, running:false };
 
@@ -585,7 +585,7 @@ function renderPage(page, {autoRefresh=false, transition=true, animate=true}={})
       root.classList.add('page-enter');
     }
   }
-  if(page==='schedules') loadSchedules().then(()=>{if(currentPage==='schedules'){const r=$('#viewRoot');if(r){r.innerHTML=renderSchedules();r.insertAdjacentHTML('afterbegin',renderHubTabs('schedules'));labelControls(r);}}});
+  if(page==='schedules') loadSchedules().then(()=>{if(currentPage==='schedules'){const r=$('#viewRoot');if(r){r.innerHTML=renderSchedules();r.insertAdjacentHTML('afterbegin',renderHubTabs('schedules'));compactPageHeader(r);labelControls(r);}}});
   if(page==='archive') {loadMarketRefreshLogs();api('/api/personal-vault/status').then(d=>{vaultStatus=d;}).catch(()=>{});}
   if(page==='fitness') hydrateGymLibrary();
   if(autoRefresh && investingPages.includes(page) && !marketBusy) refreshMarket();
@@ -1241,31 +1241,22 @@ function flowEditorPanel(kind){
 function renderDailyFlowTemplates(){
  const kind=ui.flowKind||flowDateKind();
  const runs=state.dailyFlowRuns||[],items=[...(state.dailyFlows.weekday||[]),...(state.dailyFlows.restday||[])];
- const viewControls=`<div class="flow-check-toolbar"><button type="button" class="btn btn-outline" id="flowViewToggle" aria-pressed="${ui.flowViewMode==='checklist'}">${ui.flowViewMode==='checklist'?'切换到时间轴模式':'切换到 Checklist 模式'}</button></div>`;
- return `${sectionHead('LIFE OS · DAILY RHYTHM','流程','流程编排与流程统计收进同一个工作台，用左右两个页签切换：编排看工作日/休息日时间轴，统计看记录、完成率、分类与趋势。电脑可拖动任务块调整时间；手机滑动浏览，双击任务修改时间。任务允许重叠。','')}
+ const checklist=ui.flowViewMode==='checklist';
+ const viewControls=`<div class="flow-check-toolbar flow-template-controls"><button type="button" class="btn btn-outline flow-mode-toggle ${checklist?'is-active':''}" id="flowViewToggle" aria-pressed="${checklist}" aria-label="${checklist?'切换到时间轴模式':'切换到 Checklist 模式'}"><span aria-hidden="true">${checklist?'☷':'◷'}</span><span>${checklist?'Checklist 已开启':'切换到 Checklist 模式'}</span></button></div>`;
+ return `
  <div class="flow-page-shell" data-tab-shell data-tab-key="dailyflow-v2" data-default-tab="edit">
   <div class="flow-page-bar"><div class="flow-page-tabs" data-tabs role="tablist"><button class="flow-page-tab active" data-tab="edit" role="tab"><span>流程编排</span><small>${items.length} 个流程块</small></button><button class="flow-page-tab" data-tab="stats" role="tab"><span>流程统计</span><small>${runs.length} 次记录</small></button></div><div class="flow-page-meta"><span class="live-dot"></span>${kind==='weekday'?'当前：工作日':'当前：休息日'} · 本地保存</div></div>
-  <div class="flow-page-panel active ${ui.flowViewMode==='checklist'?'flow-is-checklist':''}" data-tab-panel="edit">${ui.flowViewMode==='checklist'?renderFlowChecklist(kind,viewControls):viewControls+flowEditorPanel(kind)}</div>
+  <div class="flow-page-panel active ${checklist?'flow-is-checklist':''}" data-tab-panel="edit">${checklist?renderFlowChecklist(kind,viewControls):viewControls+flowEditorPanel(kind)}</div>
   <div class="flow-page-panel" data-tab-panel="stats" id="flowStatsPanel">${flowStatsBody()}</div>
   <div id="flowModalMount"></div>
  </div>`;
 }
 function renderDailyFlow(){
- const view=ui.flowWorkspaceView||'today',today=todayKey(),tasks=focusTasks(),todayOpen=focusTaskFilter('todayfocus').filter(t=>!t.done).length;
- const inboxCount=focusTaskFilter('inbox').filter(t=>!t.done).length;
- const weekEnd=addDaysKey(7),weekCount=tasks.filter(t=>!t.done&&(t.startDate||t.dueDate)&&(t.startDate||t.dueDate)<=weekEnd&&(t.dueDate||t.startDate)>=today).length;
- const doneToday=tasks.filter(t=>t.done&&String(t.completedAt||'').slice(0,10)===today).length;
- const views=[['today','今天',todayOpen],['inbox','收集箱',inboxCount],['upcoming','未来 7 天',weekCount],['important','重要',focusTaskCount('important')],['alltasks','全部',tasks.length],['matrix','四象限',''],['habits','习惯',''],['templates','流程模板',(state.dailyFlows.weekday||[]).length+(state.dailyFlows.restday||[]).length],['stats','统计',tasks.length]];
- let content='';
- if(['today','inbox','upcoming','important','alltasks'].includes(view)) content=renderTaskWorkspace(view==='today'?'todayfocus':view,{embedded:true});
- else if(view==='matrix') content=renderMatrix();
- else if(view==='habits') content=renderHabits();
- else if(view==='templates') content=renderDailyFlowTemplates();
- else content=renderFocusStats();
- return `${sectionHead('TICKFLOW · PERSONAL TASK SPACE','任务工作台','把快速收集、今日执行、优先排序和习惯记录放在一个清晰的工作区。现有账户任务与流程模板保持原样，并继续自动保存。',`<button class="btn btn-outline" data-action="go-page" data-page="calendar">打开周历 ↗</button><button class="btn btn-primary" data-action="focus-add-focus">＋ 快速添加</button>`)}
- <section class="tickflow-overview"><div class="tickflow-overview-main"><span class="eyebrow">MY DAY · ${today}</span><h2>今天，把重要的事推进一点。</h2><p>从收集箱挑选下一步，安排到周历；完成状态与备注会保存在当前账户。</p><div class="tickflow-overview-actions"><button class="btn btn-primary" data-action="flow-workspace-view" data-view="today">查看今日任务</button><button class="btn btn-outline" data-action="flow-workspace-view" data-view="inbox">整理收集箱</button></div></div><div class="tickflow-progress"><span>今日待完成</span><strong>${todayOpen}</strong><small>今日完成 ${doneToday} 项</small><div class="tickflow-progress-track"><i style="--progress:${Math.min(100,doneToday/Math.max(1,todayOpen+doneToday)*100)}%"></i></div></div></section>
- <div class="tickflow-nav-row"><nav class="tickflow-views" aria-label="任务视图">${views.map(([key,label,count])=>`<button type="button" class="tickflow-view ${view===key?'active':''}" data-action="flow-workspace-view" data-view="${key}"><span>${label}</span>${count!==''?`<small>${count}</small>`:''}</button>`).join('')}</nav><div class="tickflow-nav-tools"></div></div>
- <div class="tickflow-view-content" data-tickflow-view="${view}">${content}</div>`;
+ ui.flowWorkspaceView='templates';
+ const count=(state.dailyFlows.weekday||[]).length+(state.dailyFlows.restday||[]).length;
+ return `${sectionHead('TICKFLOW · DAILY FLOW','流程模板','编辑日常时间轴，或切换到 Checklist 模式逐项完成。',`<button class="btn btn-outline" data-action="go-page" data-page="calendar">打开周历 ↗</button><button class="btn btn-primary" data-action="focus-add-focus">＋ 快速添加</button>`)}
+ <div class="tickflow-nav-row"><nav class="tickflow-views" aria-label="成长流程视图"><button type="button" class="tickflow-view active" aria-current="page"><span>流程模板</span><small>${count}</small></button></nav></div>
+ <div class="tickflow-view-content" data-tickflow-view="templates">${renderDailyFlowTemplates()}</div>`;
 }
 function refreshFlowTabCounts(){
  const scope=document.querySelector('[data-tab-key="dailyflow-v2"]');if(!scope)return;

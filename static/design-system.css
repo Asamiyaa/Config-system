@@ -271,3 +271,26 @@ body.spatial-ui #viewRoot>.page-context-row:not(:has(.hub-tabs)){justify-content
   body.spatial-ui #viewRoot>.page-context-row .page-context-actions{gap:5px}
   body.spatial-ui #viewRoot>.page-context-row .page-context-actions .btn{min-height:30px;padding:5px 8px;font-size:10px}
 }
+
+/* Growth flow: keep only the template view and bring its working surface up. */
+body.spatial-ui #viewRoot[data-page="dailyflow"] .tickflow-overview{display:none!important}
+body.spatial-ui #viewRoot[data-page="dailyflow"] .tickflow-nav-row{grid-template-columns:minmax(0,1fr);margin:0 0 5px;padding:0;border:0;background:transparent}
+body.spatial-ui #viewRoot[data-page="dailyflow"] .tickflow-views{width:max-content;max-width:100%;padding:0;margin:0;border:0;border-radius:0;background:transparent;overflow:visible}
+body.spatial-ui #viewRoot[data-page="dailyflow"] .tickflow-view{min-height:30px;padding:6px 9px;border-radius:7px;font-size:11px}
+body.spatial-ui #viewRoot[data-page="dailyflow"] .tickflow-view:not([aria-current="page"]){display:none!important}
+body.spatial-ui #viewRoot[data-page="dailyflow"] .tickflow-view-content{margin:0;padding:0}
+body.spatial-ui #viewRoot[data-page="dailyflow"] .tickflow-view-content>.page-head{display:none!important}
+body.spatial-ui #viewRoot[data-page="dailyflow"] .flow-page-shell{margin:0;padding:0}
+body.spatial-ui #viewRoot[data-page="dailyflow"] .flow-page-bar{margin:0!important}
+body.spatial-ui #viewRoot[data-page="dailyflow"] .flow-page-panel{padding:2px 0 0!important}
+body.spatial-ui #viewRoot[data-page="dailyflow"] .flow-template-controls{display:flex;align-items:center;gap:8px;margin:3px 0 5px!important;padding:0!important}
+body.spatial-ui #viewRoot[data-page="dailyflow"] .flow-mode-toggle{display:inline-flex;align-items:center;gap:7px;min-height:34px;padding:6px 11px;border:1px solid var(--border)!important;border-radius:9px;background:var(--surface)!important;color:var(--text)!important;font-size:11px;font-weight:650;box-shadow:none!important}
+body.spatial-ui #viewRoot[data-page="dailyflow"] .flow-mode-toggle:hover{border-color:var(--accent)!important;color:var(--accent)!important}
+body.spatial-ui #viewRoot[data-page="dailyflow"] .flow-mode-toggle.is-active{border-color:var(--accent)!important;background:var(--accent)!important;color:var(--panel)!important}
+body.spatial-ui #viewRoot[data-page="dailyflow"] .flow-mode-toggle>span:first-child{font-size:14px;line-height:1}
+body.spatial-ui #viewRoot[data-page="dailyflow"] .flow-template-controls .execution-settings{display:flex;gap:7px;margin:0}
+body.spatial-ui #viewRoot[data-page="dailyflow"] .flow-template-controls .execution-settings button{min-height:34px;padding:6px 10px;border:1px solid var(--border);border-radius:9px;background:var(--surface);color:var(--muted);font-size:11px}
+body.spatial-ui #viewRoot[data-page="dailyflow"] .flow-mode-tabs{margin:3px 0 5px!important}
+body.spatial-ui #viewRoot[data-page="dailyflow"] .flow-timeline-scroll{padding-top:2px!important}
+body.spatial-ui #viewRoot[data-page="schedules"] .page-context-actions .execution-settings{margin:0}
+body.spatial-ui #viewRoot[data-page="schedules"] .page-context-actions .execution-settings button{min-height:32px;padding:6px 10px;font-size:11px}
