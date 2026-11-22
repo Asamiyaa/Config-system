@@ -205,4 +205,6 @@ body.spatial-ui .auth-form .auth-remember input{height:16px!important;width:16px
 .prompt-entry-tags{display:flex;align-items:center;flex-wrap:wrap;gap:7px}
 .prompt-entry-tags small{color:var(--muted);font-size:11px}
 .prompt-entry-content{margin:16px 0 0;padding:14px 16px;max-height:360px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;border:1px solid var(--border);border-radius:10px;background:var(--ground);font:12px/1.7 ui-monospace,SFMono-Regular,Consolas,monospace;color:var(--text)}
+.reading-resource-link{color:var(--text);text-decoration:none}
+.reading-resource-link:hover{color:var(--accent)}
 @media(max-width:640px){.prompt-entry-head{flex-direction:column}.prompt-entry-head .button-row{margin:0}.prompt-entry .card-body{padding:16px}}
