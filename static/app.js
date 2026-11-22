@@ -30,7 +30,7 @@ const WORKBOOKS = [
 ];
 function shiftDateKey(key, days) { if(!key) return ''; const d=new Date(`${key}T12:00:00`); d.setDate(d.getDate()+days); return todayKey(d); }
 function dayDiff(start,end) { if(!start||!end) return 0; return Math.round((new Date(`${end}T12:00:00`)-new Date(`${start}T12:00:00`))/86400000); }
-const PAGE_NAMES = {cycle:"结构与周期",uilearning:"UI 学习",scaffold:"脚手架",infogap:"信息差变现",schedules:'自动化',agents:'平衡',settings:'设置',mistakes:'避坑',social:'人性与社会',dunning:'达克曲线',learningprinciples:'学习的第一性原理',home:'工作台',inbox:'今日任务',upcoming:'未来 7 天',calendar:'周历 / 日程',matrix:'任务四象限',stats:'执行统计',important:'重要事项',alltasks:'全部任务',dashboard:'资产总览',allocation:'全球资产配置',nasdaq:'纳斯达克 AI 策略',ashare:'A股 ETF 轮动',xindeng:'新登',newconfig:'成长总览',health:'健康',checkin:'打卡与统计',diet:'饮食饮水',fitness:'健身管理',skin:'皮肤护理',sleep:'睡眠与恢复',style:'发型与穿搭',english:'英语',reading:'阅读',execution:'每日执行与日志',archive:'归档',dailyflow:'流程',flowstats:'流程统计',alpharadar:'Alpha Radar'};
+const PAGE_NAMES = {silicon:'硅基时代',cycle:"结构与周期",uilearning:"UI 学习",scaffold:"脚手架",infogap:"信息差变现",schedules:'自动化',agents:'平衡',settings:'设置',mistakes:'避坑',social:'人性与社会',dunning:'达克曲线',learningprinciples:'学习的第一性原理',home:'工作台',inbox:'今日任务',upcoming:'未来 7 天',calendar:'周历 / 日程',matrix:'任务四象限',stats:'执行统计',important:'重要事项',alltasks:'全部任务',dashboard:'资产总览',allocation:'全球资产配置',nasdaq:'纳斯达克 AI 策略',ashare:'A股 ETF 轮动',xindeng:'新登',newconfig:'成长总览',health:'健康',checkin:'打卡与统计',diet:'饮食饮水',fitness:'健身管理',skin:'皮肤护理',sleep:'睡眠与恢复',style:'发型与穿搭',english:'英语',reading:'阅读',execution:'每日执行与日志',archive:'归档',dailyflow:'流程',flowstats:'流程统计',alpharadar:'Alpha Radar'};
 
 async function api(path, options={}) {
   const res = await fetch(path, {credentials:'same-origin', headers:{'Content-Type':'application/json', ...(options.headers||{})}, ...options});
@@ -309,7 +309,7 @@ function setHeader(page) {
 }
 
 const HUB_OF={
-  uilearning:'uilearning',scaffold:'scaffold',infogap:'infogap',cycle:'cycle',xindeng:'cycle',mistakes:'cycle',social:'cycle',dunning:'cycle',learningprinciples:'cycle',mindmap:'cycle',whiteboard:'cycle',home:'newconfig',today:'newconfig',growthplan:'newconfig',review:'newconfig',
+  silicon:'silicon',uilearning:'uilearning',scaffold:'scaffold',infogap:'infogap',cycle:'cycle',xindeng:'cycle',mistakes:'cycle',social:'cycle',dunning:'cycle',learningprinciples:'cycle',mindmap:'cycle',whiteboard:'cycle',home:'newconfig',today:'newconfig',growthplan:'newconfig',review:'newconfig',
   inbox:'newconfig',schedules:'settings',settings:'settings',dailyflow:'newconfig',calendar:'newconfig',matrix:'newconfig',stats:'newconfig',important:'newconfig',alltasks:'newconfig',flowstats:'newconfig',
   dashboard:'dashboard',allocation:'dashboard',nasdaq:'dashboard',ashare:'dashboard',execution:'dashboard',alpharadar:'dashboard',
   health:'health',checkin:'health',diet:'health',fitness:'health',skin:'health',sleep:'health',style:'health',
@@ -400,6 +400,14 @@ function labelControls(root=document){
     }
   });
 }
+function renderSiliconEra(){
+  const room='https://excalidraw.com/#room=1d5f232f0de3786eb650,kRqtTNyj6EIK19laJYiyDA';
+  return `${sectionHead('SILICON ERA · OPEN CANVAS','硅基时代','连接共享思考空间与开源趋势，把想法沉淀成可持续迭代的成果。')}
+    <section class="card"><div class="card-body" style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:20px;padding:28px">
+      <div><span class="eyebrow">THINK · BUILD · EXPLORE</span><h2 style="margin:8px 0">进入你的硅基工作台</h2><p class="muted" style="margin:0">在共享画布上协作，也可以浏览 GitHub 正在发生的开源项目。</p></div>
+      <div class="button-row" style="display:flex;flex-wrap:wrap;gap:10px;margin:0"><a class="btn btn-primary" href="${room}" target="_blank" rel="noopener noreferrer">打开 Excalidraw 共享画布 ↗</a><a class="btn btn-outline" href="https://github.com/trending" target="_blank" rel="noopener noreferrer">浏览 GitHub Trending ↗</a></div>
+    </div></section>`;
+}
 function renderPage(page, {autoRefresh=false, transition=true, animate=true}={}) {  if (!state) return;
   if(window.uiLearningDirty){toast('UI 学习仍有未保存内容，请返回学习页重试或备份后再离开',true);return;}
   if(window.boardEditorDirty){toast('画板正在保存或保存失败，请先在画板内保存或导出备份',true);return;}
@@ -413,7 +421,7 @@ function renderPage(page, {autoRefresh=false, transition=true, animate=true}={})
   const root=$('#viewRoot');
   root.dataset.page=page;
   root.dataset.hub=HUB_OF[page]||page;
-  const map={uilearning:renderUILearning,scaffold:renderScaffold,infogap:renderInfoGap,cycle:renderXinDeng,mindmap:renderMindmap,whiteboard:renderWhiteboard,xindeng:renderXinDeng,growthplan:renderGrowthPlan,review:renderGrowthReview,today:()=>renderTaskWorkspace('home'),schedules:renderSchedules,agents:renderAgents,mistakes:renderMistakes,social:renderSocialInsight,dunning:renderDunningCurve,learningprinciples:renderLearningPrinciples,home:renderHome,inbox:renderInbox,upcoming:renderUpcoming,calendar:renderCalendar,matrix:renderMatrix,stats:renderFocusStats,important:renderImportant,alltasks:renderAllFocusTasks,dashboard:renderDashboard,allocation:renderAllocation,nasdaq:renderNasdaq,ashare:renderAshare,newconfig:()=> (typeof renderNewConfigV2==='function'?renderNewConfigV2():renderNewConfig()),health:renderHealth,checkin:renderHealthCheckin,diet:()=>renderHealthSection('diet'),fitness:()=>renderHealthSection('fitness'),skin:()=>renderHealthSection('skin'),sleep:()=>renderHealthSection('sleep'),style:()=>renderHealthSection('style'),english:()=> (typeof renderEnglishV2==='function'?renderEnglishV2():renderEnglish()),reading:()=> (typeof renderReadingV2==='function'?renderReadingV2():renderReading()),execution:renderExecution,archive:renderArchive,dailyflow:renderDailyFlow,flowstats:renderFlowStats,alpharadar:renderAlphaRadar};
+  const map={silicon:renderSiliconEra,uilearning:renderUILearning,scaffold:renderScaffold,infogap:renderInfoGap,cycle:renderXinDeng,mindmap:renderMindmap,whiteboard:renderWhiteboard,xindeng:renderXinDeng,growthplan:renderGrowthPlan,review:renderGrowthReview,today:()=>renderTaskWorkspace('home'),schedules:renderSchedules,agents:renderAgents,mistakes:renderMistakes,social:renderSocialInsight,dunning:renderDunningCurve,learningprinciples:renderLearningPrinciples,home:renderHome,inbox:renderInbox,upcoming:renderUpcoming,calendar:renderCalendar,matrix:renderMatrix,stats:renderFocusStats,important:renderImportant,alltasks:renderAllFocusTasks,dashboard:renderDashboard,allocation:renderAllocation,nasdaq:renderNasdaq,ashare:renderAshare,newconfig:()=> (typeof renderNewConfigV2==='function'?renderNewConfigV2():renderNewConfig()),health:renderHealth,checkin:renderHealthCheckin,diet:()=>renderHealthSection('diet'),fitness:()=>renderHealthSection('fitness'),skin:()=>renderHealthSection('skin'),sleep:()=>renderHealthSection('sleep'),style:()=>renderHealthSection('style'),english:()=> (typeof renderEnglishV2==='function'?renderEnglishV2():renderEnglish()),reading:()=> (typeof renderReadingV2==='function'?renderReadingV2():renderReading()),execution:renderExecution,archive:renderArchive,dailyflow:renderDailyFlow,flowstats:renderFlowStats,alpharadar:renderAlphaRadar};
   const investingPages=['dashboard','allocation','nasdaq','ashare','execution'];
   const body=(map[page]||renderHome)();
   const commit = () => {
