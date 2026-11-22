@@ -1,5 +1,5 @@
 /* WEALTH OS · taste layer interactions
-   - command palette (⌘K / Ctrl-K)
+   - command palette (Ctrl/⌘ + Alt + K)
    - collapsible labelled sidebar
    - consistent nav labels / titles
 */
@@ -106,7 +106,12 @@
       if (e.key === 'Enter') { e.preventDefault(); const item = filtered[active]; if (item) go(item.page); }
     });
     document.addEventListener('keydown', (e) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k' && !e.altKey && !e.shiftKey) {
+        e.preventDefault();
+        const todoButton=document.querySelector('.workspace-voice-task');
+        if(todoButton&&!document.querySelector('#appShell')?.classList.contains('hidden'))todoButton.click();
+        else palette.classList.contains('hidden') ? openPalette() : closePalette();
+      }else if ((e.metaKey || e.ctrlKey) && e.altKey && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         palette.classList.contains('hidden') ? openPalette() : closePalette();
       }

@@ -40,6 +40,9 @@ body.spatial-ui #viewRoot .flow-page-tab{border-bottom:0!important}body.spatial-
 
 /* Global voice capture for today's calendar. */
 .workspace-voice-task{background:var(--primary)!important;color:var(--primary-ink)!important;border-color:var(--primary)!important;font-weight:650!important}
+.workspace-tools .workspace-voice-task{display:inline-flex!important;flex:0 0 auto!important;align-items:center;justify-content:center;gap:6px;width:max-content!important;min-width:82px;max-width:none!important;padding-inline:12px!important;white-space:nowrap!important;word-break:keep-all!important;overflow:visible!important}
+.workspace-voice-task span{display:inline!important;white-space:nowrap!important;word-break:keep-all!important}
+.workspace-tools .workspace-voice-task kbd{margin:0 0 0 2px!important;font-size:9px!important;white-space:nowrap}
 .workspace-voice-task:hover{filter:brightness(1.06);transform:translateY(-1px)}
 .voice-task-modal{width:min(540px,100%)}
 body.spatial-ui .voice-task-modal{background:var(--surface)!important;color:var(--text)!important;border-color:var(--border)!important}
@@ -49,7 +52,7 @@ body.spatial-ui .voice-task-modal{background:var(--surface)!important;color:var(
 .voice-task-controls span{font-size:12px;color:var(--muted)}
 .voice-task-date{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border:1px solid var(--border);border-radius:10px;background:var(--ground);font-size:12px;color:var(--muted)}
 .voice-task-date strong{color:var(--text);font-variant-numeric:tabular-nums}
-@media(max-width:860px){.workspace-voice-task{flex:1}.voice-task-modal{padding:18px!important}.voice-task-modal .button-row{width:100%;flex-wrap:wrap}.voice-task-modal .button-row .btn{flex:1;min-width:130px}}
+@media(max-width:860px){.workspace-tools .workspace-voice-task{flex:0 0 auto!important;min-width:76px}.workspace-voice-task kbd{display:none!important}.voice-task-modal{padding:18px!important}.voice-task-modal .button-row{width:100%;flex-wrap:wrap}.voice-task-modal .button-row .btn{flex:1;min-width:130px}}
 
 /* Humanity and society: layered analysis with a compact guided-reading rail. */
 .social-insight-layout{display:grid;grid-template-columns:minmax(0,1fr) 278px;gap:28px;align-items:start}
