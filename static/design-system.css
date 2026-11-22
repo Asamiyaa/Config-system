@@ -285,7 +285,39 @@ body.spatial-ui #viewRoot[data-page="dailyflow"] .flow-mode-switch>span{position
 body.spatial-ui #viewRoot[data-page="dailyflow"] .flow-mode-switch[aria-checked="true"]{border-color:var(--accent);background:var(--accent)}
 body.spatial-ui #viewRoot[data-page="dailyflow"] .flow-mode-switch[aria-checked="true"]>span{transform:translateX(18px)}
 body.spatial-ui #viewRoot[data-page="dailyflow"] .flow-mode-switch:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-body.spatial-ui #viewRoot[data-page="dailyflow"] .flow-mode-tabs{margin:2px 0 3px!important}
+body.spatial-ui #viewRoot[data-page="dailyflow"] .flow-mode-tabs{display:flex;align-items:center;gap:8px;margin:2px 0 3px!important}
 body.spatial-ui #viewRoot[data-page="dailyflow"] .flow-timeline-scroll{padding-top:0!important}
 body.spatial-ui #viewRoot[data-page="schedules"] .page-context-actions .execution-settings{margin:0}
 body.spatial-ui #viewRoot[data-page="schedules"] .page-context-actions .execution-settings button{min-height:32px;padding:6px 10px;font-size:11px}
+
+/* Calendar week view follows a familiar day-column / hour-grid model. */
+body.spatial-ui #viewRoot[data-page="calendar"] .calendar-summary{display:flex;align-items:center;gap:18px;min-height:58px;padding:10px 16px;border-radius:12px}
+body.spatial-ui #viewRoot[data-page="calendar"] .calendar-range-title{font-size:18px;font-weight:650;letter-spacing:-.025em;color:var(--text)}
+body.spatial-ui #viewRoot[data-page="calendar"] .calendar-board-scroll{max-height:calc(100vh - 295px);min-height:420px;overflow:auto;padding:0;border:1px solid var(--line);border-radius:12px;background:var(--surface);scrollbar-gutter:stable}
+body.spatial-ui #viewRoot[data-page="calendar"] .week-calendar-board{--calendar-hour-size:64px;position:relative;display:grid;grid-template-columns:58px repeat(7,minmax(112px,1fr));grid-template-rows:54px var(--calendar-allday-height,42px) repeat(24,var(--calendar-hour-size));min-width:900px;min-height:0;border:0;border-radius:0;overflow:hidden;background:var(--surface);isolation:isolate}
+body.spatial-ui #viewRoot[data-page="calendar"] .calendar-day-header{grid-row:1!important;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:1px;padding:3px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--surface);color:var(--muted)}
+body.spatial-ui #viewRoot[data-page="calendar"] .calendar-day-header span{font-size:10px;font-weight:600;color:var(--muted)}
+body.spatial-ui #viewRoot[data-page="calendar"] .calendar-day-header strong{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;font:500 16px/1 var(--sans);color:var(--text)}
+body.spatial-ui #viewRoot[data-page="calendar"] .calendar-day-header.is-current-day{background:var(--surface);box-shadow:none}
+body.spatial-ui #viewRoot[data-page="calendar"] .calendar-day-header.is-current-day strong{background:#1a73e8;color:#fff}
+body.spatial-ui #viewRoot[data-page="calendar"] .calendar-day-header small{position:absolute;right:7px;top:6px;margin:0;font-size:9px;color:var(--muted)}
+body.spatial-ui #viewRoot[data-page="calendar"] .calendar-header-add{right:5px;bottom:4px;width:20px;height:18px;border:0;background:transparent;color:var(--muted)}
+body.spatial-ui #viewRoot[data-page="calendar"] .calendar-all-day-label{z-index:2;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;border-bottom:1px solid var(--line);font-size:9px;color:var(--muted)}
+body.spatial-ui #viewRoot[data-page="calendar"] .calendar-day-bg{grid-row:3 / span 24!important;z-index:0;border-right:1px solid var(--line);background:repeating-linear-gradient(to bottom,transparent 0,transparent calc(var(--calendar-hour-size) - 1px),var(--line) calc(var(--calendar-hour-size) - 1px),var(--line) var(--calendar-hour-size))}
+body.spatial-ui #viewRoot[data-page="calendar"] .calendar-day-bg.is-current-day{background-color:color-mix(in srgb,#1a73e8 3%,var(--surface));box-shadow:inset 1px 0 #1a73e833,inset -1px 0 #1a73e833}
+body.spatial-ui #viewRoot[data-page="calendar"] .calendar-time-label{z-index:2;align-self:start;justify-self:end;padding:4px 8px 0 0;transform:translateY(-7px);background:var(--surface);font:10px/1 var(--mono);font-variant-numeric:tabular-nums;color:var(--muted)}
+body.spatial-ui #viewRoot[data-page="calendar"] .calendar-hour-cell{z-index:1;min-width:0;border-bottom:1px solid color-mix(in srgb,var(--line) 76%,transparent);cursor:crosshair}
+body.spatial-ui #viewRoot[data-page="calendar"] .calendar-hour-cell:hover{background:color-mix(in srgb,#1a73e8 6%,transparent)}
+body.spatial-ui #viewRoot[data-page="calendar"] .calendar-event{z-index:4;align-self:stretch;margin:3px 2px;padding:3px 5px;border:0;border-left:3px solid #4285f4;border-radius:5px;background:#dbeafe;color:#174ea6;box-shadow:none;overflow:hidden}
+body.spatial-ui #viewRoot[data-page="calendar"] .calendar-event.priority-high{border-left-color:#d93025;background:#fce8e6;color:#a50e0e}
+body.spatial-ui #viewRoot[data-page="calendar"] .calendar-event.priority-medium{border-left-color:#f9ab00;background:#fef7e0;color:#8a5200}
+body.spatial-ui #viewRoot[data-page="calendar"] .calendar-event.priority-low{border-left-color:#188038;background:#e6f4ea;color:#137333}
+body.spatial-ui #viewRoot[data-page="calendar"] .calendar-event-title{color:inherit;font-size:10px}
+body.spatial-ui #viewRoot[data-page="calendar"] .calendar-event-project{color:color-mix(in srgb,currentColor 78%,transparent);font-size:8px}
+body.spatial-ui #viewRoot[data-page="calendar"] .calendar-event.is-all-day{align-self:start;height:28px;min-height:0;grid-template-rows:1fr}
+body.spatial-ui #viewRoot[data-page="calendar"] .calendar-event.is-all-day .calendar-event-project{display:none}
+body.spatial-ui #viewRoot[data-page="calendar"] .calendar-event.is-timed{position:relative;z-index:5;align-self:start;min-height:24px;margin-top:0;margin-right:0;margin-bottom:0;padding:3px 5px;grid-template-columns:17px minmax(0,1fr);grid-template-rows:minmax(14px,auto) 12px;gap:0 3px;border-radius:5px}
+body.spatial-ui #viewRoot[data-page="calendar"] .calendar-event.is-timed.is-done{opacity:.58}
+body.spatial-ui #viewRoot[data-page="calendar"] .calendar-now-line{position:relative;z-index:6;align-self:start;height:2px;margin-left:0;margin-right:0;background:#d93025;pointer-events:none}
+body.spatial-ui #viewRoot[data-page="calendar"] .calendar-now-line i{position:absolute;left:-4px;top:-3px;width:8px;height:8px;border-radius:50%;background:#d93025}
+@media(max-width:720px){body.spatial-ui #viewRoot[data-page="calendar"] .calendar-summary{align-items:flex-start;flex-direction:column;gap:5px}body.spatial-ui #viewRoot[data-page="calendar"] .calendar-board-scroll{max-height:calc(100vh - 250px);min-height:360px}body.spatial-ui #viewRoot[data-page="calendar"] .week-calendar-board{min-width:930px}}
