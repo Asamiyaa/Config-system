@@ -321,7 +321,7 @@ const HUB_TABS={
   scaffold:{label:'脚手架',items:[['scaffold','项目脚手架'],['prompt','Prompt']]},
   dashboard:{label:'资产',items:[['http://39.106.118.186/','市场引擎 ↗'],['dashboard','总览'],['allocation','配置'],['nasdaq','纳指'],['ashare','A股'],['execution','执行'],['alpharadar','实验']]},
   cycle:{label:'结构与周期',items:[['xindeng','新登'],['mistakes','避坑'],['social','人性与社会'],['dunning','达克曲线'],['learningprinciples','学习的第一性原理'],['whiteboard','白布画板'],['mindmap','思维导图']]},
-  newconfig:{label:'成长',items:[['dailyflow','流程'],['calendar','周历'],['growthplan','90天计划'],['agents','平衡'],['newconfig','成长总览'],['review','每周复盘']]},
+  newconfig:{label:'成长',items:[['dailyflow','流程'],['calendar','周历'],['growthplan','90天计划'],['agents','平衡'],['newconfig','成长总览'],['review','每周复盘'],['english','英语'],['reading','阅读']]},
   health:{label:'健康',items:[['health','总览'],['checkin','打卡'],['diet','饮食'],['fitness','健身'],['skin','皮肤'],['sleep','睡眠'],['style','穿搭']]}
 };
 function renderHubTabs(page){

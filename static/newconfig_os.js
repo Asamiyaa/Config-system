@@ -94,8 +94,7 @@ function renderNewConfigV2() {
   const p = ncfgProfile();
   const c = ncfgCashflow();
   const sel = ncfgSelection();
-  return `${sectionHead('OLD VS NEW · 90-DAY EXECUTION', '成长总览', '先建立底层能力，再逐层增加资产、收入引擎、全球金融基础设施与跨境选择权。通过个人能力中枢进入各能力模块，在下方工作区管理具体记录；能力层级在“新登”页查看。', `<button class="btn btn-outline" data-action="export-json">导出清单 ↓</button><button class="btn btn-primary" data-action="ncfg-add-cashflow">编辑现金流</button>`)}
-  <div class="growth-overview-capabilities">${renderCapabilityQuickNav()}</div>
+  return `${sectionHead('OLD VS NEW · 90-DAY EXECUTION', '成长总览', '先建立底层能力，再逐层增加资产、收入引擎、全球金融基础设施与跨境选择权。在下方工作区管理具体记录；能力层级在“新登”页查看。', `<button class="btn btn-outline" data-action="export-json">导出清单 ↓</button><button class="btn btn-primary" data-action="ncfg-add-cashflow">编辑现金流</button>`)}
   <div class="hos-shell ncfg-shell" data-tab-shell data-tab-key="newconfig" data-default-tab="overview">
     <div class="hos-bar ncfg-bar">
       <div class="fit-tabs ncfg-tabs" data-tabs role="tablist">${NCFG_TABS.map((t, i) => `<button class="fit-tab ${i === 0 ? 'active' : ''}" data-tab="${t.key}" role="tab">${t.label}</button>`).join('')}</div>
