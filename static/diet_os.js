@@ -127,6 +127,7 @@ function hosEnsureDietState() {
   if (!Array.isArray(d.water)) d.water = [];
   if (!Array.isArray(d.customFoods)) d.customFoods = [];
   if (!Array.isArray(d.favorites)) d.favorites = [];
+  if (!Array.isArray(d.mealPlans)) d.mealPlans = [];
 }
 function hosCalcDietTargets(profile) {
   const p = profile || {};
@@ -304,12 +305,14 @@ function renderDietOS() {
     <div class="hos-bar"><div class="fit-tabs" data-tabs role="tablist">
       <button class="fit-tab active" data-tab="today" role="tab">今日</button>
       <button class="fit-tab" data-tab="foods" role="tab">食物库</button>
+      <button class="fit-tab" data-tab="meal-plan" role="tab">每周食谱</button>
       <button class="fit-tab" data-tab="targets" role="tab">目标</button>
       <button class="fit-tab" data-tab="review" role="tab">复盘</button>
       <button class="fit-tab" data-tab="reference" role="tab">食材参考</button>
     </div><div class="hos-bar-actions"><span class="hos-badge">${esc(hosDietState().profile.goal)} · ${esc(hosDietState().profile.dietStyle)}</span><button class="btn btn-small btn-outline" data-action="hos-diet-water">＋ 饮水</button></div></div>
     <div class="fit-panel active" data-tab-panel="today">${hosDietTodayPanel()}</div>
     <div class="fit-panel" data-tab-panel="foods">${hosDietFoodsPanel()}</div>
+    <div class="fit-panel" data-tab-panel="meal-plan">${hosDietMealPlanPanel()}</div>
     <div class="fit-panel" data-tab-panel="targets">${hosDietTargetsPanel()}</div>
     <div class="fit-panel" data-tab-panel="review">${hosDietReviewPanel()}</div>
     <div class="fit-panel" data-tab-panel="reference">${hosDietPersonalFoodReference()}</div>
@@ -401,7 +404,23 @@ function hosDietFilteredFoods() {
 }
 function hosDietFoodRowsHtml(foods) {
   const favorites = new Set(hosDietState().favorites || []);
-  return foods.map((f) => `<article class="hos-food-row"><div class="hos-food-main"><strong>${esc(f.name)}</strong><small>${esc(f.cat)} · 每100g · ${esc(f.servingLabel || '')}约${hosNum(f.serving, 100)}g</small></div><div class="hos-food-macros"><span>${Math.round(f.kcal)} kcal</span><span>蛋 ${f.protein}g</span><span>碳 ${f.carbs}g</span><span>脂 ${f.fat}g</span><span>纤维 ${f.fiber}g</span></div><div class="hos-food-actions"><button class="hos-fav ${favorites.has(f.id) ? 'is-on' : ''}" data-action="hos-diet-fav" data-id="${esc(f.id)}" title="收藏">★</button><button class="btn btn-small btn-primary" data-action="hos-diet-meal" data-food-id="${esc(f.id)}" data-meal="lunch">＋ 记录</button></div></article>`).join('') || hosEmpty('没有匹配食物。');
+  return foods.map((f) => `<article class="hos-food-row"><div class="hos-food-main"><strong>${esc(f.name)}</strong><small>${esc(f.cat)} · 每100g · ${esc(f.servingLabel || '')}约${hosNum(f.serving, 100)}g</small></div><div class="hos-food-macros"><span>${Math.round(f.kcal)} kcal</span><span>蛋 ${f.protein}g</span><span>碳 ${f.carbs}g</span><span>脂 ${f.fat}g</span><span>纤维 ${f.fiber}g</span></div><div class="hos-food-actions"><button class="hos-fav ${favorites.has(f.id) ? 'is-on' : ''}" data-action="hos-diet-fav" data-id="${esc(f.id)}" title="收藏">★</button><button class="btn btn-small btn-outline" data-action="hos-diet-plan-food" data-food-id="${esc(f.id)}">＋ 食谱</button><button class="btn btn-small btn-primary" data-action="hos-diet-meal" data-food-id="${esc(f.id)}" data-meal="lunch">＋ 记录</button></div></article>`).join('') || hosEmpty('没有匹配食物。');
+}
+const HOS_WEEKDAYS = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+function hosDietCurrentWeekday() { const d = new Date().getDay(); return d === 0 ? 7 : d; }
+function hosDietMealPlanPanel() {
+  const day = Math.min(7, Math.max(1, hosNum(ui.dietPlanDay, hosDietCurrentWeekday())));
+  const plans = hosDietState().mealPlans.filter((x) => hosNum(x.weekday) === day);
+  const dayTotal = { kcal: 0, protein: 0, carbs: 0, fat: 0 };
+  plans.forEach((x) => ['kcal', 'protein', 'carbs', 'fat'].forEach((k) => { dayTotal[k] += hosNum(x[k]); }));
+  return `<div class="hos-lead"><span class="eyebrow">WEEKLY MEAL PLAN</span><h2>每周食谱组合</h2><p>把食物库中的食物安排到星期与餐次；这里保存的是计划，不会计入实际摄入记录。</p></div>
+    <section class="card"><div class="hos-toolbar"><div class="hos-chips">${HOS_WEEKDAYS.map((label, i) => `<button class="hos-chip ${day === i + 1 ? 'is-on' : ''}" data-action="hos-diet-plan-day" data-day="${i + 1}">${label}</button>`).join('')}</div><button class="btn btn-primary" data-action="hos-diet-plan-food" data-weekday="${day}">＋ 添加食物</button></div>
+    <div class="hos-kpis">${hosKpi('计划热量', Math.round(dayTotal.kcal), 'kcal', '按计划份量估算')} ${hosKpi('蛋白质', hosRound(dayTotal.protein, 1), 'g', '计划合计')} ${hosKpi('碳水', hosRound(dayTotal.carbs, 1), 'g', '计划合计')} ${hosKpi('脂肪', hosRound(dayTotal.fat, 1), 'g', '计划合计')}</div>
+    <div class="hos-meal-grid">${HOS_MEALS.map((meal) => {
+      const items = plans.filter((x) => x.meal === meal.key);
+      const total = items.reduce((sum, x) => sum + hosNum(x.kcal), 0);
+      return `<section class="card hos-meal-card"><div class="card-head"><div><h3>${esc(meal.icon)} ${esc(meal.label)}</h3><p>${items.length} 项 · ${Math.round(total)} kcal</p></div><button class="btn btn-small btn-outline" data-action="hos-diet-plan-food" data-weekday="${day}" data-meal="${meal.key}">＋ 添加</button></div><div class="hos-meal-items">${items.map((x) => `<article><div><strong>${esc(x.name || (hosFoodById(x.foodId) || {}).name || '食物')}</strong><small>${hosNum(x.grams)}g · 蛋白 ${hosNum(x.protein)}g · 碳水 ${hosNum(x.carbs)}g</small></div><b>${Math.round(hosNum(x.kcal))}<em> kcal</em></b><button class="task-delete" title="移除计划" data-action="hos-diet-plan-delete" data-id="${esc(x.id)}">×</button></article>`).join('') || `<div class="hos-meal-empty">还没有安排${esc(meal.label)}。可从食物库加入。</div>`}</div></section>`;
+    }).join('')}</div></section>`;
 }
 function hosDietFoodsPanel() {
   const foods = hosDietFilteredFoods();
@@ -442,6 +461,37 @@ function hosDietReviewPanel() {
 }
 
 /* ---- 弹层与动作 ------------------------------------------------------- */
+function hosDietOpenPlanFood(foodId = '', weekday = hosNum(ui.dietPlanDay, hosDietCurrentWeekday()), meal = 'breakfast') {
+  const all = HOS_FOODS.concat(hosDietState().customFoods || []);
+  const selected = hosFoodById(foodId) || all[0];
+  const groups = [...new Set(all.map((f) => f.cat))];
+  const day = Math.min(7, Math.max(1, hosNum(weekday, hosDietCurrentWeekday())));
+  hosOpenSheet('加入每周食谱', '选择星期、餐次与份量。保存后会出现在每周食谱，不会写入实际饮食记录。', `<form id="hosDietPlanFoodForm" class="fit-form" autocomplete="off">
+    <div class="fit-grid-2"><label class="fit-field"><span>星期</span>${hosSelect('weekday', String(day), HOS_WEEKDAYS.map((label, i) => ({ value: String(i + 1), label })))}</label><label class="fit-field"><span>餐次</span>${hosSelect('meal', meal, HOS_MEALS.map((m) => ({ value: m.key, label: m.label })))}</label></div>
+    <label class="fit-field fit-wide"><span>食物</span><select name="foodId">${groups.map((cat) => { const list = all.filter((f) => f.cat === cat); return `<optgroup label="${esc(cat)}">${list.map((f) => `<option value="${esc(f.id)}" ${f.id === (selected && selected.id) ? 'selected' : ''}>${esc(f.name)} · ${Math.round(f.kcal)} kcal/100g</option>`).join('')}</optgroup>`; }).join('')}</select></label>
+    <label class="fit-field"><span>计划份量 g</span><input name="grams" type="number" min="1" max="2000" step="5" value="${hosNum(selected && selected.serving, 100)}"></label>
+    <div class="fit-form-foot"><button type="button" class="btn btn-primary" data-action="hos-diet-plan-save">加入食谱</button></div>
+  </form>`);
+}
+function hosDietSavePlanFood() {
+  const form = $('#hosDietPlanFoodForm');
+  if (!form) return;
+  const fd = new FormData(form);
+  const food = hosFoodById(fd.get('foodId'));
+  const grams = hosNum(fd.get('grams'));
+  if (!food || grams <= 0) { toast('请选择食物并填写有效份量', true); return; }
+  const macros = hosFoodMacros(food, grams);
+  const weekday = Math.min(7, Math.max(1, hosNum(fd.get('weekday'), 1)));
+  const d = hosDietState();
+  d.mealPlans.push({ id: `plan-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, weekday, meal: String(fd.get('meal') || 'breakfast'), foodId: food.id, name: food.name, grams, ...macros });
+  ui.dietPlanDay = weekday;
+  hosCloseSheet();
+  saveAndRender(`${HOS_WEEKDAYS[weekday - 1]}${(HOS_MEALS.find((m) => m.key === String(fd.get('meal'))) || {}).label || ''}食谱已添加`);
+}
+function hosDietDeletePlanFood(id) {
+  hosDietState().mealPlans = hosDietState().mealPlans.filter((x) => String(x.id) !== String(id));
+  saveAndRender('已从食谱移除');
+}
 function hosDietOpenMeal(meal = 'lunch', date = hosToday(), foodId = '') {
   const all = HOS_FOODS.concat(hosDietState().customFoods || []);
   const food = hosFoodById(foodId) || all[0];
@@ -557,6 +607,10 @@ document.addEventListener('click', (e) => {
   const a = btn.dataset.action;
   if (!a || !a.startsWith('hos-diet-')) return;
   if (a === 'hos-diet-meal') { hosDietOpenMeal(btn.dataset.meal || 'lunch', btn.dataset.date || hosToday(), btn.dataset.foodId || ''); return; }
+  if (a === 'hos-diet-plan-food') { hosDietOpenPlanFood(btn.dataset.foodId || '', btn.dataset.weekday || ui.dietPlanDay || hosDietCurrentWeekday(), btn.dataset.meal || 'breakfast'); return; }
+  if (a === 'hos-diet-plan-save') { hosDietSavePlanFood(); return; }
+  if (a === 'hos-diet-plan-delete') { hosDietDeletePlanFood(btn.dataset.id); return; }
+  if (a === 'hos-diet-plan-day') { ui.dietPlanDay = hosNum(btn.dataset.day, hosDietCurrentWeekday()); renderPage('diet'); return; }
   if (a === 'hos-diet-save-meal') { hosDietSaveMeal(); return; }
   if (a === 'hos-diet-delete-meal') { hosDietDeleteMeal(btn.dataset.id); return; }
   if (a === 'hos-diet-water') { hosDietOpenWater(btn.dataset.date || hosToday()); return; }
