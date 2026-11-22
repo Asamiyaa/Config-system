@@ -8,16 +8,7 @@ function flowChecklistRows(kind){
  const date=ui.checklistDate||todayKey();state.flowChecklist ||= {};const records=state.flowChecklist[date] ||= [];
  return [...(state.dailyFlows[kind]||[])].sort((a,b)=>n(a.start)-n(b.start)).map(f=>{let record=records.find(x=>x.id===String(f.id)&&(x.kind===kind||!x.kind));if(!record){record={id:String(f.id),kind,done:false};records.push(record);}Object.assign(record,{kind,title:f.title,start:f.start,end:f.end,category:f.category||'日常',destination:f.destination||''});return record;});
 }
-function flowFocusCard(rows,kind,date){
- if(!rows.length)return '';
- const now=new Date(),minute=now.getHours()*60+now.getMinutes(),today=date===todayKey(),pending=rows.filter(x=>!x.done);
- const current=today?pending.find(x=>n(x.start)<=minute&&n(x.end)>minute):null;
- const upcoming=today?pending.find(x=>n(x.start)>=minute):null;
- const next=current||upcoming||pending[0];
- const done=rows.length-pending.length;
- return `<section class="execution-focus" aria-label="执行重点"><div><small>${current?'正在进行':next?(today?(upcoming?'接下来，专注这一件':'接着完成这一项'):'当日安排'):'今天的安排已完成'}</small><h2>${next?esc(next.title):'给自己一点休息时间'}</h2><p>${next?flowClock(next.start)+'–'+flowClock(next.end):'所有任务都已打卡'} <span>· 已完成 ${done}/${rows.length}</span></p></div>${next?`<button data-flow-go="${esc(next.id)}" data-kind="${kind}">去执行 <span aria-hidden="true">→</span></button>`:''}<progress max="${rows.length}" value="${done}" aria-label="完成进度"></progress></section>`;
-}
-function renderFlowChecklist(kind=ui.flowKind||flowDateKind(),controls=''){const date=ui.checklistDate||todayKey(),rows=flowChecklistRows(kind);return `${flowFocusCard(rows,kind,date)}${controls}<section class="card flow-checklist"><div class="flow-check-toolbar"><h3>${kind==='weekday'?'工作日清单':'休息日清单'}</h3><input type="date" aria-label="打卡日期" id="checklistDate" value="${esc(date)}"><button class="btn" data-action="flow-kind" data-kind="${kind==='weekday'?'restday':'weekday'}">切换${kind==='weekday'?'休息日':'工作日'}</button></div>${rows.map(x=>`<div class="flow-check-row ${x.done?'done':''}"><input type="checkbox" aria-label="${esc(x.title)}" data-checklist-id="${esc(x.id)}" data-checklist-kind="${kind}" ${x.done?'checked':''}><span><small class="checklist-time">${flowClock(x.start)}–${flowClock(x.end)}</small><strong>${esc(x.title)}</strong></span><button type="button" data-flow-go="${esc(x.id)}" data-kind="${kind}">去执行 ›</button></div>`).join('')||'<div class="execution-empty"><p>还没有安排，先从一件小事开始。</p><button class="btn btn-primary" data-action="flow-new" data-kind="'+kind+'">安排第一项</button></div>'}</section>`;}
+function renderFlowChecklist(kind=ui.flowKind||flowDateKind(),controls=''){const date=ui.checklistDate||todayKey(),rows=flowChecklistRows(kind);return `${controls}<section class="card flow-checklist"><div class="flow-check-toolbar"><h3>${kind==='weekday'?'工作日清单':'休息日清单'}</h3><input type="date" aria-label="打卡日期" id="checklistDate" value="${esc(date)}"><button class="btn" data-action="flow-kind" data-kind="${kind==='weekday'?'restday':'weekday'}">切换${kind==='weekday'?'休息日':'工作日'}</button></div>${rows.map(x=>`<div class="flow-check-row ${x.done?'done':''}"><input type="checkbox" aria-label="${esc(x.title)}" data-checklist-id="${esc(x.id)}" data-checklist-kind="${kind}" ${x.done?'checked':''}><span><small class="checklist-time">${flowClock(x.start)}–${flowClock(x.end)}</small><strong>${esc(x.title)}</strong></span><button type="button" data-flow-go="${esc(x.id)}" data-kind="${kind}">去执行 ›</button></div>`).join('')||'<div class="execution-empty"><p>还没有安排，先从一件小事开始。</p><button class="btn btn-primary" data-action="flow-new" data-kind="'+kind+'">安排第一项</button></div>'}</section>`;}
 
 function renderChecklistStats(){
  const end=ui.checklistStatsDate||todayKey(),period=ui.checklistPeriod||'week',start=period==='day'?end:shiftDateKey(end,-6),days=[];
@@ -35,8 +26,6 @@ document.addEventListener('change',e=>{
  if(e.target.matches('[data-checklist-id]')){const row=flowChecklistRows(e.target.dataset.checklistKind).find(x=>x.id===e.target.dataset.checklistId);if(row){row.done=e.target.checked;row.completedAt=row.done?new Date().toISOString():null;
   // Keep the checkbox, scroll position and keyboard focus in place.
   e.target.closest('.flow-check-row')?.classList.toggle('done',row.done);
-  const focus=document.querySelector('.execution-focus');
-  if(focus){const next=document.createElement('template');next.innerHTML=flowFocusCard(flowChecklistRows(e.target.dataset.checklistKind),e.target.dataset.checklistKind,ui.checklistDate||todayKey());focus.replaceWith(next.content);}
   persist({quiet:true});}}
  if(['checklistPeriod','checklistStatsDate'].includes(e.target.id)){ui[e.target.id]=e.target.value;renderPage('dailyflow');}
  if(e.target.id==='boardTitle'){const b=state.whiteboards.find(x=>x.id===ui.whiteboardId);b.title=e.target.value.trim()||'未命名画板';persist({quiet:true});}
