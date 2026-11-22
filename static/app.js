@@ -30,7 +30,7 @@ const WORKBOOKS = [
 ];
 function shiftDateKey(key, days) { if(!key) return ''; const d=new Date(`${key}T12:00:00`); d.setDate(d.getDate()+days); return todayKey(d); }
 function dayDiff(start,end) { if(!start||!end) return 0; return Math.round((new Date(`${end}T12:00:00`)-new Date(`${start}T12:00:00`))/86400000); }
-const PAGE_NAMES = {silicon:'硅基时代',cycle:"结构与周期",uilearning:"UI 学习",scaffold:"脚手架",prompt:'Prompt',infogap:"信息差变现",schedules:'自动化',agents:'平衡',settings:'设置',mistakes:'避坑',social:'人性与社会',dunning:'达克曲线',learningprinciples:'学习的第一性原理',home:'工作台',inbox:'今日任务',upcoming:'未来 7 天',calendar:'周历 / 日程',matrix:'任务四象限',stats:'执行统计',important:'重要事项',alltasks:'全部任务',dashboard:'资产总览',house:'房子',allocation:'全球资产配置',nasdaq:'纳斯达克 AI 策略',ashare:'A股 ETF 轮动',xindeng:'新登',newconfig:'成长总览',health:'健康',healthplan:'健康计划',checkin:'打卡与统计',diet:'饮食饮水',fitness:'健身管理',skin:'皮肤护理',sleep:'睡眠与恢复',style:'发型与穿搭',english:'英语',reading:'阅读',execution:'每日执行与日志',archive:'归档',dailyflow:'流程',flowstats:'流程统计',alpharadar:'Alpha Radar'};
+const PAGE_NAMES = {silicon:'硅基时代',cycle:"结构与周期",uilearning:"UI 学习",scaffold:"脚手架",prompt:'Prompt',infogap:"信息差变现",projects:'优秀项目',schedules:'自动化',agents:'平衡',settings:'设置',mistakes:'避坑',social:'人性与社会',dunning:'达克曲线',learningprinciples:'学习的第一性原理',home:'工作台',inbox:'今日任务',upcoming:'未来 7 天',calendar:'周历 / 日程',matrix:'任务四象限',stats:'执行统计',important:'重要事项',alltasks:'全部任务',dashboard:'资产总览',house:'房子',allocation:'全球资产配置',nasdaq:'纳斯达克 AI 策略',ashare:'A股 ETF 轮动',xindeng:'新登',newconfig:'成长总览',health:'健康',healthplan:'健康计划',checkin:'打卡与统计',diet:'饮食饮水',fitness:'健身管理',skin:'皮肤护理',sleep:'睡眠与恢复',style:'发型与穿搭',english:'英语',reading:'阅读',execution:'每日执行与日志',archive:'归档',dailyflow:'流程',flowstats:'流程统计',alpharadar:'Alpha Radar'};
 
 async function api(path, options={}) {
   const res = await fetch(path, {credentials:'same-origin', headers:{'Content-Type':'application/json', ...(options.headers||{})}, ...options});
@@ -231,6 +231,17 @@ function ensureStateDefaults() {
   if (!state.healthPlanChecks || typeof state.healthPlanChecks!=='object') state.healthPlanChecks={};
   if (!state.healthPlanReviews || typeof state.healthPlanReviews!=='object') state.healthPlanReviews={};
   if (!Array.isArray(state.promptLibrary)) state.promptLibrary=[];
+  if (!Array.isArray(state.excellentProjects)) state.excellentProjects=[];
+  let seededExcellentProject=false;
+  if(state.meta.excellentProjectsSeedVersion!==1){
+    const mapUrl='https://deanchen.me/jiangshan-map/?year=-403&polity=wei_state';
+    if(!state.excellentProjects.some(item=>String(item.url||'').replace(/&amp;/g,'&')===mapUrl)){
+      const now=new Date().toLocaleString('zh-CN');
+      state.excellentProjects.unshift({id:'project-seed-jiangshan-map',title:'江山时序',url:mapUrl,category:'历史地图',summary:'按时间与政权探索历史地图，收藏为项目灵感与资料入口。',note:'',stage:'待研究',createdAt:now,updatedAt:now});
+      seededExcellentProject=true;
+    }
+    state.meta.excellentProjectsSeedVersion=1;
+  }
   if (!Array.isArray(state.dailyMustReads)) state.dailyMustReads=[];
   if (!Array.isArray(state.alphaRadarSignals)) state.alphaRadarSignals=[];
   if (!state.alphaRadarConfig || typeof state.alphaRadarConfig!=='object') state.alphaRadarConfig={topN:5,minScore:45};
@@ -239,7 +250,7 @@ function ensureStateDefaults() {
   if (!state.screenRule) state.screenRule={windowDays:7,yellowBMin:2,includeHigherGrades:true,gradeUniverse:'A+, A, B+, B'};
   state.etfs.forEach(e=>{ if (!e.parts) e.parts={macro:0,policy:0,life:0,technical:0,activity:0,sentiment:0,ladder:0,earnings:0}; if (e.riskPenalty===undefined) e.riskPenalty=Math.max(0, Object.values(e.parts).reduce((a,b)=>a+n(b),0)-n(e.score)); });
   if (typeof ensureHealthOSState === 'function') ensureHealthOSState();
-  return seededHealthFlow;
+  return seededHealthFlow||seededExcellentProject;
 }
 
 let saveQueue = Promise.resolve();
@@ -341,7 +352,7 @@ function setHeader(page) {
 }
 
 const HUB_OF={
-  silicon:'silicon',uilearning:'uilearning',scaffold:'scaffold',prompt:'scaffold',infogap:'infogap',cycle:'cycle',xindeng:'cycle',mistakes:'cycle',social:'cycle',dunning:'cycle',learningprinciples:'cycle',mindmap:'cycle',whiteboard:'cycle',home:'newconfig',today:'newconfig',growthplan:'newconfig',review:'newconfig',
+  silicon:'silicon',uilearning:'uilearning',scaffold:'scaffold',prompt:'scaffold',infogap:'infogap',projects:'projects',cycle:'cycle',xindeng:'cycle',mistakes:'cycle',social:'cycle',dunning:'cycle',learningprinciples:'cycle',mindmap:'cycle',whiteboard:'cycle',home:'newconfig',today:'newconfig',growthplan:'newconfig',review:'newconfig',
   inbox:'newconfig',schedules:'settings',settings:'settings',dailyflow:'newconfig',calendar:'newconfig',matrix:'newconfig',stats:'newconfig',important:'newconfig',alltasks:'newconfig',flowstats:'newconfig',
   dashboard:'dashboard',house:'dashboard',allocation:'dashboard',nasdaq:'dashboard',ashare:'dashboard',execution:'dashboard',alpharadar:'dashboard',
   health:'health',healthplan:'health',checkin:'health',diet:'health',fitness:'health',skin:'health',sleep:'health',style:'health',
@@ -490,7 +501,7 @@ function renderPage(page, {autoRefresh=false, transition=true, animate=true}={})
   const root=$('#viewRoot');
   root.dataset.page=page;
   root.dataset.hub=HUB_OF[page]||page;
-  const map={silicon:renderSiliconEra,uilearning:renderUILearning,scaffold:renderScaffold,prompt:renderPromptLibrary,infogap:renderInfoGap,cycle:renderXinDeng,mindmap:renderMindmap,whiteboard:renderWhiteboard,xindeng:renderXinDeng,growthplan:renderGrowthPlan,review:renderGrowthReview,today:()=>renderTaskWorkspace('home'),schedules:renderSchedules,agents:renderAgents,mistakes:renderMistakes,social:renderSocialInsight,dunning:renderDunningCurve,learningprinciples:renderLearningPrinciples,house:renderHousePage,home:renderHome,inbox:renderInbox,upcoming:renderUpcoming,calendar:renderCalendar,matrix:renderMatrix,stats:renderFocusStats,important:renderImportant,alltasks:renderAllFocusTasks,dashboard:renderDashboard,allocation:renderAllocation,nasdaq:renderNasdaq,ashare:renderAshare,newconfig:()=> (typeof renderNewConfigV2==='function'?renderNewConfigV2():renderNewConfig()),health:renderHealth,healthplan:renderHealthPlan,checkin:renderHealthCheckin,diet:()=>renderHealthSection('diet'),fitness:()=>renderHealthSection('fitness'),skin:()=>renderHealthSection('skin'),sleep:()=>renderHealthSection('sleep'),style:()=>renderHealthSection('style'),english:()=> (typeof renderEnglishV2==='function'?renderEnglishV2():renderEnglish()),reading:()=> (typeof renderReadingV2==='function'?renderReadingV2():renderReading()),execution:renderExecution,archive:renderArchive,dailyflow:renderDailyFlow,flowstats:renderFlowStats,alpharadar:renderAlphaRadar};
+  const map={silicon:renderSiliconEra,uilearning:renderUILearning,scaffold:renderScaffold,prompt:renderPromptLibrary,infogap:renderInfoGap,projects:renderExcellentProjects,cycle:renderXinDeng,mindmap:renderMindmap,whiteboard:renderWhiteboard,xindeng:renderXinDeng,growthplan:renderGrowthPlan,review:renderGrowthReview,today:()=>renderTaskWorkspace('home'),schedules:renderSchedules,agents:renderAgents,mistakes:renderMistakes,social:renderSocialInsight,dunning:renderDunningCurve,learningprinciples:renderLearningPrinciples,house:renderHousePage,home:renderHome,inbox:renderInbox,upcoming:renderUpcoming,calendar:renderCalendar,matrix:renderMatrix,stats:renderFocusStats,important:renderImportant,alltasks:renderAllFocusTasks,dashboard:renderDashboard,allocation:renderAllocation,nasdaq:renderNasdaq,ashare:renderAshare,newconfig:()=> (typeof renderNewConfigV2==='function'?renderNewConfigV2():renderNewConfig()),health:renderHealth,healthplan:renderHealthPlan,checkin:renderHealthCheckin,diet:()=>renderHealthSection('diet'),fitness:()=>renderHealthSection('fitness'),skin:()=>renderHealthSection('skin'),sleep:()=>renderHealthSection('sleep'),style:()=>renderHealthSection('style'),english:()=> (typeof renderEnglishV2==='function'?renderEnglishV2():renderEnglish()),reading:()=> (typeof renderReadingV2==='function'?renderReadingV2():renderReading()),execution:renderExecution,archive:renderArchive,dailyflow:renderDailyFlow,flowstats:renderFlowStats,alpharadar:renderAlphaRadar};
   const investingPages=['dashboard','allocation','nasdaq','ashare','execution'];
   const body=(map[page]||renderHome)();
   const commit = () => {
@@ -2514,6 +2525,10 @@ function bindDelegatedEvents() {
     if(a==='voice-task-close'){if(voiceTaskRecognition){voiceTaskRecognition.cancelled=true;voiceTaskRecognition.abort();}voiceTaskRecognition=null;$('#voiceTaskModalMount')?.remove();return;}
     if(a==='voice-task-start'){startVoiceTaskCapture(action);return;}
     if(a==='health-plan-toggle'){const period=action.dataset.period,key=action.dataset.checkKey;if(period&&key){state.healthPlanChecks=state.healthPlanChecks||{};state.healthPlanChecks[period]=state.healthPlanChecks[period]||{};state.healthPlanChecks[period][key]=!state.healthPlanChecks[period][key];saveAndRender('健康计划已保存');}return;}
+    if(a==='new-excellent-project'){ui.excellentProjectEditId=null;renderPage('projects');setTimeout(()=>{$('#excellentProjectForm')?.scrollIntoView({behavior:'smooth',block:'center'});$('#excellentProjectForm')?.elements.title?.focus({preventScroll:true});},80);return;}
+    if(a==='edit-excellent-project'){ui.excellentProjectEditId=action.dataset.id;renderPage('projects');setTimeout(()=>{const form=$('#excellentProjectForm');form?.scrollIntoView({behavior:'smooth',block:'center'});form?.elements.title?.focus({preventScroll:true});},80);return;}
+    if(a==='cancel-excellent-project-edit'){ui.excellentProjectEditId=null;renderPage('projects');return;}
+    if(a==='delete-excellent-project'){const id=action.dataset.id;if(id&&confirm('删除这条项目收藏？')){state.excellentProjects=(state.excellentProjects||[]).filter(x=>String(x.id)!==String(id));if(String(ui.excellentProjectEditId)===String(id))ui.excellentProjectEditId=null;saveAndRender('项目收藏已删除');}return;}
     if(a==='edit-prompt-entry'){const item=state.promptLibrary[n(action.dataset.index,-1)];if(item){ui.promptEditId=item.id;renderPage('prompt');setTimeout(()=>{const form=$('#promptLibraryForm');form?.scrollIntoView({behavior:'smooth',block:'center'});form?.elements.title?.focus({preventScroll:true});},80);}return;}
     if(a==='cancel-prompt-edit'){ui.promptEditId=null;renderPage('prompt');return;}
     if(a==='delete-prompt-entry'){const i=n(action.dataset.index,-1);if(i>=0&&confirm('删除这条 Prompt？')){if(String(state.promptLibrary[i]?.id)===String(ui.promptEditId))ui.promptEditId=null;state.promptLibrary.splice(i,1);saveAndRender('Prompt 已删除');}return;}
@@ -2682,6 +2697,13 @@ function bindDelegatedEvents() {
       if(editingId){const item=state.promptLibrary.find(x=>String(x.id)===String(editingId));if(!item){ui.promptEditId=null;toast('这条 Prompt 已不存在，请重新选择',true);renderPage('prompt');return;}Object.assign(item,values,{updatedAt:new Date().toLocaleString('zh-CN')});}
       else state.promptLibrary.unshift({id:`prompt-${Date.now()}`,...values,createdAt:new Date().toLocaleString('zh-CN')});
       if(await persist({quiet:true})){ui.promptEditId=null;renderPage('prompt');toast(editingId?'Prompt 修改已保存':'Prompt 已保存到账户工作区');}else toast('保存失败，请检查网络后重试',true);return;
+    }
+    if(e.target.id==='excellentProjectForm'){
+      e.preventDefault();const fd=new FormData(e.target),id=String(fd.get('id')||''),title=String(fd.get('title')||'').trim(),url=String(fd.get('url')||'').trim(),category=String(fd.get('category')||'').trim(),summary=String(fd.get('summary')||'').trim(),note=String(fd.get('note')||'').trim(),stage=String(fd.get('stage')||'待研究');
+      if(!title){toast('请填写项目名称',true);return;}if(url&&!projectHttpUrl(url)){toast('链接需要以 http:// 或 https:// 开头',true);return;}
+      const existing=(state.excellentProjects||[]).find(x=>String(x.id)===id),now=new Date().toLocaleString('zh-CN');const value={id:id||`project-${Date.now()}-${Math.random().toString(36).slice(2,6)}`,title,url,category,summary,note,stage,updatedAt:now,createdAt:existing?.createdAt||now};
+      if(existing)Object.assign(existing,value);else{state.excellentProjects=state.excellentProjects||[];state.excellentProjects.unshift(value);}
+      if(await persist({quiet:true})){ui.excellentProjectEditId=null;renderPage('projects');toast(existing?'项目资料已更新':'项目已收藏到账户');}else toast('保存失败，请检查网络后重试',true);return;
     }
     if(e.target.id==='flowEditForm'){e.preventDefault();const f=e.target,fd=new FormData(f),kind=String(fd.get('kind')||f.dataset.kind),oldKind=f.dataset.kind,id=String(f.dataset.id||''),toMin=v=>{const [h,m]=String(v).split(':').map(Number);return h*60+m;};const start=toMin(fd.get('start')),endRaw=toMin(fd.get('end')),end=endRaw<=start?endRaw+1440:endRaw;const obj={id:id||`flow-${Date.now()}-${Math.random().toString(36).slice(2,7)}`,title:String(fd.get('title')||'').trim(),start,end,category:String(fd.get('category')||'日常').trim(),destination:String(fd.get('destination')||''),note:String(fd.get('note')||'').trim(),color:String(fd.get('color')||'#6e9c79'),order:Date.now()};if(!obj.title){toast('请填写流程事项',true);return;}if(id&&oldKind!==kind)state.dailyFlows[oldKind]=state.dailyFlows[oldKind].filter(x=>String(x.id)!==id);const list=state.dailyFlows[kind]||(state.dailyFlows[kind]=[]),idx=list.findIndex(x=>String(x.id)===id);if(idx>=0)list[idx]=obj;else list.push(obj);ui.flowKind=kind;await persist({quiet:true});$('#flowModalMount')?.replaceChildren();try{sessionStorage.setItem('wealthos-tab-dailyflow','edit')}catch(_){}renderPage(currentPage==='xindeng'?'xindeng':'dailyflow');toast('流程块已保存');return;}
     if(e.target.id==='scheduleJobForm'){
@@ -2894,6 +2916,23 @@ function renderPromptLibrary(){
     </section>`;
 }
 function renderInfoGap(){return `<iframe class="opportunity-frame" title="信息差变现工作台" src="/opportunity-os/" loading="eager"></iframe>`;}
+function projectHttpUrl(value){try{const url=new URL(String(value||'').trim());return ['http:','https:'].includes(url.protocol)?url.href:'';}catch(_){return '';}}
+function renderExcellentProjects(){
+  const rows=state.excellentProjects||[],editing=rows.find(x=>String(x.id)===String(ui.excellentProjectEditId));
+  const stages=['待研究','正在尝试','已验证','暂存'];
+  return `${sectionHead('PROJECT ATLAS · COLLECTION','优秀项目','收藏值得研究或实践的项目，补充来源、价值判断和下一步；所有记录会同步保存到当前账户。',`<button type="button" class="btn btn-outline" data-action="new-excellent-project">＋ 新增项目</button>`)}
+    <section class="card excellent-feature"><div class="card-body"><div><span class="eyebrow">REFERENCE · TIMELINE MAP</span><h2>江山时序</h2><p>按时间与政权探索中国历史地图，作为项目灵感与资料收藏入口。</p></div><a class="btn btn-primary" href="https://deanchen.me/jiangshan-map/?year=-403&polity=wei_state" target="_blank" rel="noopener noreferrer">打开江山时序 ↗</a></div></section>
+    <section class="card excellent-compose"><div class="card-head"><div><span class="eyebrow">${editing?'EDIT PROJECT':'COLLECT A PROJECT'}</span><h2>${editing?'编辑项目':'收集一个好项目'}</h2></div>${rows.length?`<span class="tag neutral">已收藏 ${rows.length} 个</span>`:''}</div><div class="card-body"><form id="excellentProjectForm" class="excellent-project-form"><input type="hidden" name="id" value="${esc(editing?.id||'')}">
+      <label class="field-label">项目名称<input name="title" required maxlength="120" value="${esc(editing?.title||'')}" placeholder="例如：江山时序"></label>
+      <div class="composer-two"><label class="field-label">项目链接<input name="url" type="url" value="${esc(editing?.url||'')}" placeholder="https://"></label><label class="field-label">分类 / 标签<input name="category" maxlength="80" value="${esc(editing?.category||'')}" placeholder="工具、AI、产品、商业模式"></label></div>
+      <div class="composer-two"><label class="field-label">研究状态<select name="stage">${stages.map(x=>`<option ${x===(editing?.stage||stages[0])?'selected':''}>${x}</option>`).join('')}</select></label><label class="field-label">一句话价值<input name="summary" maxlength="240" value="${esc(editing?.summary||'')}" placeholder="它解决什么问题，为什么值得关注？"></label></div>
+      <label class="field-label">观察与行动<textarea name="note" rows="4" maxlength="6000" placeholder="记录亮点、目标用户、商业模式、可借鉴之处或下一步验证计划。">${esc(editing?.note||'')}</textarea></label>
+      <div class="button-row"><button type="submit" class="btn btn-primary">${editing?'保存修改':'收藏项目'}</button>${editing?'<button type="button" class="btn btn-outline" data-action="cancel-excellent-project-edit">取消编辑</button>':''}</div>
+    </form></div></section>
+    <section class="excellent-project-list"><div class="section-heading"><div><span class="eyebrow">YOUR PROJECTS</span><h2>项目收藏 <span class="tag neutral">${rows.length}</span></h2></div></div>
+      ${rows.length?rows.map(item=>{const href=projectHttpUrl(item.url);return `<article class="card excellent-project-card"><div class="card-body"><div class="excellent-project-top"><div><div class="excellent-project-tags">${item.category?`<span class="tag neutral">${esc(item.category)}</span>`:''}<span class="tag ${item.stage==='已验证'?'good':'neutral'}">${esc(item.stage||'待研究')}</span></div><h3>${esc(item.title||'未命名项目')}</h3><small>更新于 ${esc(item.updatedAt||item.createdAt||'')}</small></div><div class="button-row">${href?`<a class="btn btn-small btn-outline" href="${esc(href)}" target="_blank" rel="noopener noreferrer">访问项目 ↗</a>`:''}<button class="btn btn-small btn-outline" type="button" data-action="edit-excellent-project" data-id="${esc(item.id)}">编辑</button><button class="btn btn-small btn-quiet" type="button" data-action="delete-excellent-project" data-id="${esc(item.id)}">删除</button></div></div>${item.summary?`<p class="excellent-project-summary">${esc(item.summary)}</p>`:''}${item.note?`<div class="excellent-project-note">${esc(item.note)}</div>`:''}</div></article>`;}).join(''):'<div class="empty-state card">还没有收藏项目。先添加名称、链接和你想验证的价值。</div>'}
+    </section>`;
+}
 function renderUILearning(){return `<section class="ailearn-entry" aria-labelledby="ailearnEntryTitle"><div class="ailearn-entry-mark" aria-hidden="true">A</div><div class="ailearn-entry-copy"><span>AI LEARN · CASE STUDY</span><h2 id="ailearnEntryTitle">aiLearn 案例工作台</h2><p>浏览案例画廊、拆解界面、对比设计，并用 AI 辅助解析截图。</p></div><a class="ailearn-entry-link" href="/static/ui-learning/aiLearn/index.html" target="_blank" rel="noopener">打开案例工作台 <span aria-hidden="true">↗</span></a></section><iframe class="ui-learning-frame" title="UI 学习工作台" src="/static/ui-learning/index.html" allow="clipboard-write" loading="eager"></iframe>`;}
 window.addEventListener('message',e=>{
  const frame=document.querySelector('.ui-learning-frame');
