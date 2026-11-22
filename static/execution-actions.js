@@ -50,12 +50,10 @@
   if(enabled&&!document.hidden)for(const x of entries){if(x.at>Date.now()||Date.now()-x.at>60000||seen.has(x.id+x.at))continue;seen.add(x.id+x.at);if(document.querySelector('dialog[open],.flow-modal'))continue;const d=sheet('到时间了',`<p>${esc(x.title)}</p><button data-start>去执行</button>`);d.querySelector('[data-start]').onclick=()=>{d.remove();open(x.page);};}
  }
  function settings(){
-  if(!state||document.querySelector('#executionSettings')||!['schedules','dailyflow'].includes(currentPage))return;
-  const flow=currentPage==='dailyflow';
-  const div=document.createElement('div');div.id='executionSettings';div.className='execution-settings';div.innerHTML=flow?'<button data-shortcuts>快捷入口</button>':'<button data-reminders>提醒设置</button>';
-  const target=flow?(document.querySelector('.flow-template-controls')||document.querySelector('#viewRoot')):(document.querySelector('.page-context-actions')||document.querySelector('#viewRoot'));
+  if(!state||document.querySelector('#executionSettings')||currentPage!=='schedules')return;
+  const div=document.createElement('div');div.id='executionSettings';div.className='execution-settings';div.innerHTML='<button data-reminders>提醒设置</button>';
+  const target=document.querySelector('.page-context-actions')||document.querySelector('#viewRoot');
   target.append(div);
-  div.querySelector('[data-shortcuts]')?.addEventListener('click',shortcuts);
   div.querySelector('[data-reminders]')?.addEventListener('click',()=>{const d=sheet('流程与待办提醒',`<label><input type="checkbox" data-enabled ${state.executionReminders?'checked':''}>启用到点提醒</label><p>流程按工作日/休息日重复，带日期和时间的待办单次提醒。</p><p>Android 需允许通知与精确闹钟；强行停止 App 后需重新打开。</p><button data-permission>允许系统通知</button><button data-alarm>允许准时提醒</button><p data-status></p>`);d.querySelector('[data-enabled]').onchange=async e=>{state.executionReminders=e.target.checked;await persist({quiet:true});schedule();};d.querySelector('[data-permission]').onclick=()=>window.AndroidApp?.requestReminderPermission?AndroidApp.requestReminderPermission():d.querySelector('[data-status]').textContent='当前浏览器仅支持页面打开时提醒；后台提醒请安装新版 Android App。';d.querySelector('[data-alarm]').onclick=()=>window.AndroidApp?.requestAlarmPermission?.();});
  }
  function mobilePages(){

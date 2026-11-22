@@ -1240,23 +1240,14 @@ function flowEditorPanel(kind){
 }
 function renderDailyFlowTemplates(){
  const kind=ui.flowKind||flowDateKind();
- const runs=state.dailyFlowRuns||[],items=[...(state.dailyFlows.weekday||[]),...(state.dailyFlows.restday||[])];
  const checklist=ui.flowViewMode==='checklist';
- const viewControls=`<div class="flow-check-toolbar flow-template-controls"><button type="button" class="btn btn-outline flow-mode-toggle ${checklist?'is-active':''}" id="flowViewToggle" aria-pressed="${checklist}" aria-label="${checklist?'切换到时间轴模式':'切换到 Checklist 模式'}"><span aria-hidden="true">${checklist?'☷':'◷'}</span><span>${checklist?'Checklist 已开启':'切换到 Checklist 模式'}</span></button></div>`;
- return `
- <div class="flow-page-shell" data-tab-shell data-tab-key="dailyflow-v2" data-default-tab="edit">
-  <div class="flow-page-bar"><div class="flow-page-tabs" data-tabs role="tablist"><button class="flow-page-tab active" data-tab="edit" role="tab"><span>流程编排</span><small>${items.length} 个流程块</small></button><button class="flow-page-tab" data-tab="stats" role="tab"><span>流程统计</span><small>${runs.length} 次记录</small></button></div><div class="flow-page-meta"><span class="live-dot"></span>${kind==='weekday'?'当前：工作日':'当前：休息日'} · 本地保存</div></div>
-  <div class="flow-page-panel active ${checklist?'flow-is-checklist':''}" data-tab-panel="edit">${checklist?renderFlowChecklist(kind,viewControls):viewControls+flowEditorPanel(kind)}</div>
-  <div class="flow-page-panel" data-tab-panel="stats" id="flowStatsPanel">${flowStatsBody()}</div>
-  <div id="flowModalMount"></div>
- </div>`;
+ const viewControls=`<div class="flow-check-toolbar flow-template-controls"><button type="button" class="flow-mode-switch" id="flowViewToggle" role="switch" aria-checked="${checklist}" aria-label="${checklist?'Switch to timeline mode':'Switch to checklist mode'}"><span></span></button></div>`;
+ return `<div id="flowModalMount"></div>${viewControls}${checklist?renderFlowChecklist(kind):flowEditorPanel(kind)}`;
 }
 function renderDailyFlow(){
  ui.flowWorkspaceView='templates';
- const count=(state.dailyFlows.weekday||[]).length+(state.dailyFlows.restday||[]).length;
  return `${sectionHead('TICKFLOW · DAILY FLOW','流程模板','编辑日常时间轴，或切换到 Checklist 模式逐项完成。',`<button class="btn btn-outline" data-action="go-page" data-page="calendar">打开周历 ↗</button><button class="btn btn-primary" data-action="focus-add-focus">＋ 快速添加</button>`)}
- <div class="tickflow-nav-row"><nav class="tickflow-views" aria-label="成长流程视图"><button type="button" class="tickflow-view active" aria-current="page"><span>流程模板</span><small>${count}</small></button></nav></div>
- <div class="tickflow-view-content" data-tickflow-view="templates">${renderDailyFlowTemplates()}</div>`;
+ ${renderDailyFlowTemplates()}`;
 }
 function refreshFlowTabCounts(){
  const scope=document.querySelector('[data-tab-key="dailyflow-v2"]');if(!scope)return;
