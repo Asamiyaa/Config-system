@@ -349,7 +349,7 @@ const HUB_OF={
 };
 const HUB_TABS={
   settings:{label:'设置',items:[['schedules','自动化'],['archive','归档']]},
-  scaffold:{label:'脚手架',items:[['scaffold','项目脚手架'],['prompt','Prompt']]},
+  scaffold:{label:'脚手架',items:[['scaffold','VibeCoding'],['prompt','Prompt']]},
   dashboard:{label:'资产',items:[['http://39.106.118.186/','市场引擎 ↗'],['dashboard','总览'],['house','房子'],['allocation','配置'],['nasdaq','纳指'],['ashare','A股'],['execution','执行'],['alpharadar','实验']]},
   cycle:{label:'结构与周期',items:[['xindeng','新登'],['mistakes','避坑'],['social','人性与社会'],['dunning','达克曲线'],['learningprinciples','学习的第一性原理'],['whiteboard','白布画板'],['mindmap','思维导图']]},
   newconfig:{label:'成长',items:[['dailyflow','流程'],['calendar','周历'],['agents','平衡'],['newconfig','成长总览'],['review','每周复盘'],['english','英语'],['reading','阅读']]},
@@ -2873,7 +2873,7 @@ document.addEventListener('change',async event=>{
  const ok=await persist({quiet:true});renderPage('mistakes',{transition:false,animate:false});toast(ok?`已保存 ${added} 张图片`:'图片已加入当前记录，但保存失败',!ok);
 });
 
-function renderScaffold(){return `<iframe class="scaffold-frame" title="Codex 项目脚手架" src="/static/scaffold/index.html" loading="eager"></iframe>`;}
+function renderScaffold(){return `${sectionHead('VIBECODING · SILICON ERA','VibeCoding','把灵感快速转成可运行的项目；打开 SiliconEra 中持续整理的 VibeCoding 资料与实践。')}<section class="card"><div class="card-body" style="display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;padding:28px"><div><span class="eyebrow">IDEA → PROTOTYPE → PRODUCT</span><h2 style="margin:8px 0">进入 VibeCoding 知识库</h2><p class="muted" style="margin:0">查看随想编程的工具、流程与实践记录。</p></div><a class="btn btn-primary" href="https://github.com/Asamiyaa/SiliconEra/tree/main/%E9%9A%8F%E6%83%B3%E7%BC%96%E7%A8%8B" target="_blank" rel="noopener noreferrer">打开 VibeCoding ↗</a></div></section>`;}
 function renderPromptLibrary(){
   const rows=state.promptLibrary||[];
   const editing=rows.find(item=>String(item.id)===String(ui.promptEditId));
