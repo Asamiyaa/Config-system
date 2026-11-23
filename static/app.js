@@ -1467,21 +1467,20 @@ function renderAshare() {
 
 function renderLifeCapital(){
   const levels=[
-    {id:'L06',title:'价值输出与人生完成感',items:'认知输出、影响他人、推动事情、心愿完成',detail:'人生不只是赚钱，也要创造自己的价值，减少遗憾，接近自由。'},
-    {id:'L05',title:'选择权与流动性',items:'城市切换、职业转向、全球视野、身份规划',detail:'建立拥有换工作、换城市、换生活方式的能力，而不是被动困住。'},
-    {id:'L04',title:'时间与关系资本',items:'陪伴父母、重要关系、注意力、真实体验',detail:'时间不可逆，优先给真正重要的人与事；关系需要在彼此还有时间时维护。'},
-    {id:'L03',title:'生产力与收入引擎',items:'主业能力、可迁移技能、副业、作品、AI 工具',detail:'持续提升赚钱能力与创造能力，让收入不只依赖单一岗位。'},
-    {id:'L02',title:'核心资产与风险管理',items:'现金储备、保险、低风险配置、负债控制',detail:'建立安全垫，避免因意外、失业或冲动决策而失去生活主动权。'},
-    {id:'L01',title:'身体与精力基础',items:'睡眠、运动、饮食、体检、情绪稳定',detail:'先保住体力、专注力与恢复能力；没有精力，时间和金钱都难转化为幸福感。'}
+    {id:'06',width:68,title:'价值输出与人生完成感',items:'认知输出、影响他人、推动事情、心愿完成',detail:'人生不只是赚钱，也要创造自己的价值，减少遗憾，接近自由。'},
+    {id:'05',width:76,title:'选择权与流动性',items:'城市切换、职业转向、全球视野、身份规划',detail:'建立拥有换工作、换城市、换生活方式的能力，而不是被动困住。'},
+    {id:'04',width:84,title:'时间与关系资本',items:'陪伴父母、重要关系、注意力、真实体验',detail:'时间不可逆，优先给真正重要的人与事；关系需要在彼此还有时间时维护。'},
+    {id:'03',width:92,title:'生产力与收入引擎',items:'主业能力、可迁移技能、副业、作品、AI 工具',detail:'持续提升赚钱能力与创造能力，让收入不只依赖单一岗位。'},
+    {id:'02',width:97,title:'核心资产与风险管理',items:'现金储备、保险、低风险配置、负债控制',detail:'建立安全垫，避免因意外、失业或冲动决策而失去生活主动权。'},
+    {id:'01',width:100,title:'身体与精力基础',items:'睡眠、运动、饮食、体检、情绪稳定',detail:'先保住体力、专注力与恢复能力；没有精力，时间和金钱都难转化为幸福感。'}
   ];
   const stages=[['稳定','先修复睡眠、现金流、负债、健康和执行节奏。'],['积累','建立可迁移技能与长期作品，稳步累积核心资产。'],['增产','提升主业，尝试 AI 副业、内容与产品，用交付验证。'],['扩展','增加体验、陪伴、旅行与人生记忆。'],['终点','把钱、时间、精力逐步换成自由与完成感。']];
-  return `<section class="life-capital-page" aria-labelledby="lifeCapitalTitle">
-    <header class="life-capital-intro"><span class="eyebrow">LIFE CAPITAL · BUILD FROM THE BASE</span><h2 id="lifeCapitalTitle">人生资本金字塔</h2><p>先稳底盘，再提升选择权，最终走向自由与价值。</p></header>
-    <div class="life-capital-layout"><div class="life-capital-pyramid" role="list" aria-label="人生资本六层结构">
-      ${levels.map(level=>`<article class="life-capital-tier" role="listitem"><span>${level.id}</span><div><h3>${level.title}</h3><strong>${level.items}</strong><p>${level.detail}</p></div></article>`).join('')}
-    </div><aside class="life-capital-sequence"><h2>推荐落地顺序</h2>${stages.map(([title,detail])=>`<div class="life-stage"><b>${title}</b><span>${detail}</span></div>`).join('')}<p class="life-capital-principle"><b>原则：</b>先守住底盘安全、收益与效率，再扩大选择权，最后增加人生密度。</p></aside></div>
-    <button class="life-capital-cta" type="button" data-action="go-page" data-page="growthplan">按 90 天阶段执行 ↓</button>
-  </section>`;
+  return `<div class="xindeng-foundation life-capital-foundation"><section class="card capability-pyramid-card life-capital-page" id="life-capital-pyramid">
+    <div class="card-head"><div><h3>人生资本金字塔</h3><p>先稳住身体、现金流和核心资产，再逐层扩展能力、选择权与人生完成感。</p></div><span class="tag good">先稳底盘 · 后增选择权</span></div>
+    <div class="capability-pyramid-layout"><div class="capability-pyramid" role="list" aria-label="人生资本六层金字塔">
+      ${levels.map((x,i)=>`<article class="capability-layer layer-${x.id}" style="--layer-width:${x.width}%;--layer-order:${i}" role="listitem"><div class="capability-level">L${x.id}</div><div class="capability-layer-copy"><h4>${x.title}</h4><div class="capability-items">${x.items}</div><p class="capability-subtitle">${x.detail}</p></div></article>`).join('')}
+    </div><aside class="capability-side-note"><div class="eyebrow">LIFE CAPITAL · BUILD ORDER</div><h4>推荐落地顺序</h4><ol>${stages.map(([title,detail])=>`<li><b>${title}</b><span>${detail}</span></li>`).join('')}</ol><div class="pyramid-principle">原则：先守住底盘安全、收益与效率，再扩大选择权，最后增加人生密度。</div><button class="btn btn-outline btn-full" data-action="go-page" data-page="growthplan">按 90 天阶段执行 ↓</button></aside></div>
+  </section></div>`;
 }
 
 function renderCapabilityPyramid() {
