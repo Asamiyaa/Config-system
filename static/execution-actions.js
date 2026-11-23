@@ -1,7 +1,7 @@
 /* Account-backed execution actions and reminder schedules. */
 (() => {
  const routes={skin:'护肤',diet:'饮食',fitness:'健身',sleep:'睡眠',checkin:'健康打卡',inbox:'待办',calendar:'周历',dailyflow:'流程'};
- const destination=x=>x.destination||(/护肤|护理|洗脸/.test(x.title)?'skin':/饭|餐|饮食|喝水/.test(x.title)?'diet':/健身|运动|训练/.test(x.title)?'fitness':/睡眠|睡觉/.test(x.title)?'sleep':'inbox');
+ const destination=x=>flowExecutionDestination(x);
  function open(page){if(!routes[page])page='dailyflow';if(['skin','diet'].includes(page))sessionStorage.setItem('wealthos-tab-'+page,'today');renderPage(page,{transition:false});scrollTo(0,0);}
  window.openExecutionRoute=open;
  function sheet(title,html){document.querySelector('#executionSheet')?.remove();const d=document.createElement('dialog');d.id='executionSheet';d.innerHTML=`<header><h2>${title}</h2><button data-dismiss aria-label="关闭">×</button></header>${html}`;document.body.append(d);d.querySelector('[data-dismiss]').onclick=()=>d.remove();d.addEventListener('cancel',()=>d.remove());d.showModal();return d;}
