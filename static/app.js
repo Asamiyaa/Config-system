@@ -15,7 +15,7 @@ let currentPage = 'xindeng';
 let authMode = 'login';
 let saveTimer = null;
 let marketBusy = false;
-let ui = { allocationMode:'global', expandedETF:null, showSourceDetails:false, cycleTab:'research', focusQuery:'', homeRange:'7', calendarWeekOffset:0, calendarMonthOffset:0, showCalendarComposer:false, calendarSelectedDate:'', calendarSelectedTime:'', workbookSheetIndex:0, workbookData:null, calendarDrag:null, calendarResize:null, bodyZone:'', bodyMuscle:'', bodyMode:'muscle', bodySearch:'', bodyView:{x:0,y:0,rx:0,ry:0,scale:1}, bodyDragMoved:false, checkinDate:'', guidedSummaryId:null, mustReadOpenId:null, flowWorkspaceView:'templates' };
+let ui = { allocationMode:'global', expandedETF:null, showSourceDetails:false, cycleTab:'research', focusQuery:'', homeRange:'7', calendarWeekOffset:0, calendarMonthOffset:0, showCalendarComposer:false, calendarSelectedDate:'', calendarSelectedTime:'', workbookSheetIndex:0, workbookData:null, calendarDrag:null, calendarResize:null, bodyZone:'', bodyMuscle:'', bodyMode:'muscle', bodySearch:'', bodyView:{x:0,y:0,rx:0,ry:0,scale:1}, bodyDragMoved:false, checkinDate:'', guidedSummaryId:null, mustReadOpenId:null, flowWorkspaceView:'templates', appearanceGuidanceEditing:false, appearanceGuidanceDraft:null };
 let guidedTimerInterval=null;
 let focusClock = { remaining:1500, endsAt:null, interval:null, running:false };
 
@@ -1767,12 +1767,32 @@ function renderHealthCheckin(){
  <section class="card" style="margin-top:14px">${cardHead('健康管理 · 日/周统计曲线','基于实际打卡数据统计。')} ${(()=>{const days=dateRangeKeys(7),weeks=groupedWeekStarts(8),daily=days.map(d=>Object.values(state.healthChecks[d]||{}).filter(Boolean).length),weekly=weeks.map(w=>{const e=shiftDateKey(w,6);return Object.keys(state.healthChecks||{}).filter(d=>d>=w&&d<=e).reduce((sum,d)=>sum+Object.values(state.healthChecks[d]||{}).filter(Boolean).length,0)});return renderCapabilityAnalytics({title:'健康打卡',metric:'打卡项数',dailyValues:daily,dailyLabels:days.map(d=>d.slice(5)),weeklyValues:weekly,weeklyLabels:weeks.map(d=>d.slice(5)),checkinsToday:checked,checkinsWeek:weekly[weekly.length-1]||0})})()}</section>
  ${trainingHistoryMarkup()}`;
 }
+const DEFAULT_APPEARANCE_GUIDANCE = [
+  '保持短发、干净清爽；每月理发时记录长度、参考图和沟通要点。',
+  '选择适合自己的洗发水；按头皮状态调整频率，个人原计划为隔天洗一次，避免过度清洁。',
+  '户外活动时留意头皮防晒，可用帽子或适合头皮的防晒方式。',
+  '记录穿搭组合、场景、单品、颜色和舒适度，逐步形成个人模板。',
+  '新产品或新风格一次只调整少数变量，便于复盘效果。'
+];
+function appearanceGuidanceMarkup() {
+  const items = ui.appearanceGuidanceEditing
+    ? (ui.appearanceGuidanceDraft || state.appearanceGuidance || DEFAULT_APPEARANCE_GUIDANCE)
+    : (Array.isArray(state.appearanceGuidance) ? state.appearanceGuidance : DEFAULT_APPEARANCE_GUIDANCE);
+  const controls = ui.appearanceGuidanceEditing
+    ? `<div class="appearance-guidance-list">${items.map((text, index) => `<div class="appearance-guidance-edit-row"><label class="sr-only" for="appearanceGuidance${index}">方案内容 ${index + 1}</label><textarea id="appearanceGuidance${index}" class="appearance-guidance-input" rows="2" data-appearance-guidance="${index}" placeholder="写下发型、头皮护理或穿搭建议">${esc(text)}</textarea><button class="btn btn-small btn-ghost" data-action="appearance-guidance-remove" data-index="${index}" aria-label="移除第 ${index + 1} 条">移除</button></div>`).join('') || '<div class="empty-state">还没有方案条目，点击“添加条目”开始编辑。</div>'}</div><div class="appearance-guidance-actions"><button class="btn btn-small btn-outline" data-action="appearance-guidance-add">＋ 添加条目</button><span class="spacer"></span><button class="btn btn-small btn-outline" data-action="appearance-guidance-cancel">取消</button><button class="btn btn-small btn-primary" data-action="appearance-guidance-save">保存方案</button></div>`
+    : `<ul class="health-guidance">${items.map((text) => `<li>${esc(text)}</li>`).join('') || '<li>还没有方案条目，点击“编辑方案”添加内容。</li>'}</ul><div class="appearance-guidance-actions"><button class="btn btn-small btn-outline" data-action="appearance-guidance-edit">编辑方案</button></div>`;
+  return `<section class="card"><div class="card-head"><div><h3>发型与穿搭</h3><p>记录发型参考图、理发日期、长度、头皮状态与沟通要点。</p></div></div><div class="card-body">${controls}<p class="micro-copy">如有持续瘙痒、红肿、脱发或其他头皮问题，咨询皮肤科专业人员。</p><button class="btn btn-primary" data-action="open-health-log-modal">＋ 新增形象记录</button></div></section>`;
+}
+function readAppearanceGuidanceDraft() {
+  const fields = [...document.querySelectorAll('[data-appearance-guidance]')];
+  return fields.length ? fields.map((field) => field.value) : (ui.appearanceGuidanceDraft || []);
+}
 function renderHealthSection(kind){
   if(kind==='fitness') return `${sectionHead('HEALTH OS · MODULE','健身管理','独立子模块：从健康总览进入各主题，详细数据仍保存在健康管理工作区。',`<button class="btn btn-outline" data-action="capability-page" data-page="health">← 健康总览</button>`)}<div class="health-module-card">${renderGuidedSummary()}${renderFitnessV2()}</div>`;
   if(kind==='diet') return renderDietOS();
   if(kind==='skin') return renderSkinOS();
   if(kind==='sleep') return renderSleepOS();
-  return `${sectionHead('HEALTH OS · MODULE','发型与穿搭','记录发型参考、头皮状态、衣橱搭配与场景穿搭。',`<button class="btn btn-outline" data-action="capability-page" data-page="health">← 健康总览</button>`)}<div class="health-module-card"><section class="card">${cardHead('发型与穿搭','记录发型参考图、理发日期、长度、头皮状态与沟通要点。')}<ul class="health-guidance"><li>保持短发、干净清爽；每月理发时记录长度、参考图和沟通要点。</li><li>选择适合自己的洗发水；按头皮状态调整频率，个人原计划为隔天洗一次，避免过度清洁。</li><li>户外活动时留意头皮防晒，可用帽子或适合头皮的防晒方式。</li><li>记录穿搭组合、场景、单品、颜色和舒适度，逐步形成个人模板。</li><li>新产品或新风格一次只调整少数变量，便于复盘效果。</li></ul><p class="micro-copy">如有持续瘙痒、红肿、脱发或其他头皮问题，咨询皮肤科专业人员。</p><button class="btn btn-primary" data-action="open-health-log-modal">＋ 新增形象记录</button></section></div>`;
+  return `${sectionHead('HEALTH OS · MODULE','发型与穿搭','记录发型参考、头皮状态、衣橱搭配与场景穿搭。',`<button class="btn btn-outline" data-action="capability-page" data-page="health">← 健康总览</button>`)}<div class="health-module-card">${appearanceGuidanceMarkup()}</div>`;
 }
 
 function renderHealth(){
@@ -2674,6 +2694,11 @@ function bindDelegatedEvents() {
     if(a==='open-english-log-modal'){const f=$('#englishLogForm');if(f)openInlineModal('新增英语学习记录',f);return;}
     if(a==='open-reading-session-modal'){const f=$('#readingSessionForm');if(f)openInlineModal('每日阅读打卡',f);return;}
     if(a==='open-health-log-modal'){const f=$('#healthLogForm');if(!f){renderPage('health');setTimeout(()=>document.querySelector('#healthLogForm')?.scrollIntoView({behavior:'smooth',block:'center'}),60);return;}openInlineModal('新增健康记录',f);return;}
+    if(a==='appearance-guidance-edit'){ui.appearanceGuidanceDraft=[...(Array.isArray(state.appearanceGuidance)?state.appearanceGuidance:DEFAULT_APPEARANCE_GUIDANCE)];ui.appearanceGuidanceEditing=true;renderPage('style');return;}
+    if(a==='appearance-guidance-add'){ui.appearanceGuidanceDraft=readAppearanceGuidanceDraft();ui.appearanceGuidanceDraft.push('');renderPage('style');setTimeout(()=>[...document.querySelectorAll('[data-appearance-guidance]')].at(-1)?.focus(),0);return;}
+    if(a==='appearance-guidance-remove'){ui.appearanceGuidanceDraft=readAppearanceGuidanceDraft();ui.appearanceGuidanceDraft.splice(n(action.dataset.index,-1),1);renderPage('style');return;}
+    if(a==='appearance-guidance-cancel'){ui.appearanceGuidanceEditing=false;ui.appearanceGuidanceDraft=null;renderPage('style');return;}
+    if(a==='appearance-guidance-save'){const items=readAppearanceGuidanceDraft().map((text)=>String(text||'').trim()).filter(Boolean);if(!items.length){toast('至少保留一条方案内容',true);return;}state.appearanceGuidance=items;const saved=await persist({quiet:true});if(saved){ui.appearanceGuidanceEditing=false;ui.appearanceGuidanceDraft=null;renderPage('style');toast('发型与穿搭方案已保存');}return;}
     if(a==='open-health-metric-modal'){const f=$('#healthMetricForm');if(f)openInlineModal('添加身体指标',f);else renderPage('checkin');return;}
     if(a==='toggle-health-check') { const day=action.dataset.date||todayKey(), key=action.dataset.check; state.healthChecks[day]=state.healthChecks[day]||{}; state.healthChecks[day][key]=!state.healthChecks[day][key]; saveAndRender('健康打卡已保存'); return; }
     if(a==='add-health-log') { const form=$('#healthLogForm'); if(!form?.reportValidity()) return; const fd=new FormData(form); state.healthLogs.unshift({id:Date.now(),date:String(fd.get('date')||todayKey()),category:String(fd.get('category')||'健身'),title:String(fd.get('title')||''),detail:String(fd.get('detail')||''),duration:n(fd.get('duration')),value:String(fd.get('value')||''),note:String(fd.get('note')||'')}); saveAndRender('健康记录已保存'); return; }
