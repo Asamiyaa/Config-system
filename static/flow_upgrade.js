@@ -55,7 +55,7 @@ new MutationObserver(loadBoardList).observe(document.querySelector('#viewRoot'),
 document.addEventListener('click',async e=>{const b=e.target.closest('[data-xboard]');if(!b)return;try{if(b.dataset.xboard==='new'){const r=await api('/api/boards',{method:'POST'});ui.xBoardId=r.id;}if(b.dataset.xboard==='open')ui.xBoardId=b.dataset.id;if(b.dataset.xboard==='legacy-close')ui.whiteboardId=null;renderPage('whiteboard');}catch(e){toast(e.message,true);}});
 window.addEventListener('message',e=>{if(e.origin!==location.origin||e.source!==document.querySelector('.excal-frame')?.contentWindow)return;if(e.data?.type==='board-save-state')window.boardEditorDirty=e.data.dirty;});
 
-// Fit the day into the viewport and preserve lanes computed from actual time overlaps.
+// Fit the day. Keep task geometry tied to actual times; labels are clipped inside each block.
 function fitFlowTimeline(){
  const timeline=document.querySelector('#flowTimeline');if(!timeline||!timeline.getClientRects().length)return;
  const viewport=window.visualViewport?.height||innerHeight;
@@ -63,12 +63,9 @@ function fitFlowTimeline(){
  const bottom=innerWidth<=760?88:28;
  const height=Math.max(240,viewport-top-bottom);
  timeline.style.setProperty('--flow-height',height+'px');
- const blocks=[...timeline.querySelectorAll('.flow-block')];
- blocks.forEach(block=>{
+ timeline.querySelectorAll('.flow-block').forEach(block=>{
   const start=Number(block.dataset.flowStart)/1440*height,end=Number(block.dataset.flowEnd)/1440*height;
   block.classList.toggle('flow-short',end-start<24);
-  const lane=Math.max(0,Number(block.dataset.flowLane)||0),count=Math.max(1,Number(block.dataset.flowLanes)||1);
-  block.style.left=`calc(${lane/count*100}% + 6px)`;block.style.width=`calc(${100/count}% - 12px)`;
  });
 }
 let flowFitFrame;

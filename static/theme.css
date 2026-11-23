@@ -6281,7 +6281,6 @@ body.spatial-ui .interaction-modal-panel,body.spatial-ui .focus-modal,body.spati
  body.spatial-ui *,body.spatial-ui *::before,body.spatial-ui *::after { animation:none !important; transition:none !important; scroll-behavior:auto !important; }
  body.spatial-ui :is(.spatial-hero,.home-kpi,.home-reco-card) { transform:none !important; }
 }
-body.spatial-ui #mobileTabbar { display: none !important; }
 
 /* Usability pass: shared controls and compact daily action. */
 body.spatial-ui { --ux-control-radius: 10px; --ux-panel-gap: 20px; }

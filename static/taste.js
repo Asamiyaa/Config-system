@@ -178,12 +178,14 @@
       if (on) item.setAttribute('aria-current', 'page');
       else item.removeAttribute('aria-current');
     });
+    const activeMobilePage = MOBILE_TABS.some((item) => item.page === page) ? page : (MOBILE_TABS.some((item) => item.page === hub) ? hub : '');
     $$('.mobile-tab[data-page]').forEach((item) => {
-      const on = item.dataset.page === hub;
+      const on = item.dataset.page === activeMobilePage;
       item.classList.toggle('active', on);
       if (on) item.setAttribute('aria-current', 'page');
       else item.removeAttribute('aria-current');
     });
+    $$('.mobile-more-item[data-page]').forEach((item) => item.classList.toggle('active', item.dataset.page === hub));
   }
   const root = $('#viewRoot');
   if (root && 'MutationObserver' in window) {
@@ -195,7 +197,7 @@
   setTimeout(syncActive, 300);
 
   /* ---------- app shell: bottom tab bar + hamburger morph ---------- */
-  const MOBILE_TABS = [{page:'cycle',label:'结构与周期',icon:'i-cycle'},{page:'newconfig',label:'成长',icon:'i-compass'},{page:'health',label:'健康',icon:'i-heart'},{page:'dashboard',label:'资产',icon:'i-shield'},{page:'uilearning',label:'UI 学习',icon:'i-spark'},{page:'scaffold',label:'脚手架',icon:'i-book'},{page:'infogap',label:'信息差变现',icon:'i-globe'},{page:'settings',label:'设置',icon:'i-sun'}];
+  const MOBILE_TABS = [{page:'dailyflow',label:'流程',icon:'i-cycle'},{page:'calendar',label:'月历',icon:'i-spark'},{page:'todo',label:'待办',icon:'i-book'},{page:'health',label:'健康',icon:'i-heart'}];
   function icon(id) {
     return `<svg viewBox="0 0 16 16" aria-hidden="true"><use href="#${id}"></use></svg>`;
   }
@@ -206,15 +208,50 @@
     nav.className = 'mobile-tabbar';
     nav.setAttribute('aria-label', '移动端主导航');
     nav.innerHTML = MOBILE_TABS.map((item) => `<button type="button" class="mobile-tab" data-page="${item.page}" aria-label="${item.label}">${icon(item.icon)}<span>${item.label}</span></button>`).join('')
-      + `<button type="button" class="mobile-tab mobile-tab-more" data-action="open-sidebar" aria-label="更多页面">${icon('i-more')}<span>更多</span></button>`;
+      + `<button type="button" class="mobile-tab mobile-tab-more" aria-haspopup="dialog" aria-expanded="false" aria-controls="mobileMoreOverlay" aria-label="更多页面">${icon('i-more')}<span>更多</span></button>`;
+    const overlay = document.createElement('div');
+    overlay.id = 'mobileMoreOverlay';
+    overlay.className = 'mobile-more-overlay';
+    overlay.hidden = true;
+    overlay.innerHTML = '<button class="mobile-more-backdrop" type="button" aria-label="关闭更多页面"></button><section class="mobile-more-panel" role="dialog" aria-modal="true" aria-labelledby="mobileMoreTitle"><header><strong id="mobileMoreTitle">更多页面</strong><button type="button" class="mobile-more-close" aria-label="关闭">×</button></header><div class="mobile-more-grid"></div></section>';
+    const grid = overlay.querySelector('.mobile-more-grid');
+    const primary = new Set(MOBILE_TABS.map((item) => item.page));
+    $$('#mainNav .nav-item[data-page]').forEach((item) => {
+      const page = item.dataset.page;
+      if (primary.has(page)) return;
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'mobile-more-item';
+      button.dataset.page = page;
+      button.textContent = item.querySelector('.nav-label')?.textContent.trim() || item.title || page;
+      grid.appendChild(button);
+    });
+    document.body.appendChild(overlay);
+    const closeMore = () => {
+      overlay.hidden = true;
+      nav.querySelector('.mobile-tab-more')?.setAttribute('aria-expanded', 'false');
+    };
     nav.addEventListener('click', (e) => {
+      if (e.target.closest('.mobile-tab-more')) {
+        overlay.hidden = !overlay.hidden;
+        nav.querySelector('.mobile-tab-more')?.setAttribute('aria-expanded', String(!overlay.hidden));
+        if (!overlay.hidden) overlay.querySelector('.mobile-more-item')?.focus();
+        return;
+      }
       const tab = e.target.closest('.mobile-tab[data-page]');
       if (tab) {
         if (typeof window.renderPage === 'function') window.renderPage(tab.dataset.page);
-        const sidebar = $('#sidebar');
-        sidebar?.classList.remove('open');
+        closeMore();
       }
     });
+    overlay.addEventListener('click', (e) => {
+      if (e.target.closest('.mobile-more-backdrop,.mobile-more-close')) { closeMore(); nav.querySelector('.mobile-tab-more')?.focus(); return; }
+      const item = e.target.closest('.mobile-more-item[data-page]');
+      if (!item) return;
+      if (typeof window.renderPage === 'function') window.renderPage(item.dataset.page === 'newconfig' ? 'dailyflow' : item.dataset.page);
+      closeMore();
+    });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !overlay.hidden) { closeMore(); nav.querySelector('.mobile-tab-more')?.focus(); } });
     document.body.appendChild(nav);
   }
   function syncMenuIcon() {
