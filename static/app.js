@@ -1785,20 +1785,30 @@ const DEFAULT_APPEARANCE_GUIDANCE = [
   '新产品或新风格一次只调整少数变量，便于复盘效果。'
 ];
 function appearanceGuidanceMarkup() {
+  const entries=appearanceGuidanceEntries(),date=todayKey(),checks=state.appearanceGuidanceChecks?.[date]||{};
   const items = ui.appearanceGuidanceEditing
-    ? (ui.appearanceGuidanceDraft || state.appearanceGuidance || DEFAULT_APPEARANCE_GUIDANCE)
-    : (Array.isArray(state.appearanceGuidance) ? state.appearanceGuidance : DEFAULT_APPEARANCE_GUIDANCE);
+    ? (ui.appearanceGuidanceDraft || entries.map((item)=>item.text)).map((text,index)=>({id:ui.appearanceGuidanceDraftIds?.[index]||`appearance-draft-${index}`,text}))
+    : entries;
+  const completedCount=items.filter((item)=>checks[item.id]).length;
   const itemList = ui.appearanceGuidanceEditing
-    ? `<div class="appearance-guidance-list">${items.map((text, index) => `<article class="appearance-guidance-item appearance-guidance-edit-row"><label class="sr-only" for="appearanceGuidance${index}">方案内容 ${index + 1}</label><textarea id="appearanceGuidance${index}" class="appearance-guidance-input" rows="2" data-appearance-guidance="${index}" placeholder="写下发型、头皮护理或穿搭建议">${esc(text)}</textarea><button class="btn btn-small btn-ghost" data-action="appearance-guidance-remove" data-index="${index}" aria-label="移除第 ${index + 1} 条">移除</button></article>`).join('') || '<div class="empty-state">还没有方案条目，点击“添加条目”开始编辑。</div>'}</div>`
-    : `<div class="appearance-guidance-list">${items.map((text) => `<article class="appearance-guidance-item"><p>${esc(text)}</p></article>`).join('') || '<div class="empty-state">还没有方案条目，点击“编辑方案”添加内容。</div>'}</div>`;
+    ? `<div class="appearance-guidance-list">${items.map((item, index) => `<article class="appearance-guidance-item appearance-guidance-edit-row"><label class="sr-only" for="appearanceGuidance${index}">方案内容 ${index + 1}</label><textarea id="appearanceGuidance${index}" class="appearance-guidance-input" rows="2" data-appearance-guidance="${index}" placeholder="写下发型、头皮护理或穿搭建议">${esc(item.text)}</textarea><button class="btn btn-small btn-ghost" data-action="appearance-guidance-remove" data-index="${index}" aria-label="移除第 ${index + 1} 条">移除</button></article>`).join('') || '<div class="empty-state">还没有方案条目，点击“添加条目”开始编辑。</div>'}</div>`
+    : `<div class="appearance-guidance-list">${items.map((item) => {const done=!!checks[item.id];return `<article class="appearance-guidance-item ${done?'done':''}"><button class="appearance-guidance-check" type="button" data-action="appearance-guidance-check" data-id="${esc(item.id)}" aria-label="${done?'取消完成':'标记完成'}：${esc(item.text)}" aria-pressed="${done}"><span>${done?'✓':''}</span></button><div class="appearance-guidance-copy"><p>${esc(item.text)}</p></div><span class="appearance-guidance-status">${done?'已完成':'待完成'}</span></article>`}).join('') || '<div class="empty-state">还没有方案条目，点击“编辑方案”添加内容。</div>'}</div>`;
   const controls = ui.appearanceGuidanceEditing
     ? `${itemList}<div class="appearance-guidance-actions"><button class="btn btn-small btn-outline" data-action="appearance-guidance-add">＋ 添加条目</button><span class="spacer"></span><button class="btn btn-small btn-outline" data-action="appearance-guidance-cancel">取消</button><button class="btn btn-small btn-primary" data-action="appearance-guidance-save">保存方案</button></div>`
     : `${itemList}`;
-  return `<section class="card"><div class="card-head"><div><h3>当前方案</h3><p>发型参考、头皮护理与穿搭建议，可按需维护。</p></div>${ui.appearanceGuidanceEditing?'<span class="tag neutral">编辑中</span>':'<button class="btn btn-small btn-outline" data-action="appearance-guidance-edit">编辑方案</button>'}</div><div class="card-body">${controls}<p class="micro-copy">如有持续瘙痒、红肿、脱发或其他头皮问题，咨询皮肤科专业人员。</p><button class="btn btn-primary" data-action="open-health-log-modal">＋ 新增形象记录</button></div></section>`;
+  return `<section class="card"><div class="card-head"><div><h3>当前方案</h3><p>点击圆圈记录今日完成情况；发型参考、头皮护理与穿搭建议可按需维护。</p></div><div class="appearance-guidance-head-actions"><span class="tag neutral">${completedCount}/${items.length}</span>${ui.appearanceGuidanceEditing?'<span class="tag neutral">编辑中</span>':'<button class="btn btn-small btn-outline" data-action="appearance-guidance-edit">编辑方案</button>'}</div></div><div class="card-body">${controls}<p class="micro-copy">如有持续瘙痒、红肿、脱发或其他头皮问题，咨询皮肤科专业人员。</p><button class="btn btn-primary" data-action="open-health-log-modal">＋ 新增形象记录</button></div></section>`;
 }
 function readAppearanceGuidanceDraft() {
   const fields = [...document.querySelectorAll('[data-appearance-guidance]')];
   return fields.length ? fields.map((field) => field.value) : (ui.appearanceGuidanceDraft || []);
+}
+function appearanceGuidanceEntries(){
+  const texts=Array.isArray(state.appearanceGuidance)?state.appearanceGuidance:DEFAULT_APPEARANCE_GUIDANCE;
+  if(!Array.isArray(state.appearanceGuidanceIds)||state.appearanceGuidanceIds.length!==texts.length){
+    const previous=Array.isArray(state.appearanceGuidanceIds)?state.appearanceGuidanceIds:[];
+    state.appearanceGuidanceIds=texts.map((_,index)=>previous[index]||`appearance-${Date.now()}-${index}`);
+  }
+  return texts.map((text,index)=>({id:String(state.appearanceGuidanceIds[index]),text:String(text||'')}));
 }
 function renderHealthSection(kind){
   if(kind==='fitness') return `${sectionHead('HEALTH OS · MODULE','健身管理','独立子模块：从健康总览进入各主题，详细数据仍保存在健康管理工作区。',`<button class="btn btn-outline" data-action="capability-page" data-page="health">← 健康总览</button>`)}<div class="health-module-card">${renderGuidedSummary()}${renderFitnessV2()}</div>`;
@@ -2707,11 +2717,12 @@ function bindDelegatedEvents() {
     if(a==='open-english-log-modal'){const f=$('#englishLogForm');if(f)openInlineModal('新增英语学习记录',f);return;}
     if(a==='open-reading-session-modal'){const f=$('#readingSessionForm');if(f)openInlineModal('每日阅读打卡',f);return;}
     if(a==='open-health-log-modal'){const f=$('#healthLogForm');if(!f){renderPage('health');setTimeout(()=>document.querySelector('#healthLogForm')?.scrollIntoView({behavior:'smooth',block:'center'}),60);return;}openInlineModal('新增健康记录',f);return;}
-    if(a==='appearance-guidance-edit'){ui.appearanceGuidanceDraft=[...(Array.isArray(state.appearanceGuidance)?state.appearanceGuidance:DEFAULT_APPEARANCE_GUIDANCE)];ui.appearanceGuidanceEditing=true;renderPage('style');return;}
-    if(a==='appearance-guidance-add'){ui.appearanceGuidanceDraft=readAppearanceGuidanceDraft();ui.appearanceGuidanceDraft.push('');renderPage('style');setTimeout(()=>[...document.querySelectorAll('[data-appearance-guidance]')].at(-1)?.focus(),0);return;}
-    if(a==='appearance-guidance-remove'){ui.appearanceGuidanceDraft=readAppearanceGuidanceDraft();ui.appearanceGuidanceDraft.splice(n(action.dataset.index,-1),1);renderPage('style');return;}
-    if(a==='appearance-guidance-cancel'){ui.appearanceGuidanceEditing=false;ui.appearanceGuidanceDraft=null;renderPage('style');return;}
-    if(a==='appearance-guidance-save'){const items=readAppearanceGuidanceDraft().map((text)=>String(text||'').trim()).filter(Boolean);if(!items.length){toast('至少保留一条方案内容',true);return;}state.appearanceGuidance=items;const saved=await persist({quiet:true});if(saved){ui.appearanceGuidanceEditing=false;ui.appearanceGuidanceDraft=null;renderPage('style');toast('发型与穿搭方案已保存');}return;}
+    if(a==='appearance-guidance-edit'){const entries=appearanceGuidanceEntries();ui.appearanceGuidanceDraft=entries.map((item)=>item.text);ui.appearanceGuidanceDraftIds=entries.map((item)=>item.id);ui.appearanceGuidanceEditing=true;renderPage('style');return;}
+    if(a==='appearance-guidance-add'){ui.appearanceGuidanceDraft=readAppearanceGuidanceDraft();ui.appearanceGuidanceDraftIds=[...(ui.appearanceGuidanceDraftIds||[]).slice(0,ui.appearanceGuidanceDraft.length),`appearance-${Date.now()}-${Math.random().toString(36).slice(2,7)}`];ui.appearanceGuidanceDraft.push('');renderPage('style');setTimeout(()=>[...document.querySelectorAll('[data-appearance-guidance]')].at(-1)?.focus(),0);return;}
+    if(a==='appearance-guidance-remove'){ui.appearanceGuidanceDraft=readAppearanceGuidanceDraft();ui.appearanceGuidanceDraft.splice(n(action.dataset.index,-1),1);ui.appearanceGuidanceDraftIds||=[];ui.appearanceGuidanceDraftIds.splice(n(action.dataset.index,-1),1);renderPage('style');return;}
+    if(a==='appearance-guidance-cancel'){ui.appearanceGuidanceEditing=false;ui.appearanceGuidanceDraft=null;ui.appearanceGuidanceDraftIds=null;renderPage('style');return;}
+    if(a==='appearance-guidance-save'){const draft=readAppearanceGuidanceDraft(),ids=ui.appearanceGuidanceDraftIds||[],items=[],itemIds=[];draft.forEach((text,index)=>{const value=String(text||'').trim();if(value){items.push(value);itemIds.push(ids[index]||`appearance-${Date.now()}-${index}`);}});if(!items.length){toast('至少保留一条方案内容',true);return;}state.appearanceGuidance=items;state.appearanceGuidanceIds=itemIds;const saved=await persist({quiet:true});if(saved){ui.appearanceGuidanceEditing=false;ui.appearanceGuidanceDraft=null;ui.appearanceGuidanceDraftIds=null;renderPage('style');toast('发型与穿搭方案已保存');}return;}
+    if(a==='appearance-guidance-check'){const entries=appearanceGuidanceEntries(),item=entries.find((entry)=>entry.id===String(action.dataset.id));if(!item)return;state.appearanceGuidance=entries.map((entry)=>entry.text);state.appearanceGuidanceIds=entries.map((entry)=>entry.id);state.appearanceGuidanceChecks||={};const date=todayKey();state.appearanceGuidanceChecks[date]||={};state.appearanceGuidanceChecks[date][item.id]=!state.appearanceGuidanceChecks[date][item.id];const done=state.appearanceGuidanceChecks[date][item.id],saved=await persist({quiet:true});if(saved){renderPage('style');toast(done?'已标记完成':'已取消完成');}return;}
     if(a==='open-health-metric-modal'){const f=$('#healthMetricForm');if(f)openInlineModal('添加身体指标',f);else renderPage('checkin');return;}
     if(a==='toggle-health-check') { const day=action.dataset.date||todayKey(), key=action.dataset.check; state.healthChecks[day]=state.healthChecks[day]||{}; state.healthChecks[day][key]=!state.healthChecks[day][key]; saveAndRender('健康打卡已保存'); return; }
     if(a==='add-health-log') { const form=$('#healthLogForm'); if(!form?.reportValidity()) return; const fd=new FormData(form); state.healthLogs.unshift({id:Date.now(),date:String(fd.get('date')||todayKey()),category:String(fd.get('category')||'健身'),title:String(fd.get('title')||''),detail:String(fd.get('detail')||''),duration:n(fd.get('duration')),value:String(fd.get('value')||''),note:String(fd.get('note')||'')}); saveAndRender('健康记录已保存'); return; }

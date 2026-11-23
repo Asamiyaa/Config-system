@@ -48,14 +48,28 @@
    for(const x of focusTasks())if(!x.done&&x.startDate&&x.time){const at=new Date(x.startDate+'T'+x.time).getTime();if(at>Date.now()-60000)entries.push({id:'todo-'+x.id,title:x.title,at,page:'inbox',weekly:false});}
   }
   const json=JSON.stringify(entries);if(window.AndroidApp?.syncReminders&&json!==lastSchedule){AndroidApp.syncReminders(json);lastSchedule=json;}
-  if(enabled&&!document.hidden)for(const x of entries){if(x.at>Date.now()||Date.now()-x.at>60000||seen.has(x.id+x.at))continue;seen.add(x.id+x.at);if(document.querySelector('dialog[open],.flow-modal'))continue;const d=sheet('到时间了',`<p>${esc(x.title)}</p><button data-start>去执行</button>`);d.querySelector('[data-start]').onclick=()=>{d.remove();open(x.page);};}
+  if(enabled)for(const x of entries){
+   const key=x.id+x.at,lateBy=Date.now()-x.at;
+   // Allow a short catch-up window for background-tab timer throttling.
+   if(lateBy<0||lateBy>180000||seen.has(key))continue;
+   if(document.hidden){
+    if('Notification'in window&&Notification.permission==='granted'){
+     seen.add(key);const notification=new Notification('流程提醒',{body:x.title,tag:key});
+     notification.onclick=()=>{window.focus();notification.close();open(x.page);};
+    }
+    continue;
+   }
+   // Defer rather than consume a reminder while another modal is open.
+   if(document.querySelector('dialog[open],.flow-modal'))continue;
+   seen.add(key);const d=sheet('到时间了',`<p>${esc(x.title)}</p><button data-start>去执行</button>`);d.querySelector('[data-start]').onclick=()=>{d.remove();open(x.page);};
+  }
  }
  function settings(){
   if(!state||document.querySelector('#executionSettings')||currentPage!=='schedules')return;
   const div=document.createElement('div');div.id='executionSettings';div.className='execution-settings';div.innerHTML='<button data-reminders>提醒设置</button>';
   const target=document.querySelector('.page-context-actions')||document.querySelector('#viewRoot');
   target.append(div);
-  div.querySelector('[data-reminders]')?.addEventListener('click',()=>{const d=sheet('流程与待办提醒',`<label><input type="checkbox" data-enabled ${state.executionReminders?'checked':''}>启用到点提醒</label><p>流程按工作日/休息日重复，带日期和时间的待办单次提醒。</p><p>Android 需允许通知与精确闹钟；强行停止 App 后需重新打开。</p><button data-permission>允许系统通知</button><button data-alarm>允许准时提醒</button><p data-status></p>`);d.querySelector('[data-enabled]').onchange=async e=>{state.executionReminders=e.target.checked;await persist({quiet:true});schedule();};d.querySelector('[data-permission]').onclick=()=>window.AndroidApp?.requestReminderPermission?AndroidApp.requestReminderPermission():d.querySelector('[data-status]').textContent='当前浏览器仅支持页面打开时提醒；后台提醒请安装新版 Android App。';d.querySelector('[data-alarm]').onclick=()=>window.AndroidApp?.requestAlarmPermission?.();});
+  div.querySelector('[data-reminders]')?.addEventListener('click',()=>{const d=sheet('流程与待办提醒',`<label><input type="checkbox" data-enabled ${state.executionReminders?'checked':''}>启用到点提醒</label><p>流程按工作日/休息日重复，带日期和时间的待办单次提醒。</p><p>网页前台会弹出提醒；切到后台时，允许浏览器通知后也可收到系统通知。浏览器关闭后网页不会继续计时。</p><button data-permission>允许浏览器通知</button><button data-alarm>允许准时提醒</button><p data-status></p>`);d.querySelector('[data-enabled]').onchange=async e=>{state.executionReminders=e.target.checked;await persist({quiet:true});schedule();};d.querySelector('[data-permission]').onclick=async()=>{const status=d.querySelector('[data-status]');if(window.AndroidApp?.requestReminderPermission){window.AndroidApp.requestReminderPermission();return;}if(!('Notification'in window)){status.textContent='此浏览器不支持系统通知；网页前台提醒仍可使用。';return;}if(Notification.permission==='default')await Notification.requestPermission();status.textContent=Notification.permission==='granted'?'浏览器通知已允许。':'浏览器通知未允许；请在浏览器网站设置中开启通知。';};d.querySelector('[data-alarm]').onclick=()=>window.AndroidApp?.requestAlarmPermission?.();});
  }
  function mobilePages(){
   const root=document.querySelector('#viewRoot'),tabs=root.querySelector('.hub-tabs');
