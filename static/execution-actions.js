@@ -1,13 +1,14 @@
 /* Account-backed execution actions and reminder schedules. */
 (() => {
- const routes={skin:'护肤',diet:'饮食',fitness:'健身',sleep:'睡眠',checkin:'健康打卡',inbox:'待办',calendar:'周历',dailyflow:'流程'};
+ const routes=Object.fromEntries(FLOW_DESTINATION_OPTIONS.filter(([page])=>page).map(([page,label])=>[page,label]));
+ const quickRoutes={skin:routes.skin,diet:routes.diet,checkin:routes.checkin,fitness:routes.fitness,sleep:routes.sleep,style:routes.style,calendar:routes.calendar,dailyflow:routes.dailyflow};
  const destination=x=>flowExecutionDestination(x);
  function open(page){if(!routes[page])page='dailyflow';if(['skin','diet'].includes(page))sessionStorage.setItem('wealthos-tab-'+page,'today');renderPage(page,{transition:false});scrollTo(0,0);}
  window.openExecutionRoute=open;
  function sheet(title,html){document.querySelector('#executionSheet')?.remove();const d=document.createElement('dialog');d.id='executionSheet';d.innerHTML=`<header><h2>${title}</h2><button data-dismiss aria-label="关闭">×</button></header>${html}`;document.body.append(d);d.querySelector('[data-dismiss]').onclick=()=>d.remove();d.addEventListener('cancel',()=>d.remove());d.showModal();return d;}
  function shortcuts(){
   const selected=state.executionShortcuts||['diet','skin','checkin'];
-  const d=sheet('快捷打开',`<div class="execution-links">${selected.map(x=>`<button data-route="${x}">${routes[x]||x}</button>`).join('')}</div><details><summary>配置快捷方式</summary><form>${Object.entries(routes).map(([v,t])=>`<label><input type="checkbox" name="route" value="${v}" ${selected.includes(v)?'checked':''}>${t}</label>`).join('')}<button>保存配置</button></form></details>`);
+  const d=sheet('快捷打开',`<div class="execution-links">${selected.map(x=>`<button data-route="${x}">${routes[x]||x}</button>`).join('')}</div><details><summary>配置快捷方式</summary><form>${Object.entries(quickRoutes).map(([v,t])=>`<label><input type="checkbox" name="route" value="${v}" ${selected.includes(v)?'checked':''}>${t}</label>`).join('')}<button>保存配置</button></form></details>`);
   d.querySelectorAll('[data-route]').forEach(b=>b.onclick=()=>{d.remove();open(b.dataset.route);});
   d.querySelector('form').onsubmit=async e=>{e.preventDefault();state.executionShortcuts=new FormData(e.target).getAll('route');await persist({quiet:true});d.remove();};
  }
